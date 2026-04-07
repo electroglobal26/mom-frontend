@@ -1,14 +1,242 @@
+"use client"
+
+/*
+  ┌──────────────────────────────────────────────────────────────────┐
+  │  SERVICES PAGE                                                   │
+  │                                                                  │
+  │  Card design:                                                    │
+  │  ┌─────────────────────────────────┐                            │
+  │  │  shortLabel pill  ·  number     │  ← top row                 │
+  │  │  Title (large)                  │                             │
+  │  │  Description                    │                             │
+  │  │  Preview text                   │                             │
+  │  │  ─────────── Includes ───────── │  ← divider                 │
+  │  │  • point                        │                             │
+  │  │  • point                        │                             │
+  │  │  • point                        │                             │
+  │  │  Learn More →                   │  ← sliding fill CTA        │
+  │  └─────────────────────────────────┘                            │
+  │                                                                  │
+  │  HOVER (6 layers):                                               │
+  │  1. Card lifts y:-8 (Motion whileHover)                        │
+  │  2. Top accent bar appears (CSS ::before + is-hovered)         │
+  │  3. Border colour shifts to accent (React useState)            │
+  │  4. Number brightens (CSS is-hovered)                          │
+  │  5. Bullet dots shift to accent (CSS is-hovered)              │
+  │  6. Learn More → fills with accent colour (CSS ::before)       │
+  │                                                                  │
+  │  Motion — inlined scroll state machine (idle/visible/resting)   │
+  └──────────────────────────────────────────────────────────────────┘
+*/
+
+import { useEffect, useRef, useState } from "react"
+import { motion, useReducedMotion } from "motion/react"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { services } from "@lib/data/services"
 import { Epilogue, Outfit, Mansalva } from "next/font/google"
 
 const epilogue = Epilogue({ subsets: ["latin"], weight: ["700", "800"] })
-const outfit = Outfit({ subsets: ["latin"], weight: ["400", "500", "700"] })
+const outfit   = Outfit({ subsets: ["latin"], weight: ["400", "500", "700"] })
 const mansalva = Mansalva({ subsets: ["latin"], weight: ["400"] })
 
+// ── Scroll state machine ──────────────────────────────────────────────────────
+
+type ScrollState = "idle" | "visible" | "resting"
+
+function useScrollState(amount = 0.2) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [state, setState] = useState<ScrollState>("idle")
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setState("visible")
+        } else {
+          setState((prev) => (prev === "idle" ? "idle" : "resting"))
+        }
+      },
+      { threshold: amount, rootMargin: "0px 0px -40px 0px" }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [amount])
+
+  return { ref, state }
+}
+
+function Reveal({
+  children, delay = 0, offset = 36, amount = 0.2, className = "",
+}: {
+  children: React.ReactNode; delay?: number; offset?: number
+  amount?: number; className?: string
+}) {
+  const { ref, state } = useScrollState(amount)
+  return (
+    <motion.div
+      ref={ref}
+      className={className}
+      style={state === "idle" ? { opacity: 0 } : undefined}
+      animate={
+        state === "visible"
+          ? { opacity: 1, y: 0, transition: { duration: 0.6, delay, ease: [0.16, 1, 0.3, 1] as const } }
+          : state === "resting"
+          ? { opacity: 1, y: 0, transition: { duration: 0 } }
+          : { opacity: 0, y: offset, transition: { duration: 0 } }
+      }
+    >
+      {children}
+    </motion.div>
+  )
+}
+
+// ── Accent colour palette — cycles across cards ───────────────────────────────
+/*
+  Each card gets its own accent from this cycle.
+  Accent drives: top bar, border, number, bullet dots, pill, CTA fill.
+*/
+const ACCENTS = [
+  { accent: "#e61e73", light: "#fff0f6", border: "#fbb6d4", num: "#f9a8d4" },
+  { accent: "#9333ea", light: "#f5eeff", border: "#d8b4fe", num: "#c4b5fd" },
+  { accent: "#0ea5e9", light: "#e8f6ff", border: "#7dd3fc", num: "#93c5fd" },
+  { accent: "#49d7a4", light: "#e8fdf5", border: "#6ee7b7", num: "#6ee7b7" },
+  { accent: "#f59e0b", light: "#fffbeb", border: "#fde68a", num: "#fcd34d" },
+  { accent: "#ef4444", light: "#fff5f5", border: "#fca5a5", num: "#fca5a5" },
+]
+
+const MotionArticle = motion.create("article" as never) as typeof motion.div
+
+// ── Component ─────────────────────────────────────────────────────────────────
+
 export default function ServicesPage() {
+  const prefersReduced = useReducedMotion()
+  const [hoveredCard, setHoveredCard] = useState<number | null>(null)
+
   return (
     <main className="relative overflow-hidden bg-[#f3f4f6] pt-16 pb-20 lg:pt-20 lg:pb-24">
+      <style>{`
+        /* ── Card shared ── */
+        .svc-card {
+          position: relative;
+          background: #fff;
+          border-radius: 22px;
+          padding: 28px;
+          display: flex;
+          flex-direction: column;
+          transition: border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        /* Top accent bar — hidden by default, shows on hover */
+        .svc-card::before {
+          content: "";
+          position: absolute;
+          top: 0; left: 0; right: 0;
+          height: 4px;
+          border-radius: 22px 22px 0 0;
+          background: var(--card-accent);
+          opacity: 0;
+          transition: opacity 0.25s ease;
+          z-index: 10;
+        }
+        .svc-card.is-hovered::before { opacity: 1; }
+
+        /* ── Pill (shortLabel) ── */
+        .svc-pill {
+          display: inline-flex;
+          align-items: center;
+          padding: 4px 12px;
+          border-radius: 999px;
+          font-size: 13px;
+          font-weight: 700;
+          background: var(--card-light);
+          color: var(--card-accent);
+          border: 1.5px solid var(--card-border);
+          transition: background 0.2s ease, border-color 0.2s ease;
+        }
+        .svc-card.is-hovered .svc-pill {
+          background: var(--card-accent);
+          color: #fff;
+          border-color: var(--card-accent);
+        }
+
+        /* ── Number ── */
+        .svc-num {
+          font-size: 18px;
+          font-weight: 800;
+          color: var(--card-num);
+          transition: color 0.25s ease, transform 0.25s ease;
+        }
+        .svc-card.is-hovered .svc-num {
+          color: var(--card-accent);
+          transform: scale(1.1);
+        }
+
+        /* ── Bullet dots ── */
+        .svc-dot {
+          margin-top: 10px;
+          width: 8px; height: 8px;
+          flex-shrink: 0;
+          border-radius: 50%;
+          background: #cbd5e1;
+          transition: background 0.2s ease, transform 0.2s ease;
+        }
+        .svc-card.is-hovered .svc-dot {
+          background: var(--card-accent);
+          transform: scale(1.2);
+        }
+
+        /* ── Learn More CTA — sliding fill ── */
+        .svc-cta {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          padding: 10px 20px;
+          border-radius: 10px;
+          font-size: 13px;
+          font-weight: 800;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+          text-decoration: none;
+          color: var(--card-accent);
+          border: 2px solid var(--card-border);
+          background: transparent;
+          overflow: hidden;
+          transition: color 0.25s ease, box-shadow 0.25s ease;
+          margin-top: auto;
+        }
+        /* fill layer slides in */
+        .svc-cta::before {
+          content: "";
+          position: absolute; inset: 0;
+          background: var(--card-accent);
+          transform: translateX(-101%);
+          transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+          z-index: 0;
+        }
+        .svc-cta:hover::before { transform: translateX(0); }
+        .svc-cta:hover { color: #fff; box-shadow: 0 6px 20px rgba(15,23,42,0.12); }
+        .svc-cta:active { transform: translateY(1px); }
+        .svc-cta .cta-label,
+        .svc-cta .cta-arrow { position: relative; z-index: 1; }
+        .svc-cta .cta-arrow {
+          display: inline-block;
+          font-size: 16px;
+          transition: transform 0.22s ease;
+        }
+        .svc-cta:hover .cta-arrow { transform: translateX(4px); }
+
+        /* ── Divider ── */
+        .svc-divider {
+          height: 1px;
+          background: #f1f5f9;
+          margin: 18px 0 16px;
+        }
+      `}</style>
+
+      {/* Background blobs */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute left-[5%] top-[10%] h-[140px] w-[420px] rounded-full bg-white/40 blur-3xl" />
         <div className="absolute right-[8%] top-[16%] h-[150px] w-[360px] rounded-full bg-white/35 blur-3xl" />
@@ -17,80 +245,182 @@ export default function ServicesPage() {
 
       <div className="content-container relative px-4 sm:px-6 lg:px-10">
         <div className="mx-auto max-w-[1320px]">
-          <div className="max-w-[860px]">
-            <p className={`${mansalva.className} mb-4 text-[24px] font-bold text-[#e61e73]`}>
-              Our Services
-            </p>
 
-            <h1 className={`${epilogue.className} text-[42px] font-extrabold leading-[0.95] tracking-[-0.06em] text-[#0e2547] sm:text-[56px] lg:text-[76px]`}>
-              <span className="relative inline-block">
-                Services designed to build stronger brands and sharper growth systems.
-                <span className="absolute bottom-[8px] left-0 -z-10 h-[15px] w-[38%] bg-[#ef6a99]" />
-              </span>
-            </h1>
+          {/* ── Heading — full width ── */}
+          <div className="w-full">
 
-            <p className={`${outfit.className} mt-6 max-w-[780px] text-[18px] leading-9 text-slate-500`}>
-              From UX/UI and websites to SEO, content, strategy, and paid growth, our services are built to improve communication, performance, and long-term brand momentum. We keep the work clear, premium, and aligned with business outcomes.
-            </p>
-          </div>
+            <Reveal offset={20} amount={0.5}>
+              <p className={`${mansalva.className} mb-5 text-[24px] font-bold leading-none text-[#e61e73]`}>
+                Our Services
+              </p>
+            </Reveal>
 
-          <div className="mt-14 grid gap-8 md:grid-cols-2 xl:grid-cols-3">
-            {services.map((item, index) => (
-              <article
-                key={item.slug}
-                className="group rounded-[24px] bg-white p-8 shadow-[0_18px_45px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(0,0,0,0.08)]"
-              >
-                <div className="flex items-center justify-between">
-                  <p className={`${mansalva.className} text-[22px] font-bold text-[#e61e73]`}>
-                    {item.shortLabel}
-                  </p>
-                  <span className={`${epilogue.className} text-[18px] font-extrabold text-[#99dcf8]`}>
-                    {String(index + 1).padStart(2, "0")}
+            {/*
+              Title spans full container width.
+              Split into two lines deliberately:
+              Line 1 — "Services designed to" — large, bold, left-anchored
+              Line 2 — "build stronger brands." — accent highlight on key words
+
+              The underline only marks the key phrase "stronger brands"
+              not the entire heading — more editorial, more intentional.
+            */}
+            <Reveal delay={0.08} offset={28} amount={0.4}>
+              <h1 className={`${epilogue.className} w-full text-[48px] font-extrabold leading-[0.95] tracking-[-0.065em] text-[#0e2547] sm:text-[62px] lg:text-[82px] xl:text-[92px]`}>
+                {/* Line 1 */}
+                <span className="block">
+                  Services designed to
+                </span>
+
+                {/* Line 2 — "build" plain, "stronger brands" highlighted, "and" plain */}
+                <span className="block">
+                  build{" "}
+                  <span className="relative inline-block">
+                    <span className="relative z-10">stronger brands</span>
+                    {/* Pink highlight slab behind the key phrase */}
+                    <motion.span
+                      className="absolute bottom-[4px] left-[-4px] right-[-4px] -z-10 h-[18px] rounded-[3px] bg-[#ef6a99]"
+                      initial={{ scaleX: 0 }}
+                      whileInView={{ scaleX: 1 }}
+                      viewport={{ once: false, amount: 0.8 }}
+                      transition={{ duration: 0.55, delay: 0.35, ease: [0.16, 1, 0.3, 1] as const }}
+                      style={{ transformOrigin: "left center" }}
+                    />
                   </span>
-                </div>
+                </span>
 
-                <h2 className={`${epilogue.className} mt-4 text-[30px] font-extrabold leading-[1.04] tracking-[-0.04em] text-[#0e2547]`}>
-                  {item.title}
-                </h2>
+                {/* Line 3 — smaller, muted — acts as subtitle within the heading */}
+                <span
+                  className={`${outfit.className} mt-3 block text-[22px] font-medium leading-[1.5] tracking-[-0.01em] text-slate-400 sm:text-[26px] lg:text-[30px]`}
+                >
+                  and sharper growth systems.
+                </span>
+              </h1>
+            </Reveal>
 
-                <p className={`${outfit.className} mt-4 text-[17px] leading-8 text-slate-500`}>
-                  {item.description}
-                </p>
+            {/* Divider + body copy — two-column layout at lg */}
+            <Reveal delay={0.18} offset={16} amount={0.4}>
+              <div className="mt-8 flex flex-col gap-6 border-t border-slate-200 pt-8 lg:flex-row lg:items-start lg:gap-16">
 
-                <p className={`${outfit.className} mt-5 text-[15px] leading-8 text-slate-500`}>
-                  {item.intro.slice(0, 165)}...
-                </p>
-
-                <div className="mt-6 border-t border-slate-100 pt-5">
-                  <p className={`${epilogue.className} text-[13px] font-bold uppercase tracking-[0.05em] text-[#0e2547]`}>
-                    Includes
+                {/* Left — stat-like accent */}
+                <div className="flex-shrink-0">
+                  <p className={`${epilogue.className} text-[48px] font-extrabold leading-none tracking-[-0.05em] text-[#0e2547] lg:text-[64px]`}>
+                    6+
                   </p>
-
-                  <ul className="mt-3 space-y-2">
-                    {item.points.slice(0, 4).map((point) => (
-                      <li
-                        key={point}
-                        className={`${outfit.className} flex items-start gap-3 text-[15px] leading-7 text-slate-500`}
-                      >
-                        <span className="mt-[10px] h-2.5 w-2.5 shrink-0 rounded-full bg-[#99dcf8]" />
-                        <span>{point}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <p className={`${outfit.className} mt-1 text-[14px] font-medium text-slate-400`}>
+                    Service areas
+                  </p>
                 </div>
 
-                <div className="mt-7">
-                  <LocalizedClientLink
-                    href={`/services/${item.slug}`}
-                    className={`${epilogue.className} inline-flex items-center text-[15px] font-extrabold uppercase tracking-[0.02em] text-[#0e2547] transition-colors hover:text-[#e61e73]`}
-                  >
-                    Learn More
-                    <span className="ml-2 text-[18px] leading-none">›</span>
-                  </LocalizedClientLink>
-                </div>
-              </article>
-            ))}
+                {/* Vertical rule */}
+                <div className="hidden w-[1px] self-stretch bg-slate-200 lg:block" />
+
+                {/* Right — body text */}
+                <p className={`${outfit.className} max-w-[820px] text-[17px] leading-9 text-slate-500 lg:text-[18px]`}>
+                  From UX/UI and websites to SEO, content, strategy, and paid growth,
+                  our services are built to improve communication, performance, and
+                  long-term brand momentum. We keep the work clear, premium, and
+                  aligned with business outcomes.
+                </p>
+
+              </div>
+            </Reveal>
+
           </div>
+
+          {/* ── Service cards grid ── */}
+          <div className="mt-14 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {services.map((item, index) => {
+              const theme  = ACCENTS[index % ACCENTS.length]
+              const isHov  = hoveredCard === index
+              const padNum = String(index + 1).padStart(2, "0")
+
+              return (
+                <Reveal key={item.slug} delay={index * 0.08} offset={40} amount={0.1}>
+                  <MotionArticle
+                    className={`svc-card h-full${isHov ? " is-hovered" : ""}`}
+                    style={{
+                      "--card-accent":  theme.accent,
+                      "--card-light":   theme.light,
+                      "--card-border":  theme.border,
+                      "--card-num":     theme.num,
+                      border: `1.5px solid ${isHov ? theme.accent : "#e8ecf0"}`,
+                      boxShadow: isHov
+                        ? `0 20px 56px rgba(0,0,0,0.10), 0 0 0 1px ${theme.border}`
+                        : "0 8px 28px rgba(0,0,0,0.05)",
+                    } as React.CSSProperties}
+                    /*
+                      Motion handles the physical lift.
+                      CSS + React state handle all colour changes.
+                    */
+                    whileHover={prefersReduced ? {} : {
+                      y: -8,
+                      transition: { duration: 0.22, ease: "easeOut" },
+                    }}
+                    onMouseEnter={() => setHoveredCard(index)}
+                    onMouseLeave={() => setHoveredCard(null)}
+                  >
+
+                    {/* ── Top row: pill + number ── */}
+                    <div className="flex items-center justify-between gap-3">
+                      <span className={`${mansalva.className} svc-pill`}>
+                        {item.shortLabel}
+                      </span>
+                      <span className={`${epilogue.className} svc-num`}>
+                        {padNum}
+                      </span>
+                    </div>
+
+                    {/* ── Title ── */}
+                    <h2 className={`${epilogue.className} mt-5 text-[26px] font-extrabold leading-[1.06] tracking-[-0.04em] text-[#0e2547] lg:text-[30px]`}>
+                      {item.title}
+                    </h2>
+
+                    {/* ── Description ── */}
+                    <p className={`${outfit.className} mt-3 text-[15px] leading-[1.8] text-slate-500`}>
+                      {item.description}
+                    </p>
+
+                    {/* ── Preview text ── */}
+                    <p className={`${outfit.className} mt-3 text-[14px] leading-[1.75] text-slate-400`}>
+                      {item.intro.slice(0, 150)}…
+                    </p>
+
+                    {/* ── Includes section ── */}
+                    <div className="svc-divider" />
+
+                    <p className={`${epilogue.className} mb-3 text-[11px] font-bold uppercase tracking-[0.08em] text-slate-400`}>
+                      Includes
+                    </p>
+
+                    <ul className="space-y-2">
+                      {item.points.slice(0, 4).map((point) => (
+                        <li
+                          key={point}
+                          className={`${outfit.className} flex items-start gap-3 text-[14px] leading-[1.7] text-slate-500`}
+                        >
+                          <span className="svc-dot" />
+                          <span>{point}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    {/* ── CTA — spacer pushes it to bottom ── */}
+                    <div className="mt-8 flex-1" />
+
+                    <LocalizedClientLink
+                      href={`/services/${item.slug}`}
+                      className={`${epilogue.className} svc-cta`}
+                    >
+                      <span className="cta-label">Learn More</span>
+                      <span className="cta-arrow">→</span>
+                    </LocalizedClientLink>
+
+                  </MotionArticle>
+                </Reveal>
+              )
+            })}
+          </div>
+
         </div>
       </div>
     </main>

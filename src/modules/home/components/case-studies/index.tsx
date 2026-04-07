@@ -1,26 +1,236 @@
+"use client"
+
+/*
+  FIXES APPLIED:
+  ─────────────────────────────────────────────────────────────────
+  BUG 1 (blank on scroll-up):
+    ALL viewport settings changed to once: true.
+    Cards animate in once on first scroll-down. Stay visible forever.
+
+  BUG 2 (hover not working on cards):
+    Root cause: MotionArticle used onHoverStart/onHoverEnd to set
+    data-hovered on e.currentTarget. But Motion's event passes a
+    PointerEvent where currentTarget can be the inner image div,
+    not the card — so data-hovered never set on the right element.
+
+    FIX: Use React useState to track hovered card index.
+    Each card checks `hoveredIndex === idx` to apply hover styles.
+    No DOM setAttribute needed. Clean and reliable.
+
+    Also: nested motion.div (image) had its own whileHover.
+    Nested whileHover on overlapping elements causes conflicts.
+    FIX: Image zoom is now driven by CSS on .cs-img-zone:hover
+    so it doesn't conflict with the card's Motion whileHover.
+  ─────────────────────────────────────────────────────────────────
+*/
+
+import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { motion, useReducedMotion, type Variants } from "motion/react"
 import { caseStudies } from "@lib/data/case-studies"
 import { Epilogue, Outfit, Mansalva } from "next/font/google"
 
 const epilogue = Epilogue({ subsets: ["latin"], weight: ["700", "800"] })
-const outfit = Outfit({ subsets: ["latin"], weight: ["400", "500", "700"] })
+const outfit   = Outfit({ subsets: ["latin"], weight: ["400", "500", "700"] })
 const mansalva = Mansalva({ subsets: ["latin"], weight: ["400"] })
 
+const headingVariants: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.12 } },
+}
 
-export default function CaseStudies({
-  countryCode,
-}: {
-  countryCode: string
-}) {
+const fadeUpVariants: Variants = {
+  hidden:  { opacity: 0, y: 28 },
+  visible: {
+    opacity: 1, y: 0,
+    transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const },
+  },
+}
+
+const gridVariants: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.12, delayChildren: 0.05 } },
+}
+
+const cardVariants: Variants = {
+  hidden:  { opacity: 0, y: 44, scale: 0.97 },
+  visible: {
+    opacity: 1, y: 0, scale: 1,
+    transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const },
+  },
+}
+
+const dotsContainerVariants: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.07 } },
+}
+
+const dotVariants: Variants = {
+  hidden:  { opacity: 0, x: -10 },
+  visible: {
+    opacity: 1, x: 0,
+    transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] as const },
+  },
+}
+
+const MotionLink    = motion.create(Link)
+const MotionArticle = motion.create("article" as never) as typeof motion.div
+
+const ACCENTS = [
+  { accent: "#e61e73", pillBg: "#fff0f6", pillHoverBg: "#ffe0ef", pillBorder: "#fbb6d4" },
+  { accent: "#9333ea", pillBg: "#f5eeff", pillHoverBg: "#ede0ff", pillBorder: "#d8b4fe" },
+  { accent: "#0ea5e9", pillBg: "#e8f6ff", pillHoverBg: "#d0edff", pillBorder: "#7dd3fc" },
+]
+
+export default function CaseStudies({ countryCode }: { countryCode: string }) {
+  const prefersReduced = useReducedMotion()
+
+  /*
+    FIX: Track hovered card by index with useState.
+    This is more reliable than DOM setAttribute because:
+    - No dependency on Motion's event.currentTarget
+    - React controls the style — guaranteed to update
+    - Works with any nesting depth inside the card
+  */
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null)
+
   return (
-    <section
-      className="relative overflow-hidden bg-[#f3f4f6] py-18 lg:py-24"
-      style={{
-        fontFamily:
-          '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif',
-      }}
-    >
+    <section className="relative overflow-hidden bg-[#f3f4f6] py-16 lg:py-24">
+      <style>{`
+        /* ── Card shell ── */
+        .cs-card {
+          position: relative;
+          background: #fff;
+          border-radius: 20px;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+          /*
+            border and box-shadow are animated via React inline styles
+            (driven by hoveredIdx state) — not CSS :hover.
+            This is the fix: React state is more reliable than
+            Motion's onHoverStart/onHoverEnd for nested cards.
+          */
+          transition: border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        /* Top accent bar — shown when card is hovered (via .is-hovered class) */
+        .cs-card::before {
+          content: "";
+          position: absolute;
+          top: 0; left: 0; right: 0;
+          height: 4px;
+          border-radius: 20px 20px 0 0;
+          background: var(--card-accent);
+          opacity: 0;
+          transition: opacity 0.25s ease;
+          z-index: 10;
+        }
+        .cs-card.is-hovered::before { opacity: 1; }
+
+        /* ── Image zone ── */
+        .cs-img-zone {
+          position: relative;
+          overflow: hidden;
+          aspect-ratio: 16 / 10;
+          background: #f0f0f0;
+          flex-shrink: 0;
+          display: block;
+        }
+        /*
+          FIX: Image zoom is now pure CSS on the zone.
+          No nested motion.div whileHover — avoids conflict
+          with the card's Motion whileHover.
+        */
+        .cs-img-zone img {
+          transition: transform 0.6s ease !important;
+        }
+        .cs-card.is-hovered .cs-img-zone img {
+          transform: scale(1.05) !important;
+        }
+
+        /* ── Category pill ── */
+        .cs-pill {
+          display: inline-flex;
+          align-items: center;
+          padding: 4px 12px;
+          border-radius: 999px;
+          font-size: 13px;
+          font-weight: 700;
+          background: var(--pill-bg);
+          color: var(--card-accent);
+          border: 1.5px solid var(--pill-border);
+          transition: background 0.2s ease, border-color 0.2s ease;
+        }
+        .cs-card.is-hovered .cs-pill {
+          background: var(--pill-hover-bg);
+          border-color: var(--card-accent);
+        }
+
+        /* ── Content zone ── */
+        .cs-content {
+          padding: 22px 24px 28px;
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+        }
+
+        .cs-divider {
+          height: 1px;
+          background: #f0f0f0;
+          margin: 16px 0;
+        }
+
+        .cs-results-label {
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: #94a3b8;
+          margin-bottom: 10px;
+        }
+
+        /* ── CTA link ── */
+        .cs-view-link {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 13px;
+          font-weight: 800;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+          text-decoration: none;
+          color: var(--card-accent);
+          margin-top: auto;
+          padding-top: 18px;
+          transition: opacity 0.2s ease;
+        }
+        .cs-view-link:hover { opacity: 0.7; }
+        .cs-view-link .link-arrow {
+          display: inline-block;
+          transition: transform 0.2s ease;
+        }
+        .cs-view-link:hover .link-arrow { transform: translateX(5px); }
+
+        /* ── Title hover ── */
+        .cs-title-link {
+          text-decoration: none;
+          color: #0e2547;
+          transition: color 0.2s ease;
+        }
+        .cs-card.is-hovered .cs-title-link { color: var(--card-accent); }
+
+        /* ── Doodle ── */
+        .cs-doodle {
+          position: absolute;
+          top: -4px; right: 14px;
+          z-index: 20;
+          pointer-events: none;
+        }
+      `}</style>
+
+      {/* background blobs */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute left-[4%] top-[8%] h-[140px] w-[420px] rounded-full bg-white/50 blur-3xl" />
         <div className="absolute right-[6%] top-[12%] h-[160px] w-[360px] rounded-full bg-white/40 blur-3xl" />
@@ -31,140 +241,179 @@ export default function CaseStudies({
       <div className="content-container relative px-4 sm:px-6 lg:px-10">
         <div className="mx-auto max-w-[1320px]">
 
-          {/* heading */}
+          {/* ── Heading ── */}
+          <motion.div
+            className="max-w-[560px]"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.6 }}  // FIX: once:true
+            variants={headingVariants}
+          >
+            <motion.p
+              className={`${mansalva.className} mb-5 text-[24px] font-bold leading-none text-[#e61e73] sm:text-[28px]`}
+              variants={fadeUpVariants}
+            >
+              CASE STUDIES
+            </motion.p>
 
-          <div className="max-w-[560px]">
+            <motion.h2
+              className={`${epilogue.className} text-[42px] font-extrabold leading-[0.94] tracking-[-0.065em] text-[#0e2547] sm:text-[56px] lg:text-[72px]`}
+              variants={fadeUpVariants}
+            >
+              <span className="relative inline-block">
+                Real brands. Real growth.
+                <motion.span
+                  className="absolute bottom-[8px] left-0 -z-10 h-[15px] bg-[#ef6a99]"
+                  initial={{ width: "0%" }}
+                  whileInView={{ width: "68%" }}
+                  viewport={{ once: true, amount: 0.8 }}  // FIX: once:true
+                  transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] as const }}
+                />
+              </span>
+            </motion.h2>
+          </motion.div>
 
-           <p className={`${mansalva.className} mb-5 text-[24px] font-bold leading-none text-[#e61e73] sm:text-[28px]`}>
-  CASE STUDIES
-</p>
+          {/* ── Cards grid ── */}
+          <motion.div
+            className="mt-14 grid gap-6 md:grid-cols-2 xl:grid-cols-3"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.08 }}  // FIX: once:true
+            variants={gridVariants}
+          >
+            {caseStudies.map((item, idx) => {
+              const theme    = ACCENTS[idx % ACCENTS.length]
+              const isHovered = hoveredIdx === idx
 
-
-            <h2 className={`${epilogue.className} text-[42px] font-extrabold leading-[0.94] tracking-[-0.065em] text-[#0e2547] sm:text-[56px] lg:text-[72px]`}>
-  <span className="relative inline-block">
-    Real brands. Real growth.
-    <span className="absolute bottom-[8px] left-0 -z-10 h-[15px] w-[68%] bg-[#ef6a99]" />
-  </span>
-</h2>
-
-          </div>
-
-
-          {/* cards */}
-
-          <div className="mt-14 grid gap-x-10 gap-y-16 md:grid-cols-2 xl:grid-cols-3">
-
-            {caseStudies.map((item) => (
-
-              <article key={item.slug} className="group">
-
-                <Link
-                  href={`/${countryCode}/work/${item.slug}`}
-                  className="block"
+              return (
+                <MotionArticle
+                  key={item.slug}
+                  /*
+                    FIX: className includes "is-hovered" based on React state.
+                    All CSS :hover selectors now use .cs-card.is-hovered instead.
+                    This is driven by onMouseEnter/onMouseLeave on the article —
+                    plain DOM events, not Motion events. 100% reliable.
+                  */
+                  className={`cs-card${isHovered ? " is-hovered" : ""}`}
+                  style={{
+                    "--card-accent":   theme.accent,
+                    "--pill-bg":       theme.pillBg,
+                    "--pill-hover-bg": theme.pillHoverBg,
+                    "--pill-border":   theme.pillBorder,
+                    border: `1.5px solid ${isHovered ? theme.accent : "#ebebeb"}`,
+                    boxShadow: isHovered
+                      ? "0 24px 60px rgba(0,0,0,0.12)"
+                      : "0 4px 16px rgba(0,0,0,0.04)",
+                    transition: "border-color 0.25s ease, box-shadow 0.25s ease",
+                  } as React.CSSProperties}
+                  variants={cardVariants}
+                  /*
+                    Motion handles the card lift (y: -8).
+                    React state handles all colour/border/shadow changes.
+                    This split is the key to reliable hover behaviour.
+                  */
+                  whileHover={prefersReduced ? {} : {
+                    y: -8,
+                    transition: { duration: 0.22, ease: "easeOut" },
+                  }}
+                  onMouseEnter={() => setHoveredIdx(idx)}
+                  onMouseLeave={() => setHoveredIdx(null)}
                 >
 
-                  <div className="relative">
+                  {/* ── Image zone ── */}
+                  <Link href={`/${countryCode}/work/${item.slug}`} className="cs-img-zone" tabIndex={-1}>
+                    {/*
+                      Plain next/image — no motion.div wrapper.
+                      CSS .cs-card.is-hovered .cs-img-zone img handles the scale.
+                      This removes the nested whileHover conflict entirely.
+                    */}
+                    <Image src={item.image} alt={item.title} fill className="object-cover" />
 
-                    <div className="pointer-events-none absolute -top-6 right-8 z-20">
+                    {/* Gradient overlay */}
+                    <div
+                      className="pointer-events-none absolute inset-x-0 bottom-0 h-[40%]"
+                      style={{ background: "linear-gradient(to top, rgba(14,37,71,0.4) 0%, transparent 100%)" }}
+                    />
 
-                      <svg
-                        width="82"
-                        height="54"
-                        viewBox="0 0 82 54"
-                        fill="none"
-                      >
+                    {/* Pink bars doodle */}
+                    <motion.div
+                      className="cs-doodle"
+                      initial={{ opacity: 0, y: -12 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, amount: 0.4 }}  // FIX: once:true
+                      transition={{ duration: 0.45, delay: 0.1 + idx * 0.07, ease: [0.16, 1, 0.3, 1] as const }}
+                    >
+                      <svg width="58" height="40" viewBox="0 0 82 54" fill="none">
                         <path
                           d="M8 44C14 20 14 8 14 2M24 46C30 24 30 11 30 4M40 48C46 26 46 13 46 6M56 48C62 28 62 16 62 10M72 46C76 30 76 20 76 14"
-                          stroke="#e61e73"
+                          stroke={theme.accent}
                           strokeWidth="4"
                           strokeLinecap="round"
                         />
                       </svg>
+                    </motion.div>
+                  </Link>
 
+                  {/* ── Content zone ── */}
+                  <div className="cs-content">
+
+                    <div className="mb-3">
+                      <span className={`${outfit.className} cs-pill`}>{item.category}</span>
                     </div>
 
-                    <div className="overflow-hidden bg-white shadow-[0_22px_55px_rgba(0,0,0,0.08)] transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-[0_30px_70px_rgba(0,0,0,0.12)]">
+                    <h3 className={`${epilogue.className} text-[24px] font-extrabold leading-[1.1] tracking-[-0.04em] lg:text-[28px]`}>
+                      <Link href={`/${countryCode}/work/${item.slug}`} className="cs-title-link">
+                        {item.title}
+                      </Link>
+                    </h3>
 
-                      <div className="relative aspect-[1.05/1] w-full">
+                    {item.about && (
+                      <p className={`${outfit.className} mt-3 text-[15px] leading-[1.75] text-slate-400`}>
+                        {item.about}
+                      </p>
+                    )}
 
-                        <Image
-                          src={item.image}
-                          alt={item.title}
-                          fill
-                          className="object-cover transition-transform duration-700 group-hover:scale-[1.035]"
-                        />
+                    <div className="cs-divider" />
 
-                      </div>
+                    <p className={`${epilogue.className} cs-results-label`}>Results</p>
 
-                    </div>
-
-                  </div>
-
-                </Link>
-
-
-                <div className="mt-8">
-
-                 <p className={`${mansalva.className} text-[22px] font-bold leading-none text-[#e61e73]`}>
-  {item.category}
-</p>
-
-
-                 <h3 className={`${epilogue.className} mt-4 text-[32px] font-extrabold leading-[1.03] tracking-[-0.055em] text-[#0e2547] lg:text-[38px]`}>
-  <Link href={`/${countryCode}/work/${item.slug}`}>
-    {item.title}
-  </Link>
-</h3>
-
-
-                  {item.about && (
-                    <p className={`${outfit.className} mt-4 text-[17px] leading-8 text-slate-500`}>
-  {item.about}
-</p>
-
-                  )}
-
-
-                  <div className="mt-5">
-
-                   <p className={`${epilogue.className} text-[15px] font-bold uppercase tracking-[0.04em] text-[#0e2547]`}>
-  Results
-</p>
-
-                    <ul className="mt-3 space-y-2">
-
+                    <motion.ul
+                      className="space-y-2"
+                      initial="hidden"
+                      whileInView="visible"
+                      viewport={{ once: true, amount: 0.4 }}  // FIX: once:true
+                      variants={dotsContainerVariants}
+                    >
                       {item.results.slice(0, 3).map((result) => (
-
-                        <li
+                        <motion.li
                           key={result}
-                          className="flex items-start gap-3 text-[16px] leading-7 text-slate-500"
+                          className={`${outfit.className} flex items-start gap-2.5 text-[14px] leading-[1.65] text-slate-500`}
+                          variants={dotVariants}
                         >
-                          <span className="mt-[10px] h-2.5 w-2.5 rounded-full bg-[#99dcf8]" />
+                          <span className="mt-[6px] h-[7px] w-[7px] flex-shrink-0 rounded-full" style={{ background: theme.accent, opacity: 0.7 }} />
                           <span>{result}</span>
-                        </li>
-
+                        </motion.li>
                       ))}
+                    </motion.ul>
 
-                    </ul>
+                    {/*
+                      CTA link — pure CSS hover (arrow slide + opacity).
+                      No Motion needed — CSS is simpler and more reliable for
+                      hover effects that don't need physics or spring.
+                    */}
+                    <Link
+                      href={`/${countryCode}/work/${item.slug}`}
+                      className={`${epilogue.className} cs-view-link`}
+                    >
+                      View Case Study
+                      <span className="link-arrow">→</span>
+                    </Link>
 
                   </div>
-
-
-                  <Link
-  href={`/${countryCode}/work/${item.slug}`}
-  className={`${epilogue.className} mt-6 inline-flex items-center text-[15px] font-extrabold uppercase tracking-[0.02em] text-[#0e2547] hover:text-[#e61e73]`}
->
-  View Case Study
-</Link>
-
-
-                </div>
-
-              </article>
-
-            ))}
-
-          </div>
+                </MotionArticle>
+              )
+            })}
+          </motion.div>
 
         </div>
       </div>
