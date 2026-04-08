@@ -1,40 +1,5 @@
 "use client"
 
-/*
-  ┌──────────────────────────────────────────────────────────────────┐
-  │  HOW THE SCROLL ANIMATION WORKS (once:false without blank bug)   │
-  │                                                                  │
-  │  The blank-on-scroll-up bug happens because:                    │
-  │    initial = { opacity: 0, y: 40 }                              │
-  │    When element leaves viewport, Motion resets TO initial.      │
-  │    So it goes invisible. Then re-animates on next scroll-in.    │
-  │    With stagger delays this causes a flash of invisible content. │
-  │                                                                  │
-  │  THE FIX — two-state approach:                                  │
-  │    Use animate (not initial) for the "resting visible" state.   │
-  │    Use whileInView only for the "entering" effect.              │
-  │                                                                  │
-  │  Concretely:                                                     │
-  │    animate={{ opacity: 1, y: 0 }}   ← always visible at rest   │
-  │    whileInView={{ opacity: 1, y: 0, transition: entrance }}     │
-  │    initial={{ opacity: 0, y: 40 }}  ← only the VERY first load │
-  │                                                                  │
-  │  Wait — that still resets. The REAL fix:                        │
-  │    Don't use initial at all for scroll elements.                │
-  │    Use variants where hidden state is applied via               │
-  │    custom="hidden" only before first intersection.              │
-  │                                                                  │
-  │  SIMPLEST CORRECT PATTERN:                                      │
-  │    Use a wrapper that applies initial only once via             │
-  │    a ref + useState(hasAnimated). After first whileInView,     │
-  │    set hasAnimated=true and stop applying initial.             │
-  │                                                                  │
-  │  IMPLEMENTED: ScrollReveal wrapper component below.            │
-  │  It shows the animation every time the element enters view,    │
-  │  but when leaving, it stays at its visible resting state.      │
-  └──────────────────────────────────────────────────────────────────┘
-*/
-
 import { useEffect, useRef, useState } from "react"
 import { motion } from "motion/react"
 import Link from "next/link"
@@ -43,24 +8,7 @@ import { Epilogue, Outfit } from "next/font/google"
 const epilogue = Epilogue({ subsets: ["latin"], weight: ["700", "800"] })
 const outfit   = Outfit({ subsets: ["latin"], weight: ["400", "500", "700"] })
 
-// ── ScrollReveal — the key component that fixes both bugs ─────────────────────
-/*
-  HOW ScrollReveal WORKS:
-
-  State machine:
-    "idle"    → element not yet seen. Renders with opacity:0, y:offset (invisible).
-    "visible" → element in viewport. Animates to opacity:1, y:0.
-    "resting" → element has left viewport after being seen.
-                Renders at opacity:1, y:0 WITHOUT any transition.
-                So it stays visible — no blank flash on scroll up.
-
-  On next scroll-in from "resting":
-    Transitions back to "visible" — plays the entrance animation again.
-    This gives the "re-animates on revisit" feel you want.
-
-  The key insight: "resting" and "visible" both show the element fully.
-  Only "idle" (first load, never seen) shows it hidden.
-*/
+// ── ScrollReveal ──────────────────────────────────────────────────────────────
 function ScrollReveal({
   children,
   delay = 0,
@@ -80,19 +28,16 @@ function ScrollReveal({
   useEffect(() => {
     const el = ref.current
     if (!el) return
-
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setState("visible")
         } else {
-          // Only go to "resting" (not "idle") after first animation
           setState((prev) => (prev === "idle" ? "idle" : "resting"))
         }
       },
       { threshold: amount, rootMargin: "0px 0px -40px 0px" }
     )
-
     observer.observe(el)
     return () => observer.disconnect()
   }, [amount])
@@ -105,8 +50,8 @@ function ScrollReveal({
         state === "visible"
           ? { opacity: 1, y: 0, transition: { duration: 0.55, delay, ease: [0.16, 1, 0.3, 1] } }
           : state === "resting"
-          ? { opacity: 1, y: 0, transition: { duration: 0 } } // instant — no blank
-          : { opacity: 0, y: offset, transition: { duration: 0 } } // idle — hidden
+          ? { opacity: 1, y: 0, transition: { duration: 0 } }
+          : { opacity: 0, y: offset, transition: { duration: 0 } }
       }
       style={state === "idle" ? { opacity: 0 } : undefined}
     >
@@ -116,7 +61,6 @@ function ScrollReveal({
 }
 
 // ── Data ──────────────────────────────────────────────────────────────────────
-
 const services = [
   {
     label: "Creative",
@@ -142,17 +86,41 @@ const services = [
 ]
 
 // ── Main component ────────────────────────────────────────────────────────────
-
 export default function OurServices() {
   return (
     <section className="relative overflow-hidden bg-white py-16 lg:py-20">
       <style>{`
+        /*
+          Left accent bar — always present logic:
+          The ::before bar was previously opacity:0 → opacity:1 on hover.
+          Now the bar is always opacity:1, but it SLIDES in from left on hover
+          using scaleY so the card already shows a subtle indicator at rest.
+        */
         .service-card::before {
           content: ""; position: absolute; left: 0; top: 16px; bottom: 16px;
           width: 4px; border-radius: 0 3px 3px 0;
-          background: var(--card-accent); opacity: 0; transition: opacity 0.28s ease;
+          background: var(--card-accent);
+          opacity: 1;
+          /* Resting: bar is there but collapsed to a dot */
+          transform: scaleY(0.18);
+          transform-origin: center;
+          transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .service-card:hover::before { opacity: 1; }
+        /* On hover: bar expands to full height */
+        .service-card:hover::before { transform: scaleY(1); }
+
+        /*
+          Image/content zoom effect inside card on hover.
+          The card itself lifts (whileHover y:-6).
+          Inner content scales up very slightly for a "zoom" feel.
+        */
+        .service-card-inner {
+          transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+          will-change: transform;
+        }
+        .service-card:hover .service-card-inner {
+          transform: scale(1.025) translateY(-2px);
+        }
 
         .btn-learn {
           position: relative; display: inline-flex; align-items: center; gap: 6px;
@@ -212,7 +180,6 @@ export default function OurServices() {
           <h2 className={`${epilogue.className} text-[34px] font-extrabold tracking-[-0.06em] text-[#0e2547] sm:text-[42px] lg:text-[64px]`}>
             <span className="relative inline-block leading-none">
               Our Services
-              {/* Underline uses ScrollReveal's state machine separately */}
               <UnderlineReveal />
             </span>
           </h2>
@@ -230,7 +197,13 @@ export default function OurServices() {
               <motion.div
                 className="service-card relative overflow-hidden rounded-[20px] p-8 h-full"
                 style={{
-                  border: "1.5px solid transparent",
+                  /*
+                    CHANGE: border is now always visible using accentBorder colour.
+                    Previously: border: "1.5px solid transparent" (invisible at rest).
+                    Now: border uses the card's accent border colour at all times.
+                    On hover: border brightens to full accent via whileHover borderColor.
+                  */
+                  border: `1.5px solid ${service.accentBorder}`,
                   background: "#fff",
                   "--card-accent": service.accent,
                   "--btn-accent": service.accent,
@@ -238,52 +211,64 @@ export default function OurServices() {
                 } as React.CSSProperties}
                 whileHover={{
                   y: -6,
-                  boxShadow: "0 12px 36px rgba(15,23,42,0.09)",
-                  borderColor: service.accentBorder,
-                  transition: { duration: 0.22 },
+                  /*
+                    CHANGE: box shadow is now more prominent on hover (zoom feel).
+                    Border brightens from accentBorder → full accent on hover.
+                    Combined with .service-card-inner scale this gives a zoom effect.
+                  */
+                  boxShadow: `0 20px 48px rgba(15,23,42,0.11), 0 0 0 1.5px ${service.accent}`,
+                  borderColor: service.accent,
+                  transition: { duration: 0.25, ease: [0.16, 1, 0.3, 1] },
                 }}
               >
-                <p className={`${outfit.className} mb-4 text-[24px] font-bold leading-none`} style={{ color: service.accent }}>
-                  {service.label}
-                </p>
-                <h3 className={`${epilogue.className} max-w-[390px] text-[28px] font-extrabold leading-[1.08] tracking-[-0.05em] text-[#0e2547] lg:text-[34px]`}>
-                  {service.title}
-                </h3>
-                <p className={`${outfit.className} mt-5 max-w-[400px] text-[15px] leading-8 text-slate-500 lg:text-[16px]`}>
-                  {service.description}
-                </p>
+                {/*
+                  CHANGE: all card content is wrapped in .service-card-inner.
+                  CSS scales it up slightly on .service-card:hover to create
+                  a zoom effect on the content — distinct from the card lift (y:-6).
+                */}
+                <div className="service-card-inner">
+                  <p className={`${outfit.className} mb-4 text-[24px] font-bold leading-none`} style={{ color: service.accent }}>
+                    {service.label}
+                  </p>
+                  <h3 className={`${epilogue.className} max-w-[390px] text-[28px] font-extrabold leading-[1.08] tracking-[-0.05em] text-[#0e2547] lg:text-[34px]`}>
+                    {service.title}
+                  </h3>
+                  <p className={`${outfit.className} mt-5 max-w-[400px] text-[15px] leading-8 text-slate-500 lg:text-[16px]`}>
+                    {service.description}
+                  </p>
 
-                <div className="mt-5 flex max-w-[420px] flex-wrap gap-2.5">
-                  {service.points.map((point, pi) => (
-                    <motion.span
-                      key={point}
-                      className={`${outfit.className} skill-chip`}
-                      style={{
-                        border: `1.5px solid ${service.accentBorder}`,
-                        background: service.accentLight,
-                        color: service.accent,
-                      }}
-                      initial={{ opacity: 0, scale: 0.88 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
-                      viewport={{ once: false, amount: 0.5 }}
-                      transition={{ delay: pi * 0.05, duration: 0.3, ease: [0.16, 1, 0.3, 1] as const }}
-                      whileHover={{
-                        y: -3, scale: 1.06,
-                        backgroundColor: service.accentHover,
-                        borderColor: service.accent,
-                        boxShadow: "0 4px 14px rgba(15,23,42,0.1)",
-                        transition: { duration: 0.15 },
-                      }}
-                    >
-                      {point}
-                    </motion.span>
-                  ))}
+                  <div className="mt-5 flex max-w-[420px] flex-wrap gap-2.5">
+                    {service.points.map((point, pi) => (
+                      <motion.span
+                        key={point}
+                        className={`${outfit.className} skill-chip`}
+                        style={{
+                          border: `1.5px solid ${service.accentBorder}`,
+                          background: service.accentLight,
+                          color: service.accent,
+                        }}
+                        initial={{ opacity: 0, scale: 0.88 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: false, amount: 0.5 }}
+                        transition={{ delay: pi * 0.05, duration: 0.3, ease: [0.16, 1, 0.3, 1] as const }}
+                        whileHover={{
+                          y: -3, scale: 1.06,
+                          backgroundColor: service.accentHover,
+                          borderColor: service.accent,
+                          boxShadow: "0 4px 14px rgba(15,23,42,0.1)",
+                          transition: { duration: 0.15 },
+                        }}
+                      >
+                        {point}
+                      </motion.span>
+                    ))}
+                  </div>
+
+                  <Link href="/services" className="btn-learn mt-8">
+                    <span className="lbl">Learn More</span>
+                    <span className="arrow-txt">→</span>
+                  </Link>
                 </div>
-
-                <Link href="/services" className="btn-learn mt-8">
-                  <span className="lbl">Learn More</span>
-                  <span className="arrow-txt">→</span>
-                </Link>
               </motion.div>
             </ScrollReveal>
           ))}
@@ -293,8 +278,7 @@ export default function OurServices() {
   )
 }
 
-// ── Underline with same ScrollReveal state machine ────────────────────────────
-
+// ── Underline with ScrollReveal state machine ─────────────────────────────────
 function UnderlineReveal() {
   const ref = useRef<HTMLSpanElement>(null)
   const [state, setState] = useState<"idle" | "visible" | "resting">("idle")

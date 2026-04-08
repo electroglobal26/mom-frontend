@@ -472,7 +472,7 @@ export default function AboutPage(props: {
             <Reveal offset={40} amount={0.2}>
               <div className="overflow-hidden rounded-[22px] bg-white shadow-[0_22px_55px_rgba(0,0,0,0.08)]">
                 <div className="relative aspect-[4/5] w-full bg-[#eef0f2]">
-                  <Image src="/about/kuldeep.jpg" alt="Kuldeep Ahir" fill className="object-cover" />
+                  <Image src="/team/kuldeep.webp" alt="Kuldeep Ahir" fill className="object-cover" />
                 </div>
                 {/* Name below photo */}
                 <div className="px-6 py-5">

@@ -24,7 +24,7 @@ export const blogPosts: BlogPost[] = [
     category: "Strategy",
     date: "March 15, 2025",
     readTime: "5 min read",
-    image: "/blog/post-1.jpg",
+    image: "/blog/post-1.webp",
     excerpt:
       "Most D2C brands treat creative as a one-off task. The ones that scale treat it as a system. Here's how to build one.",
     content: {
@@ -52,7 +52,7 @@ export const blogPosts: BlogPost[] = [
     category: "Performance",
     date: "March 8, 2025",
     readTime: "4 min read",
-    image: "/blog/post-2.jpg",
+    image: "/blog/post-2.webp",
     excerpt:
       "Running ads without a system is just burning money. Here are the five mistakes we see most often — and how to fix them.",
     content: {
@@ -80,7 +80,7 @@ export const blogPosts: BlogPost[] = [
     category: "SEO",
     date: "February 28, 2025",
     readTime: "6 min read",
-    image: "/blog/post-3.jpg",
+    image: "/blog/post-3.webp",
     excerpt:
       "Paid traffic stops the moment you stop paying. Here's how to build an SEO foundation that keeps working for years.",
     content: {
@@ -108,7 +108,7 @@ export const blogPosts: BlogPost[] = [
     category: "Branding",
     date: "February 20, 2025",
     readTime: "5 min read",
-    image: "/blog/post-4.jpg",
+    image: "/blog/post-4.webp",
     excerpt:
       "A logo is the start of a brand, not the end. The brands people remember have systems — not just symbols.",
     content: {
@@ -136,7 +136,7 @@ export const blogPosts: BlogPost[] = [
     category: "Creative",
     date: "February 12, 2025",
     readTime: "4 min read",
-    image: "/blog/post-5.jpg",
+    image: "/blog/post-5.webp",
     excerpt:
       "User-generated content is the most trusted form of marketing. Here's how to build a system that produces it consistently.",
     content: {
@@ -164,7 +164,7 @@ export const blogPosts: BlogPost[] = [
     category: "Growth",
     date: "February 5, 2025",
     readTime: "5 min read",
-    image: "/blog/post-6.jpg",
+    image: "/blog/post-6.webp",
     excerpt:
       "Acquiring a customer costs 5x more than keeping one. Here's how to build a retention system that compounds.",
     content: {

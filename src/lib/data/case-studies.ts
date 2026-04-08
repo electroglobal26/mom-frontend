@@ -34,7 +34,7 @@ export const caseStudies: CaseStudy[] = [
       "28% lower CAC",
       "Multiple winning creatives",
     ],
-    image: "/case-studies/jalvayu.jpg",
+    image: "/images/case-studies/jalvayu.webp",
     accent: "#e61e73",
     overview:
       "Jalvayu Wellness had a meaningful product and a strong brand story, but the digital experience and creative system were not converting as strongly as they should. The goal was to build a sharper performance-driven creative direction while keeping the brand’s sustainability story intact.",
@@ -56,7 +56,7 @@ export const caseStudies: CaseStudy[] = [
       "4× inbound leads",
       "Higher engagement",
     ],
-    image: "/case-studies/electroglobal.jpg",
+    image: "/images/case-studies/electroglobal.webp",
     accent: "#e61e73",
     overview:
       "ElectroGlobal needed stronger digital visibility and a more consistent brand presence. The focus was on building content that looked professional, explained the offering clearly, and attracted more inbound interest.",
@@ -81,7 +81,7 @@ export const caseStudies: CaseStudy[] = [
       "Massive brand recall",
       "Higher customer engagement",
     ],
-    image: "/case-studies/urban-vada-pav.jpg",
+    image: "/images/case-studies/urban-vada-pav.webp",
     accent: "#e61e73",
     overview:
       "Urban Vada Pav already had strong offline appeal, but the digital side of the brand was not creating the same excitement. The objective was to turn flavour variety and local appeal into attention-grabbing content.",
@@ -95,7 +95,7 @@ export const teamMember = {
   role: "Creative Director",
   description:
     "A growth-focused creator helping D2C brands scale through strategic content, performance marketing, and aligned execution.",
-  image: "/team/kuldeep.jpg",
+  image: "/team/kuldeep.webp",
 }
 
 export const testimonials = [
