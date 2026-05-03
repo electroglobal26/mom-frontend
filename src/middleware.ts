@@ -1,14 +1,11 @@
 import { HttpTypes } from "@medusajs/types"
 import { NextRequest, NextResponse } from "next/server"
 
-// ✅ FIXED ENV
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || process.env.MEDUSA_BACKEND_URL
 
-const PUBLISHABLE_API_KEY =
-  process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
+const PUBLISHABLE_API_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
 
-// ✅ INDIA default (tu India use kar raha hai)
 const DEFAULT_REGION = process.env.NEXT_PUBLIC_DEFAULT_REGION || "in"
 
 const regionMapCache = {
@@ -16,12 +13,10 @@ const regionMapCache = {
   regionMapUpdated: Date.now(),
 }
 
-async function getRegionMap(cacheId: string) {
+async function getRegionMap() {
   const { regionMap, regionMapUpdated } = regionMapCache
 
-  // ❌ CRASH remove kiya
   if (!BACKEND_URL || !PUBLISHABLE_API_KEY) {
-    console.error("❌ Missing ENV variables")
     return new Map()
   }
 
@@ -31,35 +26,21 @@ async function getRegionMap(cacheId: string) {
   ) {
     try {
       const response = await fetch(`${BACKEND_URL}/store/regions`, {
-        headers: {
-          "x-publishable-api-key": PUBLISHABLE_API_KEY,
-        },
+        headers: { "x-publishable-api-key": PUBLISHABLE_API_KEY },
         cache: "no-store",
       })
 
       const json = await response.json()
+      if (!response.ok || !json.regions?.length) return new Map()
 
-      if (!response.ok) {
-        console.error("❌ Region fetch failed:", json)
-        return new Map()
-      }
-
-      const regions = json.regions
-
-      if (!regions?.length) {
-        console.error("❌ No regions found")
-        return new Map()
-      }
-
-      regions.forEach((region: HttpTypes.StoreRegion) => {
+      json.regions.forEach((region: HttpTypes.StoreRegion) => {
         region.countries?.forEach((c) => {
           regionMapCache.regionMap.set(c.iso_2 ?? "", region)
         })
       })
 
       regionMapCache.regionMapUpdated = Date.now()
-    } catch (err) {
-      console.error("❌ Fetch error:", err)
+    } catch {
       return new Map()
     }
   }
@@ -71,27 +52,52 @@ async function getCountryCode(
   request: NextRequest,
   regionMap: Map<string, HttpTypes.StoreRegion>
 ) {
-  let countryCode
-
   const urlCountryCode = request.nextUrl.pathname.split("/")[1]?.toLowerCase()
 
-  if (urlCountryCode && regionMap.has(urlCountryCode)) {
-    countryCode = urlCountryCode
-  } else if (regionMap.has(DEFAULT_REGION)) {
-    countryCode = DEFAULT_REGION
-  } else if (regionMap.keys().next().value) {
-    countryCode = regionMap.keys().next().value
-  }
+  if (urlCountryCode && regionMap.has(urlCountryCode)) return urlCountryCode
+  if (regionMap.has(DEFAULT_REGION)) return DEFAULT_REGION
+  if (regionMap.keys().next().value) return regionMap.keys().next().value
 
-  return countryCode
+  return null
 }
 
 export async function middleware(request: NextRequest) {
-  const cacheId = request.cookies.get("_medusa_cache_id")?.value || crypto.randomUUID()
+  const { pathname } = request.nextUrl
+  const adminSecret = process.env.ADMIN_SECRET
+  const adminCookie = request.cookies.get("admin_auth")?.value
 
-  const regionMap = await getRegionMap(cacheId)
+  // ── 1. STATIC FILES — always pass through immediately ──
+  if (
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/api/") ||
+    pathname.includes(".") 
+  ) {
+    return NextResponse.next()
+  }
 
-  // ✅ SAFE FALLBACK (CRASH FIX)
+  // ── 2. /admin-login — handle separately, no Medusa logic ──
+  if (pathname === "/admin-login") {
+    // Already logged in → go to dashboard
+    if (adminCookie && adminCookie === adminSecret) {
+      return NextResponse.redirect(new URL("/admin", request.url))
+    }
+    // Not logged in → show login page
+    return NextResponse.next()
+  }
+
+  // ── 3. /admin/* routes — check cookie, no Medusa logic ──
+  if (pathname.startsWith("/admin")) {
+    // Not logged in → go to login
+    if (!adminCookie || adminCookie !== adminSecret) {
+      return NextResponse.redirect(new URL("/admin-login", request.url))
+    }
+    // Logged in → show admin page
+    return NextResponse.next()
+  }
+
+  // ── 4. MEDUSA REGION LOGIC — only for storefront pages ──
+  const regionMap = await getRegionMap()
+
   if (!regionMap || regionMap.size === 0) {
     return NextResponse.next()
   }
@@ -99,21 +105,13 @@ export async function middleware(request: NextRequest) {
   const countryCode = await getCountryCode(request, regionMap)
 
   const urlHasCountryCode =
-    countryCode &&
-    request.nextUrl.pathname.split("/")[1]?.includes(countryCode)
+    countryCode && pathname.split("/")[1]?.includes(countryCode)
 
   if (urlHasCountryCode) {
     return NextResponse.next()
   }
 
-  // static files skip
-  if (request.nextUrl.pathname.includes(".")) {
-    return NextResponse.next()
-  }
-
-  const redirectPath =
-    request.nextUrl.pathname === "/" ? "" : request.nextUrl.pathname
-
+  const redirectPath = pathname === "/" ? "" : pathname
   const queryString = request.nextUrl.search || ""
 
   if (countryCode) {
@@ -126,6 +124,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico|images|assets).*)",
+    "/((?!_next/static|_next/image|favicon.ico|images|assets).*)",
   ],
 }

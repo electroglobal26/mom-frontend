@@ -4,19 +4,19 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 
 const leftServices = [
   { name: "Branding & visual design", link: "/services/branding-visual-design" },
-  { name: "E-commerce development", link: "/services/ecommerce-development" },
-  { name: "Software as a service", link: "/services/software-as-a-service" },
+  { name: "Web and app development", link: "/services/ecommerce-development" },
+  { name: "Ai automation and ai agentic service", link: "/services/software-as-a-service" },
   { name: "UX / UI design", link: "/services/ux-ui-design" },
   { name: "Web design & development", link: "/services/web-design-development" },
   { name: "WordPress web design", link: "/services/wordpress-web-design" },
 ]
 
 const rightServices = [
-  { name: "Search engine optimization", link: "/services/search-engine-optimization" },
+  { name: "Search engine optimization - AEO & GEO", link: "/services/search-engine-optimization" },
   { name: "Content & copywriting", link: "/services/content-copywriting" },
-  { name: "Email marketing", link: "/services/email-marketing" },
-  { name: "Pay per click management", link: "/services/pay-per-click-management" },
-  { name: "Social media marketing", link: "/services/social-media-marketing" },
+  { name: "D2C overall branding and scale growth", link: "/services/email-marketing" },
+  { name: "Performance marketing - meta ads, google ads", link: "/services/pay-per-click-management" },
+  { name: "SMO and Content Creation", link: "/services/social-media-marketing" },
   { name: "Strategy & consulting", link: "/services/strategy-consulting" },
 ]
 
@@ -36,12 +36,11 @@ export default function ServicesDropdown() {
         {/* Left column */}
         <div>
           <h3 className="mb-3 text-[20px] font-extrabold tracking-[-0.03em] text-[#0e2547]">
-            Web Design & Development
+            Performance Marketing
           </h3>
 
           <p className="mb-5 text-[15px] leading-7 text-neutral-500">
-            Modern websites, premium storefronts, and digital experiences built
-            for clarity, usability, and conversion.
+            We help you get the right people to your website, turn them into customers, and grow your sales using ads, content, and simple strategies.
           </p>
 
           <div className="space-y-1.5">
@@ -60,12 +59,12 @@ export default function ServicesDropdown() {
         {/* Right column */}
         <div>
           <h3 className="mb-3 text-[20px] font-extrabold tracking-[-0.03em] text-[#0e2547]">
-            Digital Marketing
+            Web Development and AI Development
+
           </h3>
 
           <p className="mb-5 text-[15px] leading-7 text-neutral-500">
-            Growth systems built around visibility, messaging, paid performance,
-            and stronger brand communication.
+           We build websites, apps, and AI automations & agents that are easy to use, fast, and help you run your business better as you grow. 
           </p>
 
           <div className="space-y-1.5">

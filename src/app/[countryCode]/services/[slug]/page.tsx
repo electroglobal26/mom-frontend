@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import { services } from "@lib/data/services"
+import { getServices, getService } from "@lib/data/services"
 import { Epilogue, Outfit, Mansalva } from "next/font/google"
 
 const epilogue = Epilogue({ subsets: ["latin"], weight: ["700", "800"] })
@@ -15,6 +15,7 @@ type Props = {
 }
 
 export async function generateStaticParams() {
+  const services = await getServices()
   return services.map((service) => ({
     slug: service.slug,
   }))
@@ -22,7 +23,7 @@ export async function generateStaticParams() {
 
 export default async function ServiceDetailPage(props: Props) {
   const params = await props.params
-  const service = services.find((item) => item.slug === params.slug)
+  const service = await getService(params.slug)
 
   if (!service) return notFound()
 
@@ -124,7 +125,9 @@ export default async function ServiceDetailPage(props: Props) {
               </p>
 
               <p className={`${outfit.className} mt-5 text-[16px] leading-8 text-slate-500`}>
-                When the service is aligned with positioning, messaging, and execution, the result becomes more durable. That is where stronger momentum usually starts.
+                When the service is aligned with positioning, messaging, and
+                execution, the result becomes more durable. That is where
+                stronger momentum usually starts.
               </p>
 
               <div className="mt-8">
@@ -138,6 +141,7 @@ export default async function ServiceDetailPage(props: Props) {
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </main>
