@@ -52,51 +52,56 @@ function ScrollReveal({
   )
 }
 
-// ── Updated services data ─────────────────────────────────────────────────────
 const services = [
   {
     label: "Performance",
     title: "Performance Marketing",
-    description: "Data-driven paid campaigns on Meta and Google that generate real revenue, not just clicks.",
+    description:
+      "We run ad campaigns that bring the right audience, improve how they interact with the brand, and turn them into customers — so your ad spend leads to better conversions, lower cost, and consistent growth.",
     points: [
-      "Meta & Google Ads",
-      "Audience targeting",
-      "Ad creatives",
+      "Meta Ads",
+      "Google Ads",
       "Funnel setup",
-      "ROAS optimization",
+      "Retargeting",
+      "Creative testing",
     ],
+    href: "/services/performance-marketing",
     accent: "#e61e73",
     accentLight: "#fff0f6",
     accentHover: "#fce7f3",
     accentBorder: "#fbb6d4",
   },
   {
-    label: "SEO & Content",
-    title: "SEO, AEO & Copywriting",
-    description: "Get found by buyers on search engines, answer platforms, and AI tools — with copy that converts.",
+    label: "Web",
+    title: "Web & App Development",
+    description:
+      "We build fast, easy-to-use websites and apps that help users understand your product, build trust, and take action — so your visitors can move smoothly from landing to purchase without confusion and distraction.",
     points: [
-      "SEO / AEO / GEO",
-      "Script & Copywriting",
-      "Content strategy",
-      "Landing pages",
-      "Brand messaging",
+      "Website development",
+      "App development",
+      "Ecommerce website",
+      "Performance optimization",
+      
     ],
+    href: "/services/web-app-development",
     accent: "#9333ea",
     accentLight: "#f5eeff",
     accentHover: "#e9d5ff",
     accentBorder: "#d8b4fe",
   },
   {
-    label: "Web & AI",
-    title: "Web & AI Development",
-    description: "Custom websites, apps, and AI systems built to convert better and scale your business efficiently.",
+    label: "Automation",
+    title: "AI Automation",
+    description:
+      "We set up systems that handle repetitive tasks, improve response time, and keep your operations running smoothly — so your team can focus on important work while everything else runs faster and more efficiently.",
     points: [
-      "Web development",
-      "AI automation",
-      "AI agents",
-      "AI video",
-      "App development",
+      "Workflow automation",
+      "Task automation",
+      "Chat automation",
+      "System integration",
+      
     ],
+    href: "/services/ai-automation",
     accent: "#0ea5e9",
     accentLight: "#e8f6ff",
     accentHover: "#c8e8f8",
@@ -219,15 +224,15 @@ export default function OurServices() {
               >
                 <div className="service-card-inner">
                   <p
-                    className={`${outfit.className} mb-4 text-[24px] font-bold leading-none`}
+                    className={`${outfit.className} mb-4 text-[22px] font-bold leading-none`}
                     style={{ color: service.accent }}
                   >
                     {service.label}
                   </p>
-                  <h3 className={`${epilogue.className} max-w-[390px] text-[28px] font-extrabold leading-[1.08] tracking-[-0.05em] text-[#0e2547] lg:text-[32px]`}>
+                  <h3 className={`${epilogue.className} max-w-[390px] text-[26px] font-extrabold leading-[1.08] tracking-[-0.05em] text-[#0e2547] lg:text-[30px]`}>
                     {service.title}
                   </h3>
-                  <p className={`${outfit.className} mt-4 max-w-[400px] text-[15px] leading-[1.85] text-slate-600 lg:text-[16px]`}>
+                  <p className={`${outfit.className} mt-4 max-w-[400px] text-[14px] leading-[1.85] text-slate-600 lg:text-[15px]`}>
                     {service.description}
                   </p>
 
@@ -258,7 +263,7 @@ export default function OurServices() {
                     ))}
                   </div>
 
-                  <Link href="/services" className="btn-learn mt-8">
+                  <Link href={service.href} className="btn-learn mt-8">
                     <span className="lbl">Learn More</span>
                     <span className="arrow-txt">→</span>
                   </Link>
