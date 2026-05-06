@@ -273,7 +273,7 @@ export default async function BlogDetailPage(props: {
             </h1>
 
             {post.excerpt && (
-              <p className={`${outfit.className} mt-5 max-w-[700px] text-[17px] leading-[1.85] text-slate-500`}>
+              <p className={`${outfit.className} mt-5 max-w-[700px] text-[17px] leading-[1.85]text-slate-600`}>
                 {post.excerpt}
               </p>
             )}
@@ -434,7 +434,7 @@ export default async function BlogDetailPage(props: {
                     </div>
                     <div className="px-6 pb-6 pt-4">
                       <p
-                        className={`${outfit.className} text-[15px] leading-[1.9] text-slate-500`}
+                        className={`${outfit.className} text-[15px] leading-[1.9]text-slate-600`}
                         style={{ paddingLeft: "46px" }}
                       >
                         {faq.answer}
@@ -462,7 +462,7 @@ export default async function BlogDetailPage(props: {
             <h3 className={`${epilogue.className} relative mt-3 text-[26px] font-extrabold tracking-[-0.04em] text-white lg:text-[34px]`}>
               Explore all our articles
             </h3>
-            <p className={`${outfit.className} relative mt-3 text-[15px] text-white/60`}>
+            <p className={`${outfit.className} relative mt-3 text-[15px] text-white/75`}>
               Strategy, creative, and performance insights — all in one place.
             </p>
             <div className="relative mt-8">

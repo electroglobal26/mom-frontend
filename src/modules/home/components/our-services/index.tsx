@@ -8,13 +8,8 @@ import { Epilogue, Outfit } from "next/font/google"
 const epilogue = Epilogue({ subsets: ["latin"], weight: ["700", "800"] })
 const outfit   = Outfit({ subsets: ["latin"], weight: ["400", "500", "700"] })
 
-// ── ScrollReveal ──────────────────────────────────────────────────────────────
 function ScrollReveal({
-  children,
-  delay = 0,
-  offset = 36,
-  amount = 0.2,
-  className = "",
+  children, delay = 0, offset = 36, amount = 0.2, className = "",
 }: {
   children: React.ReactNode
   delay?: number
@@ -30,11 +25,8 @@ function ScrollReveal({
     if (!el) return
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          setState("visible")
-        } else {
-          setState((prev) => (prev === "idle" ? "idle" : "resting"))
-        }
+        if (entry.isIntersecting) setState("visible")
+        else setState((prev) => (prev === "idle" ? "idle" : "resting"))
       },
       { threshold: amount, rootMargin: "0px 0px -40px 0px" }
     )
@@ -60,60 +52,72 @@ function ScrollReveal({
   )
 }
 
-// ── Data ──────────────────────────────────────────────────────────────────────
+// ── Updated services data ─────────────────────────────────────────────────────
 const services = [
   {
-    label: "Creative",
-    title: "Creative Production",
-    description: "We create content engineered to convert and strengthen your brand.",
-    points: ["Product photography", "Video ads", "UGC content", "Reels + motion graphics", "Shoot planning"],
-    accent: "#61baf7", accentLight: "#f3fbff", accentHover: "#c8e8f8", accentBorder: "#99dcf8",
-  },
-  {
-    label: "Marketing",
+    label: "Performance",
     title: "Performance Marketing",
-    description: "Profit-focused ad systems designed to scale across the right channels.",
-    points: ["Meta Ads", "Google Ads", "Funnels", "Retargeting", "Creative testing"],
-    accent: "#a855f7", accentLight: "#f5eeff", accentHover: "#e9d5ff", accentBorder: "#d8b4fe",
+    description: "Data-driven paid campaigns on Meta and Google that generate real revenue, not just clicks.",
+    points: [
+      "Meta & Google Ads",
+      "Audience targeting",
+      "Ad creatives",
+      "Funnel setup",
+      "ROAS optimization",
+    ],
+    accent: "#e61e73",
+    accentLight: "#fff0f6",
+    accentHover: "#fce7f3",
+    accentBorder: "#fbb6d4",
   },
   {
-    label: "Growth",
-    title: "Growth Enablement",
-    description: "The strategic backbone that keeps your brand growing with clarity.",
-    points: ["Brand strategy", "Analytics", "Conversion optimization", "Retention systems", "Growth roadmap"],
-    accent: "#49d7a4", accentLight: "#e8fdf5", accentHover: "#bbf7d0", accentBorder: "#6ee7b7",
+    label: "SEO & Content",
+    title: "SEO, AEO & Copywriting",
+    description: "Get found by buyers on search engines, answer platforms, and AI tools — with copy that converts.",
+    points: [
+      "SEO / AEO / GEO",
+      "Script & Copywriting",
+      "Content strategy",
+      "Landing pages",
+      "Brand messaging",
+    ],
+    accent: "#9333ea",
+    accentLight: "#f5eeff",
+    accentHover: "#e9d5ff",
+    accentBorder: "#d8b4fe",
+  },
+  {
+    label: "Web & AI",
+    title: "Web & AI Development",
+    description: "Custom websites, apps, and AI systems built to convert better and scale your business efficiently.",
+    points: [
+      "Web development",
+      "AI automation",
+      "AI agents",
+      "AI video",
+      "App development",
+    ],
+    accent: "#0ea5e9",
+    accentLight: "#e8f6ff",
+    accentHover: "#c8e8f8",
+    accentBorder: "#7dd3fc",
   },
 ]
 
-// ── Main component ────────────────────────────────────────────────────────────
 export default function OurServices() {
   return (
     <section className="relative overflow-hidden bg-white py-16 lg:py-20">
       <style>{`
-        /*
-          Left accent bar — always present logic:
-          The ::before bar was previously opacity:0 → opacity:1 on hover.
-          Now the bar is always opacity:1, but it SLIDES in from left on hover
-          using scaleY so the card already shows a subtle indicator at rest.
-        */
         .service-card::before {
           content: ""; position: absolute; left: 0; top: 16px; bottom: 16px;
           width: 4px; border-radius: 0 3px 3px 0;
           background: var(--card-accent);
           opacity: 1;
-          /* Resting: bar is there but collapsed to a dot */
           transform: scaleY(0.18);
           transform-origin: center;
           transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        /* On hover: bar expands to full height */
         .service-card:hover::before { transform: scaleY(1); }
-
-        /*
-          Image/content zoom effect inside card on hover.
-          The card itself lifts (whileHover y:-6).
-          Inner content scales up very slightly for a "zoom" feel.
-        */
         .service-card-inner {
           transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
           will-change: transform;
@@ -121,7 +125,6 @@ export default function OurServices() {
         .service-card:hover .service-card-inner {
           transform: scale(1.025) translateY(-2px);
         }
-
         .btn-learn {
           position: relative; display: inline-flex; align-items: center; gap: 6px;
           padding: 10px 20px; border-radius: 10px; font-size: 14px; font-weight: 800;
@@ -141,7 +144,6 @@ export default function OurServices() {
         .btn-learn .lbl, .btn-learn .arrow-txt { position: relative; z-index: 1; }
         .btn-learn .arrow-txt { display: inline-block; transition: transform 0.22s ease; }
         .btn-learn:hover .arrow-txt { transform: translateX(4px); }
-
         .skill-chip {
           display: inline-flex; align-items: center; border-radius: 10px;
           padding: 6px 12px; font-size: 13px; font-weight: 500; line-height: 1.5;
@@ -171,7 +173,12 @@ export default function OurServices() {
             transition={{ duration: 0.5 }}
           >
             {["★","★","★","★","★"].map((s, i) => (
-              <motion.span key={i} initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06, duration: 0.35 }}>
+              <motion.span
+                key={i}
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.06, duration: 0.35 }}
+              >
                 {s}
               </motion.span>
             ))}
@@ -185,7 +192,7 @@ export default function OurServices() {
           </h2>
 
           <ScrollReveal delay={0.2} offset={16} amount={0.5}>
-            <p className={`${outfit.className} mx-auto mt-5 max-w-[980px] text-[16px] leading-8 text-slate-500 lg:text-[18px]`}>
+            <p className={`${outfit.className} mx-auto mt-5 max-w-[680px] text-[16px] leading-[1.85] text-slate-600 lg:text-[17px]`}>
               Everything your D2C brand needs to grow predictably and profitably.
             </p>
           </ScrollReveal>
@@ -197,12 +204,6 @@ export default function OurServices() {
               <motion.div
                 className="service-card relative overflow-hidden rounded-[20px] p-8 h-full"
                 style={{
-                  /*
-                    CHANGE: border is now always visible using accentBorder colour.
-                    Previously: border: "1.5px solid transparent" (invisible at rest).
-                    Now: border uses the card's accent border colour at all times.
-                    On hover: border brightens to full accent via whileHover borderColor.
-                  */
                   border: `1.5px solid ${service.accentBorder}`,
                   background: "#fff",
                   "--card-accent": service.accent,
@@ -211,29 +212,22 @@ export default function OurServices() {
                 } as React.CSSProperties}
                 whileHover={{
                   y: -6,
-                  /*
-                    CHANGE: box shadow is now more prominent on hover (zoom feel).
-                    Border brightens from accentBorder → full accent on hover.
-                    Combined with .service-card-inner scale this gives a zoom effect.
-                  */
                   boxShadow: `0 20px 48px rgba(15,23,42,0.11), 0 0 0 1.5px ${service.accent}`,
                   borderColor: service.accent,
                   transition: { duration: 0.25, ease: [0.16, 1, 0.3, 1] },
                 }}
               >
-                {/*
-                  CHANGE: all card content is wrapped in .service-card-inner.
-                  CSS scales it up slightly on .service-card:hover to create
-                  a zoom effect on the content — distinct from the card lift (y:-6).
-                */}
                 <div className="service-card-inner">
-                  <p className={`${outfit.className} mb-4 text-[24px] font-bold leading-none`} style={{ color: service.accent }}>
+                  <p
+                    className={`${outfit.className} mb-4 text-[24px] font-bold leading-none`}
+                    style={{ color: service.accent }}
+                  >
                     {service.label}
                   </p>
-                  <h3 className={`${epilogue.className} max-w-[390px] text-[28px] font-extrabold leading-[1.08] tracking-[-0.05em] text-[#0e2547] lg:text-[34px]`}>
+                  <h3 className={`${epilogue.className} max-w-[390px] text-[28px] font-extrabold leading-[1.08] tracking-[-0.05em] text-[#0e2547] lg:text-[32px]`}>
                     {service.title}
                   </h3>
-                  <p className={`${outfit.className} mt-5 max-w-[400px] text-[15px] leading-8 text-slate-500 lg:text-[16px]`}>
+                  <p className={`${outfit.className} mt-4 max-w-[400px] text-[15px] leading-[1.85] text-slate-600 lg:text-[16px]`}>
                     {service.description}
                   </p>
 
@@ -278,7 +272,6 @@ export default function OurServices() {
   )
 }
 
-// ── Underline with ScrollReveal state machine ─────────────────────────────────
 function UnderlineReveal() {
   const ref = useRef<HTMLSpanElement>(null)
   const [state, setState] = useState<"idle" | "visible" | "resting">("idle")

@@ -24,7 +24,7 @@ export default function AdminDashboard() {
       <h1 className="text-[28px] font-extrabold tracking-[-0.04em] text-[#0e2547]">
         Dashboard
       </h1>
-      <p className="mt-1 text-[14px] text-slate-500">
+      <p className="mt-1 text-[14px]text-slate-600">
         Welcome back. Here's your content overview.
       </p>
 

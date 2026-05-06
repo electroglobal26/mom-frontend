@@ -24,7 +24,7 @@ export default function AdminServicesList() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-[28px] font-extrabold tracking-[-0.04em] text-[#0e2547]">Services</h1>
-          <p className="mt-1 text-[14px] text-slate-500">{services.length} services</p>
+          <p className="mt-1 text-[14px]text-slate-600">{services.length} services</p>
         </div>
         <Link
           href="/admin/services/new"

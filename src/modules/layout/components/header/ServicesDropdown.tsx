@@ -3,52 +3,87 @@
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
 const leftServices = [
-  { name: "Branding & visual design", link: "/services/branding-visual-design" },
-  { name: "Web and app development", link: "/services/ecommerce-development" },
-  { name: "Ai automation and ai agentic service", link: "/services/software-as-a-service" },
-  { name: "UX / UI design", link: "/services/ux-ui-design" },
-  { name: "Web design & development", link: "/services/web-design-development" },
-  { name: "WordPress web design", link: "/services/wordpress-web-design" },
+  { name: "Performance Marketing — Meta & Google Ads", link: "/services/performance-marketing" },
+  { name: "Conversion Rate Optimization (CRO)", link: "/services/conversion-rate-optimization" },
+  { name: "SEO — AEO & GEO", link: "/services/search-engine-optimization" },
+  { name: "Script & Copywriting", link: "/services/script-copywriting" },
+  { name: "D2C Branding & Scale Growth", link: "/services/d2c-branding-scale-growth" },
+  { name: "Social Media Marketing (SMO & Content)", link: "/services/social-media-marketing" },
+  { name: "Strategy & Consulting", link: "/services/strategy-consulting" },
 ]
 
 const rightServices = [
-  { name: "Search engine optimization - AEO & GEO", link: "/services/search-engine-optimization" },
-  { name: "Content & copywriting", link: "/services/content-copywriting" },
-  { name: "D2C overall branding and scale growth", link: "/services/email-marketing" },
-  { name: "Performance marketing - meta ads, google ads", link: "/services/pay-per-click-management" },
-  { name: "SMO and Content Creation", link: "/services/social-media-marketing" },
-  { name: "Strategy & consulting", link: "/services/strategy-consulting" },
+  { name: "Web and App Development", link: "/services/web-app-development" },
+  { name: "AI Automation", link: "/services/ai-automation" },
+  { name: "AI Agentic Service", link: "/services/ai-agentic-service" },
+  { name: "AI Video Generation", link: "/services/ai-video-generation" },
 ]
+
+// Performance icon
+const PerfIcon = () => (
+  <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+    <rect width="36" height="36" rx="8" fill="#fff0f6" />
+    <path d="M8 26 L14 18 L20 22 L28 10" stroke="#e61e73" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M24 9 L29 9 L29 14" stroke="#e61e73" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    <circle cx="14" cy="18" r="2" fill="#e61e73" opacity="0.4" />
+    <circle cx="20" cy="22" r="2" fill="#e61e73" opacity="0.4" />
+  </svg>
+)
+
+// Web & AI icon
+const WebAiIcon = () => (
+  <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+    <rect width="36" height="36" rx="8" fill="#f5eeff" />
+    <rect x="8" y="24" width="5" height="8" rx="1.5" fill="#9333ea" opacity="0.4" />
+    <rect x="15" y="18" width="5" height="14" rx="1.5" fill="#9333ea" opacity="0.65" />
+    <rect x="22" y="12" width="5" height="20" rx="1.5" fill="#9333ea" />
+    <circle cx="29" cy="9" r="2.5" fill="#9333ea" opacity="0.5" />
+  </svg>
+)
 
 export default function ServicesDropdown() {
   return (
-    <div className="invisible absolute right-0 top-full z-50 mt-4 w-[620px] rounded-[22px] border border-neutral-200 bg-white p-7 opacity-0 shadow-[0_20px_60px_rgba(0,0,0,0.08)] transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
-      <div className="mb-5">
+    <div className="invisible absolute left-1/2 top-full z-50 mt-4 w-[620px] -translate-x-1/2 rounded-[20px] border border-neutral-100 bg-white opacity-0 shadow-[0_20px_60px_rgba(0,0,0,0.10)] transition-all duration-200 group-hover:visible group-hover:opacity-100"
+      style={{ minWidth: 580 }}
+    >
+      {/* Top header */}
+      <div className="flex items-center justify-between border-b border-neutral-100 px-6 py-4">
+        <p className="text-[12px] font-semibold uppercase tracking-[0.06em] text-neutral-400">
+          What we do
+        </p>
         <LocalizedClientLink
           href="/services"
-          className="inline-flex rounded-[14px] bg-[#f6f7f8] px-4 py-3 text-[13px] font-extrabold uppercase tracking-[0.03em] text-[#0e2547] transition hover:bg-[#eef0f2]"
+          className="text-[12px] font-extrabold text-[#e61e73] hover:underline"
         >
-          View all services
+          View all →
         </LocalizedClientLink>
       </div>
 
-      <div className="grid grid-cols-2 gap-10">
-        {/* Left column */}
-        <div>
-          <h3 className="mb-3 text-[20px] font-extrabold tracking-[-0.03em] text-[#0e2547]">
-            Performance Marketing
-          </h3>
+      {/* Two columns */}
+      <div className="grid grid-cols-2 divide-x divide-neutral-100">
 
-          <p className="mb-5 text-[15px] leading-7 text-neutral-500">
-            We help you get the right people to your website, turn them into customers, and grow your sales using ads, content, and simple strategies.
-          </p>
+        {/* Left — Performance Marketing */}
+        <div className="px-6 py-5">
+          {/* Category header */}
+          <div className="mb-4 flex items-center gap-3">
+            <PerfIcon />
+            <div>
+              <p className="text-[14px] font-extrabold tracking-[-0.02em] text-[#0e2547]">
+                Performance Marketing
+              </p>
+              <p className="mt-0.5 text-[12px] leading-[1.5] text-neutral-400">
+                Ads, SEO, content & brand growth
+              </p>
+            </div>
+          </div>
 
-          <div className="space-y-1.5">
+          {/* Links */}
+          <div className="space-y-0.5">
             {leftServices.map((item) => (
               <LocalizedClientLink
                 key={item.name}
                 href={item.link}
-                className="block rounded-[12px] px-3 py-2.5 text-[15px] font-medium text-neutral-700 transition hover:bg-rose-50 hover:text-rose-600"
+                className="block rounded-[8px] px-2 py-2 text-[13px] font-medium text-neutral-600 transition-all hover:bg-rose-50 hover:pl-4 hover:text-[#e61e73]"
               >
                 {item.name}
               </LocalizedClientLink>
@@ -56,29 +91,51 @@ export default function ServicesDropdown() {
           </div>
         </div>
 
-        {/* Right column */}
-        <div>
-          <h3 className="mb-3 text-[20px] font-extrabold tracking-[-0.03em] text-[#0e2547]">
-            Web Development and AI Development
+        {/* Right — Web & AI */}
+        <div className="px-6 py-5">
+          {/* Category header */}
+          <div className="mb-4 flex items-center gap-3">
+            <WebAiIcon />
+            <div>
+              <p className="text-[14px] font-extrabold tracking-[-0.02em] text-[#0e2547]">
+                Web & AI Development
+              </p>
+              <p className="mt-0.5 text-[12px] leading-[1.5] text-neutral-400">
+                Websites, apps & AI systems
+              </p>
+            </div>
+          </div>
 
-          </h3>
-
-          <p className="mb-5 text-[15px] leading-7 text-neutral-500">
-           We build websites, apps, and AI automations & agents that are easy to use, fast, and help you run your business better as you grow. 
-          </p>
-
-          <div className="space-y-1.5">
+          {/* Links */}
+          <div className="space-y-0.5">
             {rightServices.map((item) => (
               <LocalizedClientLink
                 key={item.name}
                 href={item.link}
-                className="block rounded-[12px] px-3 py-2.5 text-[15px] font-medium text-neutral-700 transition hover:bg-rose-50 hover:text-rose-600"
+                className="block rounded-[8px] px-2 py-2 text-[13px] font-medium text-neutral-600 transition-all hover:bg-purple-50 hover:pl-4 hover:text-[#9333ea]"
               >
                 {item.name}
               </LocalizedClientLink>
             ))}
           </div>
+
+          {/* CTA card */}
+          <div className="mt-5 rounded-[12px] p-4" style={{ background: "linear-gradient(135deg, #f5eeff, #fff0f6)" }}>
+            <p className="text-[12px] font-extrabold text-[#0e2547]">
+              Need something custom?
+            </p>
+            <p className="mt-1 text-[11px] leading-[1.6] text-neutral-400">
+              Tailored solutions for D2C brands at every stage.
+            </p>
+            <LocalizedClientLink
+              href="/contact"
+              className="mt-2 inline-flex items-center gap-1 text-[12px] font-extrabold text-[#e61e73] hover:underline"
+            >
+              Let&apos;s Talk →
+            </LocalizedClientLink>
+          </div>
         </div>
+
       </div>
     </div>
   )

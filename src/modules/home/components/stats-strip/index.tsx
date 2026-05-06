@@ -27,7 +27,7 @@ const outfit   = Outfit({ subsets: ["latin"], weight: ["400", "500"] })
 
 const stats = [
   {
-    number: 8,
+    number: 5,
     prefix: "+",
     label: "Years of experience",
     color: "#d42cf0",
@@ -35,7 +35,7 @@ const stats = [
     glowColor: "rgba(212,44,240,0.18)",
   },
   {
-    number: 60,
+    number: 20,
     prefix: "+",
     label: "Completed projects",
     color: "#ef3a6b",
@@ -43,7 +43,7 @@ const stats = [
     glowColor: "rgba(239,58,107,0.18)",
   },
   {
-    number: 90,
+    number: 50,
     prefix: "+",
     label: "Agency members",
     color: "#55b8f5",
@@ -147,7 +147,7 @@ function StatBlock({
           </span>
 
           <span
-            className={`${outfit.className} max-w-[130px] pb-2 text-left text-[17px] font-semibold leading-[1.35] text-slate-500 sm:text-[18px]`}
+            className={`${outfit.className} max-w-[130px] pb-2 text-left text-[17px] font-semibold leading-[1.35]text-slate-600 sm:text-[18px]`}
           >
             {stat.label}
           </span>

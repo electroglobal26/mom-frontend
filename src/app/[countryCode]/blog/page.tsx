@@ -61,9 +61,8 @@ export default async function BlogPage() {
                 <span className="absolute bottom-[6px] left-0 -z-10 h-[13px] w-[58%] bg-[#ef6a99]" />
               </span>
             </h1>
-            <p className={`${outfit.className} mt-5 max-w-[560px] text-[16px] leading-8 text-slate-500`}>
-              Thoughts, strategy, and practical insights on creative systems,
-              performance content, and brand growth.
+            <p className={`${outfit.className} mt-5 max-w-[560px] text-[16px] leading-8text-slate-600`}>
+             We write about what we see working, what is not working, and how brands can grow without wasting time and money on the wrong things. If you run a D2C brand or an ecommerce business and want to get better at performance marketing, branding, content, or just marketing in general, this is the right place.
             </p>
           </div>
 
@@ -109,7 +108,7 @@ export default async function BlogPage() {
                       {featured.title}
                     </LocalizedClientLink>
                   </h2>
-                  <p className={`${outfit.className} mt-3 text-[15px] leading-[1.85] text-slate-500`}>
+                  <p className={`${outfit.className} mt-3 text-[15px] leading-[1.85]text-slate-600`}>
                     {featured.excerpt}
                   </p>
                   <LocalizedClientLink
@@ -170,7 +169,7 @@ export default async function BlogPage() {
                           {post.title}
                         </LocalizedClientLink>
                       </h3>
-                      <p className={`${outfit.className} mt-1.5 line-clamp-2 text-[14px] leading-[1.7] text-slate-500`}>
+                      <p className={`${outfit.className} mt-1.5 line-clamp-2 text-[14px] leading-[1.7]text-slate-600`}>
                         {post.excerpt}
                       </p>
                     </div>
@@ -214,7 +213,7 @@ export default async function BlogPage() {
                 <h3 className={`${epilogue.className} mt-2 text-[22px] font-extrabold tracking-[-0.04em]`}>
                   Let's build your growth system
                 </h3>
-                <p className={`${outfit.className} mt-3 text-[13px] leading-6 text-white/65`}>
+                <p className={`${outfit.className} mt-3 text-[13px] leading-6 text-white/80`}>
                   Strategy, creative, and performance — all aligned.
                 </p>
                 <LocalizedClientLink

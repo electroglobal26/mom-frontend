@@ -5,6 +5,11 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
+export type FAQ = {
+  question: string
+  answer: string
+}
+
 export type Service = {
   id?: string
   slug: string
@@ -15,6 +20,7 @@ export type Service = {
   image: string
   points: string[]
   outcomes: string[]
+  faqs: FAQ[]
 }
 
 type ServiceRow = {
@@ -27,6 +33,7 @@ type ServiceRow = {
   image: string
   points: string[]
   outcomes: string[]
+  faqs: { question: string; answer: string }[]
   created_at: string
 }
 
@@ -48,6 +55,7 @@ export async function getServices(): Promise<Service[]> {
     image: s.image,
     points: s.points || [],
     outcomes: s.outcomes || [],
+    faqs: s.faqs || [],
   }))
 }
 
@@ -72,5 +80,6 @@ export async function getService(slug: string): Promise<Service | null> {
     image: s.image,
     points: s.points || [],
     outcomes: s.outcomes || [],
+    faqs: s.faqs || [],
   }
 }

@@ -111,7 +111,7 @@ export default function GoogleFormContact() {
         </div>
 
         <div className="mt-6 flex flex-wrap items-center justify-between gap-5">
-          <p className="text-[13px] text-slate-500">
+          <p className="text-[13px]text-slate-600">
             Your details will be submitted securely.
           </p>
 

@@ -1,7 +1,5 @@
 "use client"
 
-// FIX: All viewport.once changed to true — prevents blank-on-scroll-up
-
 import React, { useEffect, useRef, useState } from "react"
 import { WandSparkles, TrendingUp, Users, Clock3, Eye } from "lucide-react"
 import { motion, type Variants } from "motion/react"
@@ -11,14 +9,39 @@ const epilogue = Epilogue({ subsets: ["latin"], weight: ["700", "800"] })
 const outfit   = Outfit({ subsets: ["latin"], weight: ["400", "500"] })
 
 const topItems = [
-  { Icon: WandSparkles, accent: "sky",   title: "Growth Alignment",       text: "Growth works when everything moves together. Most agencies focus on ads or creatives. We focus on alignment — strategy, content, and performance working as one system." },
-  { Icon: TrendingUp,   accent: "pink",  title: "Outcomes That Matter",   text: "We improve the metrics that grow revenue — lower CAC, higher ROAS, stronger retention, better conversion rates, and more consistent revenue." },
-  { Icon: Users,        accent: "green", title: "A Skilled, D2C-Focused Team", text: "Access performance marketers, strategists, creative directors, and content producers — all under one roof, working together for predictable growth." },
+  {
+    Icon: WandSparkles,
+    accent: "sky",
+    title: "Growth Alignment",
+    text: "Growth works only when everything moves together. Most agencies focus only on ads or creatives. As a performance marketing company we align strategy, content, and campaigns so your brand grows as one system.",
+  },
+  {
+    Icon: TrendingUp,
+    accent: "pink",
+    title: "Outcomes That Matter",
+    text: "We focus on results that actually grow your business — not just reports. Better conversions, lower CAC, higher ROAS, CRO, stronger retention, and consistent revenue growth.",
+  },
+  {
+    Icon: Users,
+    accent: "green",
+    title: "A Skilled, D2C-Focused Team",
+    text: "Work with a team that understands modern brand growth. As a branding and marketing agency, we bring strategy, creatives, and performance together under one roof.",
+  },
 ] as const
 
 const bottomItems = [
-  { Icon: Clock3, accent: "violet", title: "Predictable Execution", text: "Clear timelines, clear reports, and clear next steps. We keep execution transparent, structured, and easy to trust." },
-  { Icon: Eye,    accent: "pink",   title: "Total Transparency",    text: "No hidden costs. No jargon. Just honest communication, visible progress, and aligned execution from start to finish." },
+  {
+    Icon: Clock3,
+    accent: "violet",
+    title: "Predictable Execution",
+    text: "Clear process, fixed timelines, and simple reporting so you always know what's done, what's working, and what comes next.",
+  },
+  {
+    Icon: Eye,
+    accent: "pink",
+    title: "Total Transparency",
+    text: "We keep everything clear and honest. If you're looking for a branding agency in India, we ensure open communication and full visibility at every stage.",
+  },
 ] as const
 
 const accentStyles = {
@@ -29,14 +52,14 @@ const accentStyles = {
 } as const
 
 const blobs = [
-  { x: "left-[10%]",  y: "top-[8%]",    w: 480, h: 80,  color: "bg-purple-200/40",  blur: "blur-3xl" },
-  { x: "right-[6%]",  y: "top-[14%]",   w: 360, h: 72,  color: "bg-fuchsia-200/30", blur: "blur-3xl" },
-  { x: "left-[-2%]",  y: "top-[40%]",   w: 340, h: 64,  color: "bg-white/50",       blur: "blur-2xl" },
-  { x: "left-[30%]",  y: "top-[32%]",   w: 500, h: 88,  color: "bg-white/35",       blur: "blur-2xl" },
-  { x: "right-[-4%]", y: "top-[44%]",   w: 320, h: 60,  color: "bg-sky-100/40",     blur: "blur-2xl" },
-  { x: "left-[8%]",   y: "bottom-[18%]", w: 400, h: 72, color: "bg-white/40",       blur: "blur-2xl" },
-  { x: "left-[38%]",  y: "bottom-[8%]",  w: 460, h: 68, color: "bg-fuchsia-100/30", blur: "blur-3xl" },
-  { x: "right-[10%]", y: "bottom-[16%]", w: 340, h: 64, color: "bg-purple-100/35",  blur: "blur-2xl" },
+  { x: "left-[10%]",  y: "top-[8%]",     w: 480, h: 80,  color: "bg-purple-200/40",  blur: "blur-3xl" },
+  { x: "right-[6%]",  y: "top-[14%]",    w: 360, h: 72,  color: "bg-fuchsia-200/30", blur: "blur-3xl" },
+  { x: "left-[-2%]",  y: "top-[40%]",    w: 340, h: 64,  color: "bg-white/50",       blur: "blur-2xl" },
+  { x: "left-[30%]",  y: "top-[32%]",    w: 500, h: 88,  color: "bg-white/35",       blur: "blur-2xl" },
+  { x: "right-[-4%]", y: "top-[44%]",    w: 320, h: 60,  color: "bg-sky-100/40",     blur: "blur-2xl" },
+  { x: "left-[8%]",   y: "bottom-[18%]", w: 400, h: 72,  color: "bg-white/40",       blur: "blur-2xl" },
+  { x: "left-[38%]",  y: "bottom-[8%]",  w: 460, h: 68,  color: "bg-fuchsia-100/30", blur: "blur-3xl" },
+  { x: "right-[10%]", y: "bottom-[16%]", w: 340, h: 64,  color: "bg-purple-100/35",  blur: "blur-2xl" },
 ] as const
 
 function FeatureItem({
@@ -54,8 +77,12 @@ function FeatureItem({
           <Icon strokeWidth={2.25} className="h-[54px] w-[54px]" />
         </div>
       </div>
-      <h3 className={`${epilogue.className} text-[22px] font-extrabold tracking-[-0.03em] text-[#0e2547] lg:text-[24px]`}>{title}</h3>
-      <p className={`${outfit.className} mx-auto mt-3 max-w-[380px] text-[15px] leading-[1.85] text-slate-500 lg:text-[16px]`}>{text}</p>
+      <h3 className={`${epilogue.className} text-[22px] font-extrabold tracking-[-0.03em] text-[#0e2547] lg:text-[24px]`}>
+        {title}
+      </h3>
+      <p className={`${outfit.className} mx-auto mt-3 max-w-[380px] text-[15px] leading-[1.85]text-slate-600 lg:text-[16px]`}>
+        {text}
+      </p>
     </div>
   )
 }
@@ -113,18 +140,25 @@ export default function WhyMomentum() {
 
       <div className="pointer-events-none absolute inset-0">
         {blobs.map((b, i) => (
-          <div key={i} className={`absolute rounded-[999px] ${b.x} ${b.y} ${b.color} ${b.blur}`} style={{ width: b.w, height: b.h }} />
+          <div key={i}
+            className={`absolute rounded-[999px] ${b.x} ${b.y} ${b.color} ${b.blur}`}
+            style={{ width: b.w, height: b.h }}
+          />
         ))}
       </div>
 
       <div className="content-container relative lg:px-10">
         <div className="mx-auto max-w-[980px] text-center">
-          <h2 ref={headingRef} className={`${epilogue.className} inline-block text-[44px] font-extrabold tracking-[-0.04em] text-[#0e2547] lg:text-[56px]`}>
-            Why Momentum?
+          <h2
+            ref={headingRef}
+            className={`${epilogue.className} inline-block text-[44px] font-extrabold tracking-[-0.04em] text-[#0e2547] lg:text-[56px]`}
+          >
+            Why Mommantum?
             <span className={`heading-underline${active ? " active" : ""}`} />
           </h2>
-          <p className={`${outfit.className} mx-auto mt-5 max-w-[700px] text-[17px] leading-8 text-slate-500 lg:text-[18px]`}>
-            Because predictable D2C growth requires alignment — and that&apos;s what we deliver.
+          <p className={`${outfit.className} mx-auto mt-5 max-w-[700px] text-[17px] leading-8text-slate-600 lg:text-[18px]`}>
+            Focused on Real Business Growth — because predictable D2C growth
+            requires alignment, and that&apos;s what we deliver.
           </p>
         </div>
 
@@ -132,7 +166,7 @@ export default function WhyMomentum() {
           className="mx-auto mt-16 grid max-w-[1320px] gap-x-10 gap-y-12 md:grid-cols-3"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
-          viewport={{ once: true, amount: 0.1 }}  // FIX: once:true
+          viewport={{ once: true, amount: 0.1 }}
           transition={{ duration: 0.4 }}
         >
           {topItems.map((item, i) => (
@@ -140,7 +174,7 @@ export default function WhyMomentum() {
               key={item.title}
               initial={{ opacity: 0, y: 36 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}  // FIX: once:true
+              viewport={{ once: true, amount: 0.2 }}
               transition={{ duration: 0.55, delay: i * 0.12, ease: [0.16, 1, 0.3, 1] as const }}
             >
               <FeatureItem {...item} />
@@ -152,7 +186,7 @@ export default function WhyMomentum() {
           className="mx-auto mt-12 grid max-w-[920px] gap-x-12 gap-y-12 md:grid-cols-2"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
-          viewport={{ once: true, amount: 0.1 }}  // FIX: once:true
+          viewport={{ once: true, amount: 0.1 }}
           transition={{ duration: 0.4 }}
         >
           {bottomItems.map((item, i) => (
@@ -160,7 +194,7 @@ export default function WhyMomentum() {
               key={item.title}
               initial={{ opacity: 0, y: 36 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}  // FIX: once:true
+              viewport={{ once: true, amount: 0.2 }}
               transition={{ duration: 0.55, delay: i * 0.12, ease: [0.16, 1, 0.3, 1] as const }}
             >
               <FeatureItem {...item} />

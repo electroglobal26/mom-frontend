@@ -38,7 +38,7 @@ export default function SectionHeading({
 
       {/* desc */}
       {desc && (
-        <p className="mx-auto mt-4 max-w-[920px] text-[16px] leading-7 text-slate-500 lg:text-[18px] lg:whitespace-nowrap">
+        <p className="mx-auto mt-4 max-w-[920px] text-[16px] leading-7text-slate-600 lg:text-[18px] lg:whitespace-nowrap">
           {desc}
         </p>
       )}

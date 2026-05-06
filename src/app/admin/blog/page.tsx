@@ -51,7 +51,7 @@ export default function AdminBlogList() {
           <h1 className="text-[28px] font-extrabold tracking-[-0.04em] text-[#0e2547]">
             Blog Posts
           </h1>
-          <p className="mt-1 text-[14px] text-slate-500">
+          <p className="mt-1 text-[14px]text-slate-600">
             {posts.length} total posts
           </p>
         </div>
@@ -106,7 +106,7 @@ export default function AdminBlogList() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => togglePublish(post)}
-                  className="rounded-[8px] border border-slate-200 px-3 py-1.5 text-[12px] font-semibold text-slate-500 hover:border-slate-400 transition-all"
+                  className="rounded-[8px] border border-slate-200 px-3 py-1.5 text-[12px] font-semiboldtext-slate-600 hover:border-slate-400 transition-all"
                 >
                   {post.published ? "Unpublish" : "Publish"}
                 </button>

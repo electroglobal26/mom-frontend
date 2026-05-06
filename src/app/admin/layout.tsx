@@ -53,7 +53,7 @@ export default function AdminLayout({
                 className={`flex items-center gap-3 rounded-[10px] px-3 py-2.5 text-[13px] font-semibold transition-all ${
                   active
                     ? "bg-[#e61e73] text-white"
-                    : "text-white/60 hover:bg-white/10 hover:text-white"
+                    : "text-white/75 hover:bg-white/10 hover:text-white"
                 }`}
               >
                 <span className="text-[15px]">{item.icon}</span>

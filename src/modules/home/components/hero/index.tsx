@@ -129,17 +129,11 @@ export default function Hero() {
         .btn-get-started:hover .arrow { transform: translateX(5px); }
       `}</style>
 
-      {/* ══════════════════════════════════════════
-          MOBILE LAYOUT — completely separate
-          Shows: text first, then full-width image
-          iPhone 12 Pro = 390px wide
-      ══════════════════════════════════════════ */}
+      {/* MOBILE LAYOUT */}
       <div className="lg:hidden">
-
-        {/* Text content — top on mobile */}
         <div className="px-5 pb-8 text-center">
           <p className={`${mansalva.className} mb-3 text-[18px] font-bold text-[#ef3a6b]`}>
-            Growing a D2C brand is challenging
+            Performance Marketing & D2C Branding
           </p>
           <h1 className={`${epilogue.className} text-[#0e2547] leading-[1.05]`}>
             <span className="block text-[38px] font-bold">
@@ -154,74 +148,55 @@ export default function Hero() {
               <span className="absolute left-0 bottom-[4px] -z-10 h-[8px] w-[45%] bg-[#ef5b87]" />
             </span>
           </h1>
-          <p className={`${outfit.className} mt-5 text-[15px] leading-[1.85] text-slate-500`}>
-            We simplify growth for modern brands by combining strategy,
-            design, and performance into a system that actually works.
+          <p className={`${outfit.className} mt-5 text-[15px] leading-[1.85]text-slate-600`}>
+            Performance marketing service in India that combines data, design,
+            and strategy to help D2C brands grow faster and build a strong market presence.
           </p>
           <div className="mt-7 flex justify-center">
             <Link href="/contact" className={`${epilogue.className} btn-get-started`}
               style={{ fontSize: "15px", padding: "14px 28px" }}>
-              Get Started
+              Book a Call
               <span className="arrow">→</span>
             </Link>
           </div>
         </div>
 
-        {/* Image — full width on mobile, truly centered */}
         <div className="relative w-full overflow-hidden">
-
-          {/* Purple blob — centered */}
-          <div className="absolute left-1/2 top-[10%] -translate-x-1/2
-            h-[220px] w-[220px] rounded-[28%] bg-slate-200/35" />
+          <div className="absolute left-1/2 top-[10%] -translate-x-1/2 h-[220px] w-[220px] rounded-[28%] bg-slate-200/35" />
           <div
-            className="absolute left-1/2 top-[14%] -translate-x-1/2
-              h-[200px] w-[200px] rounded-[24%]"
+            className="absolute left-1/2 top-[14%] -translate-x-1/2 h-[200px] w-[200px] rounded-[24%]"
             style={{ background: "linear-gradient(135deg, #c026d3 0%, #9333ea 45%, #a855f7 100%)" }}
           />
-          <div className="absolute left-1/2 top-[13%] -translate-x-1/2
-            h-[205px] w-[205px] rounded-[24%] border-[3px] border-[#d7d7e6]/70" />
-
-          {/* Crown — above image, centered */}
+          <div className="absolute left-1/2 top-[13%] -translate-x-1/2 h-[205px] w-[205px] rounded-[24%] border-[3px] border-[#d7d7e6]/70" />
           <div
             className="crown-bob absolute left-1/2 top-[2%] z-20 w-[44px] drop-shadow-md"
             style={{ color: "#9333ea", transform: "translateX(-50%)" }}
           >
             <CrownIcon />
           </div>
-
-          {/* Sparkle — right of image */}
           <div className="scribble absolute right-[8%] top-[16%] z-20 w-[28px] text-rose-400">
             <SparkleIcon />
           </div>
-
-          {/* Squiggle — left of image */}
           <div className="scribble absolute left-[6%] top-[45%] z-20 w-[40px] text-violet-400">
             <SquiggleArrowIcon />
           </div>
-
-          {/* Bars — right bottom */}
           <div className="scribble absolute bottom-[10%] right-[6%] z-20 w-[28px] text-sky-400">
             <BarsIcon />
           </div>
-
-          {/* Hero image — truly centered using flex */}
           <div className="relative z-10 flex justify-center">
             <Image
               src="/hero-girl.png"
-              alt="Creative design hero"
+              alt="Performance marketing agency"
               width={700}
               height={880}
               priority
               className="h-auto w-[68%] max-w-[280px] object-contain"
             />
           </div>
-
         </div>
       </div>
 
-      {/* ══════════════════════════════════════════
-          DESKTOP LAYOUT — original, untouched
-      ══════════════════════════════════════════ */}
+      {/* DESKTOP LAYOUT */}
       <div className="hidden lg:block">
         <div className="content-container relative lg:px-10">
           <div className="grid items-center gap-8 lg:grid-cols-[1fr_1fr]">
@@ -229,51 +204,44 @@ export default function Hero() {
             {/* LEFT VISUAL */}
             <div className="relative flex justify-start">
               <div className="relative w-full max-w-[720px]">
-
                 <div className="absolute left-[8%] top-[14%] h-[74%] w-[78%] rounded-[28%] bg-slate-200/35" />
                 <div
                   className="absolute left-[13%] top-[18%] h-[68%] w-[72%] rounded-[24%]"
                   style={{ background: "linear-gradient(135deg, #c026d3 0%, #9333ea 45%, #a855f7 100%)" }}
                 />
                 <div className="absolute left-[12%] top-[17%] h-[70%] w-[74%] rounded-[24%] border-[3px] border-[#d7d7e6]/70" />
-
                 <div className="relative z-10 flex justify-center pt-2">
                   <Image
                     src="/hero-girl.png"
-                    alt="Creative design hero"
+                    alt="Performance marketing agency"
                     width={700}
                     height={880}
                     priority
                     className="h-auto w-[95%] max-w-[620px] object-contain"
                   />
                 </div>
-
                 <div
                   className="crown-bob absolute left-[50%] top-[3%] z-20 w-[72px] drop-shadow-md"
                   style={{ color: "#9333ea", transform: "translateX(-50%)" }}
                 >
                   <CrownIcon />
                 </div>
-
                 <div className="scribble absolute right-[8%] top-[12%] z-20 w-[50px] text-rose-400 drop-shadow">
                   <SparkleIcon />
                 </div>
-
                 <div className="scribble absolute left-[0%] top-[48%] z-20 w-[66px] text-violet-400 drop-shadow">
                   <SquiggleArrowIcon />
                 </div>
-
                 <div className="scribble absolute right-[3%] bottom-[14%] z-20 w-[54px] text-sky-400 drop-shadow">
                   <BarsIcon />
                 </div>
-
               </div>
             </div>
 
             {/* RIGHT CONTENT */}
             <div className="max-w-[760px]">
               <p className={`${mansalva.className} mb-4 text-[22px] font-bold text-[#ef3a6b]`}>
-                Growing a D2C brand is challenging
+                Performance Marketing & D2C Branding
               </p>
               <h1 className={`${epilogue.className} text-[#0e2547] leading-[1.05]`}>
                 <span className="block text-[52px] font-bold sm:text-[60px] lg:text-[76px] xl:text-[84px]">
@@ -288,14 +256,13 @@ export default function Hero() {
                   <span className="absolute left-0 bottom-[6px] -z-10 h-[10px] w-[40%] bg-[#ef5b87]" />
                 </span>
               </h1>
-              <p className={`${outfit.className} mt-7 text-[16px] leading-[2] text-slate-500 lg:text-[18px]`}>
-                We simplify growth for modern brands by combining strategy, design,
-                and performance into a system that actually works. No random efforts,
-                only structured growth.
+              <p className={`${outfit.className} mt-7 text-[16px] leading-[2]text-slate-600 lg:text-[18px]`}>
+                Performance marketing service in India that combines data, design, and strategy
+                to help D2C brands grow faster and build a strong market presence.
               </p>
               <div className="mt-9 flex flex-wrap items-center gap-8">
                 <Link href="/contact" className={`${epilogue.className} btn-get-started`}>
-                  Get Started
+                  Book a Call
                   <span className="arrow">→</span>
                 </Link>
               </div>

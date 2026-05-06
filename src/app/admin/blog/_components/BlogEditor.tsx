@@ -129,7 +129,7 @@ export default function BlogEditor({ initialData, isEdit = false }: Props) {
           )}
           <button
             onClick={() => router.push("/admin/blog")}
-            className="rounded-[10px] border border-slate-200 px-4 py-2 text-[13px] font-semibold text-slate-500 hover:border-slate-400"
+            className="rounded-[10px] border border-slate-200 px-4 py-2 text-[13px] font-semiboldtext-slate-600 hover:border-slate-400"
           >
             ← Back
           </button>
@@ -329,7 +329,7 @@ export default function BlogEditor({ initialData, isEdit = false }: Props) {
         <div className="flex justify-end gap-3 pb-8">
           <button
             onClick={() => router.push("/admin/blog")}
-            className="rounded-[10px] border border-slate-200 px-5 py-2.5 text-[13px] font-semibold text-slate-500 hover:border-slate-400"
+            className="rounded-[10px] border border-slate-200 px-5 py-2.5 text-[13px] font-semiboldtext-slate-600 hover:border-slate-400"
           >
             Cancel
           </button>

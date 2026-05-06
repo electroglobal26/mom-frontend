@@ -4,26 +4,23 @@ import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { motion, useReducedMotion, type Variants } from "motion/react"
-import { Code2, PenTool, ShoppingCart, Cog, Eye, GitBranch, MessageSquare, Search } from "lucide-react"
+import { TrendingUp, Globe, Megaphone, Bot, Video, Zap, PenTool, BarChart3 } from "lucide-react"
 import { Epilogue, Outfit } from "next/font/google"
 
 const epilogue = Epilogue({ subsets: ["latin"], weight: ["700", "800"] })
 const outfit   = Outfit({ subsets: ["latin"], weight: ["400", "500", "700"] })
 
 const skills = [
-  { title: "SEO/SEM/PPC",    Icon: Search,        color: "#61baf7", bg: "#e8f6ff", bgHover: "#c8e8f8", border: "#99dcf8" },
-  { title: "Web Design",     Icon: PenTool,       color: "#a855f7", bg: "#f5eeff", bgHover: "#e9d5ff", border: "#d8b4fe" },
-  { title: "Development",    Icon: Code2,         color: "#49d7a4", bg: "#e8fdf5", bgHover: "#bbf7d0", border: "#6ee7b7" },
-  { title: "E-commerce",     Icon: ShoppingCart,  color: "#f43f8e", bg: "#fff0f7", bgHover: "#fce7f3", border: "#fbcfe8" },
-  { title: "Prototyping",    Icon: Cog,           color: "#f59e0b", bg: "#fffbeb", bgHover: "#fef9c3", border: "#fde68a" },
-  { title: "Visual Design",  Icon: Eye,           color: "#61baf7", bg: "#e8f6ff", bgHover: "#c8e8f8", border: "#99dcf8" },
-  { title: "Wireframing",    Icon: GitBranch,     color: "#a855f7", bg: "#f5eeff", bgHover: "#e9d5ff", border: "#d8b4fe" },
-  { title: "User Research",  Icon: MessageSquare, color: "#49d7a4", bg: "#e8fdf5", bgHover: "#bbf7d0", border: "#6ee7b7" },
+  { title: "Performance Ads",   Icon: TrendingUp,  color: "#e61e73", bg: "#fff0f6", bgHover: "#fce7f3", border: "#fbb6d4" },
+  { title: "SEO & AEO",         Icon: BarChart3,   color: "#9333ea", bg: "#f5eeff", bgHover: "#e9d5ff", border: "#d8b4fe" },
+  { title: "Web Development",   Icon: Globe,       color: "#0ea5e9", bg: "#e8f6ff", bgHover: "#c8e8f8", border: "#7dd3fc" },
+  { title: "Copywriting",       Icon: PenTool,     color: "#f59e0b", bg: "#fffbeb", bgHover: "#fef9c3", border: "#fde68a" },
+  { title: "Social Media",      Icon: Megaphone,   color: "#e61e73", bg: "#fff0f6", bgHover: "#fce7f3", border: "#fbb6d4" },
+  { title: "AI Automation",     Icon: Bot,         color: "#49d7a4", bg: "#e8fdf5", bgHover: "#bbf7d0", border: "#6ee7b7" },
+  { title: "AI Agents",         Icon: Zap,         color: "#9333ea", bg: "#f5eeff", bgHover: "#e9d5ff", border: "#d8b4fe" },
+  { title: "AI Video",          Icon: Video,       color: "#0ea5e9", bg: "#e8f6ff", bgHover: "#c8e8f8", border: "#7dd3fc" },
 ]
 
-// ── Contextual doodle SVGs ─────────────────────────────────────────────────
-
-// Spark/star — creativity & ideas
 const SparkIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 80 80" fill="none">
     <path d="M40 8 L44 34 L68 28 L48 44 L62 66 L40 52 L18 66 L32 44 L12 28 L36 34 Z"
@@ -34,7 +31,6 @@ const SparkIcon = ({ className }: { className?: string }) => (
   </svg>
 )
 
-// Growth arrow — upward trend
 const GrowthArrow = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 80 80" fill="none">
     <path d="M10 65 L28 42 L44 52 L68 18"
@@ -46,20 +42,15 @@ const GrowthArrow = ({ className }: { className?: string }) => (
   </svg>
 )
 
-// Chart bars — performance marketing
 const ChartIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 80 80" fill="none">
-    <rect x="8" y="44" width="14" height="26" rx="4"
-      stroke="currentColor" strokeWidth="3.5" fill="none" />
-    <rect x="28" y="28" width="14" height="42" rx="4"
-      stroke="currentColor" strokeWidth="3.5" fill="none" />
-    <rect x="48" y="14" width="14" height="56" rx="4"
-      stroke="currentColor" strokeWidth="3.5" fill="none" />
+    <rect x="8" y="44" width="14" height="26" rx="4" stroke="currentColor" strokeWidth="3.5" fill="none" />
+    <rect x="28" y="28" width="14" height="42" rx="4" stroke="currentColor" strokeWidth="3.5" fill="none" />
+    <rect x="48" y="14" width="14" height="56" rx="4" stroke="currentColor" strokeWidth="3.5" fill="none" />
     <path d="M6 74 L74 74" stroke="currentColor" strokeWidth="3" strokeLinecap="round" opacity="0.4" />
   </svg>
 )
 
-// Lightning bolt — speed & energy
 const LightningIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 60 80" fill="none">
     <path d="M36 4 L10 44 L28 44 L24 76 L50 36 L32 36 Z"
@@ -69,7 +60,6 @@ const LightningIcon = ({ className }: { className?: string }) => (
   </svg>
 )
 
-// GOALS text SVG — kept, works well
 const GoalsText = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 130 52" fill="none">
     <text x="4" y="42"
@@ -79,8 +69,6 @@ const GoalsText = ({ className }: { className?: string }) => (
     </text>
   </svg>
 )
-
-// ── Animation variants ─────────────────────────────────────────────────────
 
 const leftColVariants: Variants = {
   hidden: {},
@@ -105,57 +93,31 @@ export default function WhoWeAre() {
     <section className="relative overflow-hidden bg-white py-16 lg:py-20">
       <style>{`
         .skill-card {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 10px;
-          padding: 14px 14px 16px;
-          border-radius: 14px;
-          cursor: default;
-          transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+          display: flex; flex-direction: column; align-items: flex-start;
+          gap: 10px; padding: 14px 14px 16px; border-radius: 14px;
+          cursor: default; transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
         }
-        .skill-card .skill-title {
-          font-size: 13px;
-          font-weight: 700;
-          color: #0e2547;
-          line-height: 1.3;
-        }
+        .skill-card .skill-title { font-size: 13px; font-weight: 700; color: #0e2547; line-height: 1.3; }
         .btn-more {
-          position: relative;
-          display: inline-flex;
-          align-items: center;
-          gap: 10px;
-          padding: 15px 32px;
-          border-radius: 14px;
-          font-size: 15px;
-          font-weight: 700;
-          letter-spacing: 0.04em;
-          text-transform: uppercase;
-          color: #fff;
-          text-decoration: none;
-          background: #49d7a4;
-          overflow: hidden;
+          position: relative; display: inline-flex; align-items: center; gap: 10px;
+          padding: 15px 32px; border-radius: 14px; font-size: 15px; font-weight: 700;
+          letter-spacing: 0.04em; text-transform: uppercase; color: #fff;
+          text-decoration: none; background: #49d7a4; overflow: hidden;
         }
         .btn-more::before {
-          content: "";
-          position: absolute;
-          inset: 0;
+          content: ""; position: absolute; inset: 0;
           background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.22) 50%, transparent 70%);
-          transform: translateX(-100%);
-          transition: transform 0.45s ease;
+          transform: translateX(-100%); transition: transform 0.45s ease;
         }
         .btn-more:hover::before { transform: translateX(100%); }
-        .btn-more .arrow {
-          display: inline-block;
-          transition: transform 0.22s ease;
-        }
+        .btn-more .arrow { display: inline-block; transition: transform 0.22s ease; }
         .btn-more:hover .arrow { transform: translateX(5px); }
       `}</style>
 
       <div className="content-container relative lg:px-10">
         <div className="grid items-center gap-10 lg:grid-cols-[1fr_1fr] lg:gap-12">
 
-          {/* ── LEFT ── */}
+          {/* LEFT */}
           <motion.div
             className="max-w-[760px]"
             initial="hidden"
@@ -167,7 +129,7 @@ export default function WhoWeAre() {
               className={`${outfit.className} text-[20px] font-bold tracking-[-0.03em] text-[#49d7a4] lg:text-[26px]`}
               variants={fadeUpVariants}
             >
-              Creative Web Solutions
+              Performance Marketing & Web Solutions
             </motion.p>
 
             <motion.div className="mt-3 inline-block" variants={fadeUpVariants}>
@@ -176,12 +138,8 @@ export default function WhoWeAre() {
               </h2>
               <motion.span
                 style={{
-                  display: "block",
-                  height: "10px",
-                  borderRadius: "3px",
-                  background: "#49d7a4",
-                  marginTop: "8px",
-                  transformOrigin: "left center",
+                  display: "block", height: "10px", borderRadius: "3px",
+                  background: "#49d7a4", marginTop: "8px", transformOrigin: "left center",
                   boxShadow: "0 2px 6px rgba(73,215,164,0.3)",
                 }}
                 initial={{ width: "0%", opacity: 0 }}
@@ -192,18 +150,19 @@ export default function WhoWeAre() {
             </motion.div>
 
             <motion.p
-              className={`${outfit.className} mt-6 max-w-[640px] text-[16px] leading-8 text-slate-500 lg:text-[18px]`}
+              className={`${outfit.className} mt-6 max-w-[640px] text-[16px] leading-[1.9] text-slate-600 lg:text-[18px]`}
               variants={fadeUpVariants}
             >
-              We are a digital marketing and SEO agency dedicated to helping
-              businesses develop their online presence and really grow.
+              We provide performance marketing services and web solutions in India
+              to help D2C brands grow with clear positioning, better conversions,
+              and systems built to scale revenue.
             </motion.p>
 
             <motion.h3
               className={`${epilogue.className} mt-10 text-[28px] font-extrabold tracking-[-0.04em] text-[#0e2547] lg:text-[36px]`}
               variants={fadeUpVariants}
             >
-              Check out our skills:
+              What we do:
             </motion.h3>
 
             {/* Skills grid */}
@@ -229,8 +188,8 @@ export default function WhoWeAre() {
                       boxShadow: isHov ? "0 6px 20px rgba(15,23,42,0.08)" : "none",
                     }}
                     variants={{
-                      hidden: { opacity: 0, y: 20, scale: 0.94 },
-                      visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] as const } },
+                      hidden:   { opacity: 0, y: 20, scale: 0.94 },
+                      visible:  { opacity: 1, y: 0,  scale: 1,   transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] as const } },
                     } satisfies Variants}
                     whileHover={prefersReduced ? {} : { y: -6, scale: 1.04, transition: { duration: 0.18 } }}
                     whileTap={prefersReduced ? {} : { scale: 0.97 }}
@@ -266,22 +225,19 @@ export default function WhoWeAre() {
             </motion.div>
           </motion.div>
 
-          {/* ── RIGHT — image + doodles ── */}
+          {/* RIGHT — image + doodles */}
           <div className="relative flex items-center justify-center lg:justify-end">
             <div className="relative w-full max-w-[300px] sm:max-w-[380px] lg:max-w-[520px]">
-
-              {/* Person image */}
               <div className="flex items-end justify-center">
                 <Image
                   src="/who-we-are-person.png"
-                  alt="Who we are"
+                  alt="Who we are — Mommantum team"
                   width={430}
                   height={525}
                   className="h-auto w-[260px] object-contain sm:w-[320px] lg:w-[420px]"
                 />
               </div>
 
-              {/* Doodles — all screen sizes, scale with breakpoints */}
               <motion.div
                 className="absolute inset-0"
                 initial="hidden"
@@ -289,67 +245,45 @@ export default function WhoWeAre() {
                 viewport={{ once: true, amount: 0.2 }}
                 variants={doodleContainerVariants}
               >
-
-                {/* Spark — top right, above person's shoulder */}
                 <motion.div
                   className="absolute right-[14%] top-[2%] w-[32px] text-[#386edc] sm:w-[42px] lg:w-[54px]"
-                  variants={{
-                    hidden: { opacity: 0, scale: 0.4, rotate: -30 },
-                    visible: { opacity: 1, scale: 1, rotate: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const } },
-                  } satisfies Variants}
+                  variants={{ hidden: { opacity: 0, scale: 0.4, rotate: -30 }, visible: { opacity: 1, scale: 1, rotate: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const } } } satisfies Variants}
                   whileHover={prefersReduced ? {} : { scale: 1.2, rotate: 20, transition: { duration: 0.22 } }}
                 >
                   <SparkIcon />
                 </motion.div>
 
-                {/* GOALS text — left side overlapping image */}
                 <motion.div
                   className="absolute left-[4%] top-[32%] w-[60px] sm:w-[80px] lg:w-[110px]"
-                  variants={{
-                    hidden: { opacity: 0, x: -30, rotate: -16, scale: 0.8 },
-                    visible: { opacity: 1, x: 0, rotate: -8, scale: 1, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const } },
-                  } satisfies Variants}
+                  variants={{ hidden: { opacity: 0, x: -30, rotate: -16, scale: 0.8 }, visible: { opacity: 1, x: 0, rotate: -8, scale: 1, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const } } } satisfies Variants}
                   whileHover={prefersReduced ? {} : { scale: 1.1, rotate: -4, transition: { duration: 0.22 } }}
                 >
                   <GoalsText />
                 </motion.div>
 
-                {/* Growth arrow — right middle, overlapping image */}
                 <motion.div
                   className="absolute right-[10%] top-[26%] w-[32px] text-[#7c3aed] sm:w-[42px] lg:w-[56px]"
-                  variants={{
-                    hidden: { opacity: 0, y: -20, x: 10, scale: 0.6 },
-                    visible: { opacity: 1, y: 0, x: 0, scale: 1, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] as const } },
-                  } satisfies Variants}
+                  variants={{ hidden: { opacity: 0, y: -20, x: 10, scale: 0.6 }, visible: { opacity: 1, y: 0, x: 0, scale: 1, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] as const } } } satisfies Variants}
                   whileHover={prefersReduced ? {} : { scale: 1.15, rotate: -8, transition: { duration: 0.2 } }}
                 >
                   <GrowthArrow />
                 </motion.div>
 
-                {/* Chart bars — bottom left overlapping image */}
                 <motion.div
                   className="absolute bottom-[14%] left-[6%] w-[34px] text-[#38bdf8] sm:w-[44px] lg:w-[58px]"
-                  variants={{
-                    hidden: { opacity: 0, x: -20, y: 20, scale: 0.6 },
-                    visible: { opacity: 1, x: 0, y: 0, scale: 1, transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] as const } },
-                  } satisfies Variants}
+                  variants={{ hidden: { opacity: 0, x: -20, y: 20, scale: 0.6 }, visible: { opacity: 1, x: 0, y: 0, scale: 1, transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] as const } } } satisfies Variants}
                   whileHover={prefersReduced ? {} : { scale: 1.12, y: -4, transition: { duration: 0.22 } }}
                 >
                   <ChartIcon />
                 </motion.div>
 
-                {/* Lightning bolt — bottom right overlapping image */}
                 <motion.div
                   className="absolute bottom-[10%] right-[12%] w-[28px] text-[#f43f8e] sm:w-[36px] lg:w-[48px]"
-                  variants={{
-                    hidden: { opacity: 0, x: 20, y: 20, scale: 0.6 },
-                    visible: { opacity: 1, x: 0, y: 0, scale: 1, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] as const } },
-                  } satisfies Variants}
+                  variants={{ hidden: { opacity: 0, x: 20, y: 20, scale: 0.6 }, visible: { opacity: 1, x: 0, y: 0, scale: 1, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] as const } } } satisfies Variants}
                   whileHover={prefersReduced ? {} : { scale: 1.15, rotate: 10, transition: { duration: 0.2 } }}
                 >
                   <LightningIcon />
                 </motion.div>
-
               </motion.div>
             </div>
           </div>

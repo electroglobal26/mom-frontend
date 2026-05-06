@@ -100,7 +100,7 @@ export default function ServiceEditor({ initialData, isEdit = false }: Props) {
         <div className="flex items-center gap-3">
           {savedMsg && <span className="text-[13px] font-semibold text-green-500">✓ {savedMsg}</span>}
           <button onClick={() => router.push("/admin/services")}
-            className="rounded-[10px] border border-slate-200 px-4 py-2 text-[13px] font-semibold text-slate-500 hover:border-slate-400"
+            className="rounded-[10px] border border-slate-200 px-4 py-2 text-[13px] font-semiboldtext-slate-600 hover:border-slate-400"
           >← Back</button>
           <button onClick={handleSave} disabled={saving}
             className="rounded-[10px] bg-[#0e2547] px-5 py-2 text-[13px] font-bold text-white hover:opacity-90 disabled:opacity-50"
@@ -176,7 +176,7 @@ export default function ServiceEditor({ initialData, isEdit = false }: Props) {
         </div>
 
         <div className="flex justify-end gap-3 pb-8">
-          <button onClick={() => router.push("/admin/services")} className="rounded-[10px] border border-slate-200 px-5 py-2.5 text-[13px] font-semibold text-slate-500 hover:border-slate-400">Cancel</button>
+          <button onClick={() => router.push("/admin/services")} className="rounded-[10px] border border-slate-200 px-5 py-2.5 text-[13px] font-semiboldtext-slate-600 hover:border-slate-400">Cancel</button>
           <button onClick={handleSave} disabled={saving} className="rounded-[10px] bg-[#0e2547] px-7 py-2.5 text-[13px] font-bold text-white hover:opacity-90 disabled:opacity-50">
             {saving ? "Saving..." : isEdit ? "Save Changes" : "Create Service"}
           </button>

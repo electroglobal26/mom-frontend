@@ -17,6 +17,36 @@ const stripItems = [
   "Let's build something great",
 ]
 
+const InstagramIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    width="20"
+    height="20"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+    <circle cx="12" cy="12" r="4" />
+    <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none" />
+  </svg>
+)
+
+const LinkedInIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    width="20"
+    height="20"
+    fill="currentColor"
+  >
+    <path d="M20.447 20.452H16.89v-5.569c0-1.327-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a1.983 1.983 0 1 1 0-3.966 1.983 1.983 0 0 1 0 3.966zm1.997 13.019H3.34V9h3.994v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+  </svg>
+)
+
 export default function ContactPage() {
   const headingRef = useRef<HTMLHeadingElement>(null)
   const msgRef = useRef<HTMLDivElement>(null)
@@ -155,26 +185,37 @@ export default function ContactPage() {
           display: flex;
           align-items: center;
           justify-content: center;
-          width: 46px;
-          height: 46px;
-          border-radius: 50%;
+          width: 50px;
+          height: 50px;
+          border-radius: 14px;
           border: 1.5px solid #e2e8f0;
           background: white;
-          font-size: 15px;
-          font-weight: 800;
           color: #0e2547;
           text-decoration: none;
           transition:
             border-color 0.2s ease,
             color 0.2s ease,
             transform 0.25s cubic-bezier(0.34,1.56,0.64,1),
-            box-shadow 0.2s ease;
+            box-shadow 0.2s ease,
+            background 0.2s ease;
         }
-        .social-btn:hover {
-          border-color: #e61e73;
-          color: #e61e73;
-          transform: translateY(-4px) scale(1.1);
-          box-shadow: 0 8px 22px rgba(230,30,115,0.18);
+
+        /* Instagram: pink/purple gradient on hover */
+        .social-btn.instagram:hover {
+          border-color: transparent;
+          color: white;
+          background: linear-gradient(135deg, #f58529 0%, #dd2a7b 50%, #8134af 100%);
+          transform: translateY(-5px) scale(1.1);
+          box-shadow: 0 10px 28px rgba(221,42,123,0.35);
+        }
+
+        /* LinkedIn: blue on hover */
+        .social-btn.linkedin:hover {
+          border-color: transparent;
+          color: white;
+          background: #0077b5;
+          transform: translateY(-5px) scale(1.1);
+          box-shadow: 0 10px 28px rgba(0,119,181,0.35);
         }
 
         /* ─── Info card ─── */
@@ -229,6 +270,31 @@ export default function ContactPage() {
           height: 1px;
           background: linear-gradient(90deg, transparent, #e8e8ef 30%, #e8e8ef 70%, transparent);
           margin: 0 auto;
+        }
+
+        /* ─── Contact link ─── */
+        .contact-link {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          color: #475569;
+          text-decoration: none;
+          transition: color 0.2s ease;
+        }
+        .contact-link:hover {
+          color: #e61e73;
+        }
+
+        /* ─── Contact icon pill ─── */
+        .contact-icon {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 32px;
+          height: 32px;
+          border-radius: 8px;
+          background: #fdf2f7;
+          flex-shrink: 0;
         }
       `}</style>
 
@@ -342,12 +408,37 @@ export default function ContactPage() {
                 <h3 className={`${epilogue.className} text-[26px] font-extrabold tracking-[-0.04em] text-[#0e2547] lg:text-[32px]`}>
                   <span className="h-accent">General Inquiries</span>
                 </h3>
-                <a
-                  href="mailto:hello@mommantum.com"
-                  className={`${outfit.className} mt-5 inline-flex items-center gap-2 text-[16px] text-slate-500 transition-colors duration-200 hover:text-[#e61e73]`}
-                >
-                  hello@mommantum.com
-                </a>
+
+                <div className="mt-5 flex flex-col gap-3">
+                  {/* Email */}
+                  <a
+                    href="mailto:mommantum@gmail.com"
+                    className={`${outfit.className} contact-link text-[15px]`}
+                  >
+                    <span className="contact-icon">
+                      {/* Email icon */}
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e61e73" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="2" y="4" width="20" height="16" rx="2" />
+                        <polyline points="2,4 12,13 22,4" />
+                      </svg>
+                    </span>
+                    mommantum@gmail.com
+                  </a>
+
+                  {/* Phone */}
+                  <a
+                    href="tel:+919588973492"
+                    className={`${outfit.className} contact-link text-[15px]`}
+                  >
+                    <span className="contact-icon">
+                      {/* Phone icon */}
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e61e73" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.62 3.42 2 2 0 0 1 3.6 1.24h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.92a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 16.92z" />
+                      </svg>
+                    </span>
+                    +91 95889 73492
+                  </a>
+                </div>
               </div>
 
               {/* Social Networks */}
@@ -358,24 +449,35 @@ export default function ContactPage() {
                 <h3 className={`${epilogue.className} text-[26px] font-extrabold tracking-[-0.04em] text-[#0e2547] lg:text-[32px]`}>
                   <span className="h-accent">Social Networks</span>
                 </h3>
-                <div className="mt-6 flex items-center gap-3">
-                  {[
-                    { icon: "IG", label: "Instagram" },
-                    { icon: "in", label: "LinkedIn" },
-                    { icon: "X",  label: "X / Twitter" },
-                    { icon: "▶", label: "YouTube" },
-                  ].map(({ icon, label }) => (
-                    <a
-                      key={icon}
-                      href="#"
-                      aria-label={label}
-                      className="social-btn"
-                      style={{ fontFamily: epilogue.style.fontFamily }}
-                    >
-                      {icon}
-                    </a>
-                  ))}
+                <div className="mt-6 flex items-center gap-4">
+
+                  {/* Instagram */}
+                  <a
+                    href="https://www.instagram.com/mommantummedia?igsh=OXpxZ3Y0aTAxMTk4"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Instagram"
+                    className="social-btn instagram"
+                  >
+                    <InstagramIcon />
+                  </a>
+
+                  {/* LinkedIn */}
+                  <a
+                    href="https://www.linkedin.com/company/mommantum-media/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="LinkedIn"
+                    className="social-btn linkedin"
+                  >
+                    <LinkedInIcon />
+                  </a>
+
                 </div>
+
+                <p className={`${outfit.className} mt-5 text-[13px] text-slate-400`}>
+                  Stay connected and follow our latest updates.
+                </p>
               </div>
 
             </div>
