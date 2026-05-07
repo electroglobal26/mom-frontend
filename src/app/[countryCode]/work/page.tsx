@@ -4,8 +4,10 @@ import WorkPage from "./_components/WorkClient"
 export default async function WorkPageServer({
   params,
 }: {
-  params: { countryCode: string }
+  params: Promise<{ countryCode: string }>
 }) {
+  const { countryCode } = await params
+
   const [caseStudies, testimonials] = await Promise.all([
     getCaseStudies(),
     getTestimonials(),
@@ -13,7 +15,7 @@ export default async function WorkPageServer({
 
   return (
     <WorkPage
-      params={params}
+      params={{ countryCode }}
       caseStudies={caseStudies}
       testimonials={testimonials}
       teamMember={teamMember}

@@ -9,7 +9,7 @@ const outfit = Outfit({ subsets: ["latin"], weight: ["400", "500", "700"] })
 const mansalva = Mansalva({ subsets: ["latin"], weight: ["400"] })
 
 type Props = {
-  params: { countryCode: string; slug: string }
+  params: Promise<{ countryCode: string; slug: string }>
 }
 
 export async function generateStaticParams() {
@@ -18,7 +18,7 @@ export async function generateStaticParams() {
 }
 
 export default async function CaseStudyDetailPage({ params }: Props) {
-  const { slug, countryCode } = params
+  const { slug, countryCode } = await params
   const study = await getCaseStudy(slug)
   if (!study) return notFound()
 
@@ -96,36 +96,36 @@ export default async function CaseStudyDetailPage({ params }: Props) {
             </div>
           </div>
 
-         {/* Challenge */}
-<div className="mt-10 rounded-[22px] bg-white px-8 py-9 shadow-[0_8px_28px_rgba(0,0,0,0.05)] lg:px-12 lg:py-10">
-  <p
-    className={`${mansalva.className} text-[16px]`}
-    style={{ color: accent }}
-  >
-    The Challenge
-  </p>
-  <h2 className={`${epilogue.className} mt-2 text-[22px] font-extrabold tracking-[-0.04em] text-[#0e2547] lg:text-[28px]`}>
-    What was holding growth back
-  </h2>
-  <p className={`${outfit.className} mt-4 max-w-[920px] text-[15px] leading-[1.95] text-slate-600`}>
-    {study.challenge}
-  </p>
+          {/* Challenge */}
+          <div className="mt-10 rounded-[22px] bg-white px-8 py-9 shadow-[0_8px_28px_rgba(0,0,0,0.05)] lg:px-12 lg:py-10">
+            <p
+              className={`${mansalva.className} text-[16px]`}
+              style={{ color: accent }}
+            >
+              The Challenge
+            </p>
+            <h2 className={`${epilogue.className} mt-2 text-[22px] font-extrabold tracking-[-0.04em] text-[#0e2547] lg:text-[28px]`}>
+              What was holding growth back
+            </h2>
+            <p className={`${outfit.className} mt-4 max-w-[920px] text-[15px] leading-[1.95] text-slate-600`}>
+              {study.challenge}
+            </p>
 
-  {study.overview && (
-    <>
-      <div className="my-6 h-[1px] bg-slate-100" />
-      <p
-        className={`${mansalva.className} text-[15px]`}
-        style={{ color: accent }}
-      >
-        Strategy
-      </p>
-      <p className={`${outfit.className} mt-3 max-w-[920px] text-[15px] leading-[1.95] text-slate-600`}>
-        {study.overview}
-      </p>
-    </>
-  )}
-</div>
+            {study.overview && (
+              <>
+                <div className="my-6 h-[1px] bg-slate-100" />
+                <p
+                  className={`${mansalva.className} text-[15px]`}
+                  style={{ color: accent }}
+                >
+                  Strategy
+                </p>
+                <p className={`${outfit.className} mt-3 max-w-[920px] text-[15px] leading-[1.95] text-slate-600`}>
+                  {study.overview}
+                </p>
+              </>
+            )}
+          </div>
 
           {/* What we did + Strategy */}
           <div className="mt-6 grid gap-6 lg:grid-cols-2">
