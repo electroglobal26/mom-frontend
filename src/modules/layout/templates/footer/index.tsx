@@ -60,7 +60,7 @@ const LinkedInIcon = () => (
   </svg>
 )
 
-// ── Desktop-only accordion (Services / Web & AI / Articles columns) ───────────
+// ── Mobile-only accordion ─────────────────────────────────────────────────────
 function FooterAccordion({
   title,
   children,
@@ -107,18 +107,14 @@ function FooterAccordion({
 }
 
 // ── Mobile Quick Links accordion ─────────────────────────────────────────────
-// "Services" link always visible, rest collapse/expand
 function MobileQuickLinks() {
   const [open, setOpen] = useState(false)
 
-  // First link (Services) always shown
   const alwaysVisible = companyLinks[0]
-  // Rest hidden until expanded
   const hidden = companyLinks.slice(1)
 
   return (
     <div className="border-b border-slate-100 lg:hidden">
-      {/* Header row */}
       <button
         type="button"
         onClick={() => setOpen(v => !v)}
@@ -134,7 +130,6 @@ function MobileQuickLinks() {
         />
       </button>
 
-      {/* Always visible — Services */}
       <div className="pb-2">
         <Link
           href={alwaysVisible.href}
@@ -144,7 +139,6 @@ function MobileQuickLinks() {
         </Link>
       </div>
 
-      {/* Hidden links — expand on tap */}
       <div
         className="overflow-hidden transition-all duration-300"
         style={{ maxHeight: open ? "400px" : "0px" }}
@@ -207,10 +201,9 @@ export default function Footer() {
       <div className="content-container relative px-4 sm:px-6 lg:px-10">
         <div className="mx-auto max-w-[1320px] py-10 lg:py-16">
 
-          {/* ── MOBILE LAYOUT ── */}
+          {/* ── MOBILE LAYOUT ── (unchanged) */}
           <div className="lg:hidden">
 
-            {/* Logo */}
             <Link href="/" className="inline-flex items-center gap-2.5">
               <Image
                 src="/logo.png"
@@ -232,7 +225,6 @@ export default function Footer() {
               Growth studio for D2C brands.
             </p>
 
-            {/* Mobile CTA */}
             <div className="mt-5 rounded-[14px] border border-slate-100 bg-[#f7f8fa] p-5">
               <p className={`${epilogue.className} text-[16px] font-extrabold tracking-[-0.03em] text-[#0e2547]`}>
                 Ready to grow?
@@ -248,81 +240,71 @@ export default function Footer() {
               </Link>
             </div>
 
-            {/* Quick Links accordion — Services always visible, rest hidden */}
             <div className="mt-4">
               <MobileQuickLinks />
             </div>
 
-            {/* Performance Marketing accordion */}
             <FooterAccordion title="Performance Marketing">
               <div className="flex flex-col gap-3">
                 {performanceServices.map((item) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={`${outfit.className} text-[13.5px] font-medium leading-snug text-slate-600 transition-colors hover:text-[#e61e73]`}
-                  >
+                  <Link key={item.name} href={item.href}
+                    className={`${outfit.className} text-[13.5px] font-medium leading-snug text-slate-600 transition-colors hover:text-[#e61e73]`}>
                     {item.name}
                   </Link>
                 ))}
               </div>
             </FooterAccordion>
 
-            {/* Web & AI accordion */}
             <FooterAccordion title="Web & AI">
               <div className="flex flex-col gap-3">
                 {webAiServices.map((item) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={`${outfit.className} text-[13.5px] font-medium leading-snug text-slate-600 transition-colors hover:text-[#9333ea]`}
-                  >
+                  <Link key={item.name} href={item.href}
+                    className={`${outfit.className} text-[13.5px] font-medium leading-snug text-slate-600 transition-colors hover:text-[#9333ea]`}>
                     {item.name}
                   </Link>
                 ))}
               </div>
             </FooterAccordion>
 
-            {/* Articles accordion */}
             <FooterAccordion title="Articles">
               <div className="flex flex-col gap-4">
                 {articleLinks.map((item) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={`${outfit.className} block text-[13.5px] leading-[1.65] text-slate-600 transition-colors hover:text-[#0e2547]`}
-                  >
+                  <Link key={item.name} href={item.href}
+                    className={`${outfit.className} block text-[13.5px] leading-[1.65] text-slate-600 transition-colors hover:text-[#0e2547]`}>
                     {item.name}
                   </Link>
                 ))}
               </div>
             </FooterAccordion>
 
-            {/* Social */}
             <div className="mt-6 flex items-center gap-3">
-              <Link
-                href="https://www.instagram.com/mommantummedia?igsh=OXpxZ3Y0aTAxMTk4"
+              <Link href="https://www.instagram.com/mommantummedia?igsh=OXpxZ3Y0aTAxMTk4"
                 target="_blank" rel="noopener noreferrer" aria-label="Instagram"
-                className="footer-social-btn instagram"
-              >
+                className="footer-social-btn instagram">
                 <InstagramIcon />
               </Link>
-              <Link
-                href="https://www.linkedin.com/company/mommantum-media/"
+              <Link href="https://www.linkedin.com/company/mommantum-media/"
                 target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"
-                className="footer-social-btn linkedin"
-              >
+                className="footer-social-btn linkedin">
                 <LinkedInIcon />
               </Link>
             </div>
-
           </div>
 
           {/* ── DESKTOP LAYOUT ── */}
-          <div className="hidden lg:grid lg:grid-cols-[200px_1fr_1fr_1fr_260px] lg:gap-x-12 xl:gap-x-16">
+          {/*
+            Column order:
+            1. Logo + tagline + CTA block + socials   (240px fixed)
+            2. Quick Links (Services → T&C)            (160px fixed)
+            3. Performance Marketing                   (1fr)
+            4. Web & AI                                (1fr)
+            5. Articles                                (1fr)
+          */}
+          <div className="hidden lg:grid lg:grid-cols-[240px_160px_1fr_1fr_1fr] lg:gap-x-10 xl:gap-x-14 lg:items-start">
 
-            {/* Column 1 — Logo + company links */}
-            <div>
+            {/* ── Col 1: Brand + CTA + Socials ── */}
+            <div className="flex flex-col">
+              {/* Logo */}
               <Link href="/" className="inline-flex items-center gap-2.5">
                 <Image
                   src="/logo.png"
@@ -340,91 +322,27 @@ export default function Footer() {
                 </span>
               </Link>
 
+              {/* Tagline */}
               <p className={`${outfit.className} mt-3 text-[13px] leading-relaxed text-slate-400`}>
                 Growth studio for D2C brands.
               </p>
 
-              <div className="mt-6 flex flex-col gap-3">
-                {companyLinks.map((item) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={`${outfit.className} text-[13.5px] font-medium text-slate-600 transition-colors duration-200 hover:text-[#e61e73]`}
-                  >
-                    {item.name}
-                  </Link>
-                ))}
-              </div>
-            </div>
+              {/* Divider */}
+              <div className="my-5 h-px w-full bg-slate-100" />
 
-            {/* Column 2 — Performance Marketing */}
-            <div>
-              <p className={`${epilogue.className} mb-5 text-[11px] font-extrabold uppercase tracking-[0.1em] text-slate-400`}>
-                Performance Marketing
-              </p>
-              <div className="flex flex-col gap-3">
-                {performanceServices.map((item) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={`${outfit.className} text-[13.5px] font-medium leading-snug text-slate-600 transition-colors duration-200 hover:text-[#e61e73]`}
-                  >
-                    {item.name}
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            {/* Column 3 — Web & AI */}
-            <div>
-              <p className={`${epilogue.className} mb-5 text-[11px] font-extrabold uppercase tracking-[0.1em] text-slate-400`}>
-                Web & AI
-              </p>
-              <div className="flex flex-col gap-3">
-                {webAiServices.map((item) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={`${outfit.className} text-[13.5px] font-medium leading-snug text-slate-600 transition-colors duration-200 hover:text-[#9333ea]`}
-                  >
-                    {item.name}
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            {/* Column 4 — Articles */}
-            <div>
-              <p className={`${epilogue.className} mb-5 text-[11px] font-extrabold uppercase tracking-[0.1em] text-slate-400`}>
-                Articles
-              </p>
-              <div className="flex flex-col gap-4">
-                {articleLinks.map((item) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={`${outfit.className} block text-[13.5px] leading-[1.65] text-slate-600 transition-colors duration-200 hover:text-[#0e2547]`}
-                  >
-                    {item.name}
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            {/* Column 5 — CTA */}
-            <div>
+              {/* CTA block */}
               <p className={`${epilogue.className} text-[11px] font-extrabold uppercase tracking-[0.1em] text-slate-400`}>
                 Let&apos;s Work
               </p>
-              <h3 className={`${epilogue.className} mt-5 text-[19px] font-extrabold leading-snug tracking-[-0.03em] text-[#0e2547]`}>
+              <h3 className={`${epilogue.className} mt-3 text-[17px] font-extrabold leading-snug tracking-[-0.03em] text-[#0e2547]`}>
                 Ready to grow your brand?
               </h3>
-              <p className={`${outfit.className} mt-2.5 text-[13.5px] leading-[1.75] text-slate-500`}>
+              <p className={`${outfit.className} mt-2 text-[13px] leading-[1.75] text-slate-500`}>
                 Free strategy call. We tell you exactly what to fix first.
               </p>
               <Link
                 href="/contact"
-                className={`${epilogue.className} mt-5 inline-flex h-[40px] items-center justify-center gap-1.5 rounded-[10px] bg-[#e61e73] px-6 text-[11.5px] font-extrabold uppercase tracking-[0.07em] text-white transition-all duration-200 hover:bg-[#ca155f] hover:shadow-md`}
+                className={`${epilogue.className} mt-4 inline-flex h-[40px] w-full items-center justify-center gap-1.5 rounded-[10px] bg-[#e61e73] px-5 text-[11px] font-extrabold uppercase tracking-[0.07em] text-white transition-all duration-200 hover:bg-[#ca155f] hover:shadow-md`}
               >
                 Let&apos;s Make It Happen
               </Link>
@@ -434,7 +352,9 @@ export default function Footer() {
                   No commitment. Just clarity.
                 </p>
               </div>
-              <div className="mt-7 flex items-center gap-3">
+
+              {/* Socials */}
+              <div className="mt-6 flex items-center gap-3">
                 <Link
                   href="https://www.instagram.com/mommantummedia?igsh=OXpxZ3Y0aTAxMTk4"
                   target="_blank" rel="noopener noreferrer" aria-label="Instagram"
@@ -452,11 +372,83 @@ export default function Footer() {
               </div>
             </div>
 
+            {/* ── Col 2: Quick Links ── */}
+            <div className="flex flex-col">
+              <p className={`${epilogue.className} mb-5 text-[11px] font-extrabold uppercase tracking-[0.1em] text-slate-400`}>
+                Quick Links
+              </p>
+              <div className="flex flex-col gap-3">
+                {companyLinks.map((item) => (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={`${outfit.className} text-[13.5px] font-medium text-slate-600 transition-colors duration-200 hover:text-[#e61e73]`}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* ── Col 3: Performance Marketing ── */}
+            <div className="flex flex-col">
+              <p className={`${epilogue.className} mb-5 text-[11px] font-extrabold uppercase tracking-[0.1em] text-slate-400`}>
+                Performance Marketing
+              </p>
+              <div className="flex flex-col gap-3">
+                {performanceServices.map((item) => (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={`${outfit.className} text-[13.5px] font-medium leading-snug text-slate-600 transition-colors duration-200 hover:text-[#e61e73]`}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* ── Col 4: Web & AI ── */}
+            <div className="flex flex-col">
+              <p className={`${epilogue.className} mb-5 text-[11px] font-extrabold uppercase tracking-[0.1em] text-slate-400`}>
+                Web & AI
+              </p>
+              <div className="flex flex-col gap-3">
+                {webAiServices.map((item) => (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={`${outfit.className} text-[13.5px] font-medium leading-snug text-slate-600 transition-colors duration-200 hover:text-[#9333ea]`}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* ── Col 5: Articles ── */}
+            <div className="flex flex-col">
+              <p className={`${epilogue.className} mb-5 text-[11px] font-extrabold uppercase tracking-[0.1em] text-slate-400`}>
+                Articles
+              </p>
+              <div className="flex flex-col gap-4">
+                {articleLinks.map((item) => (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={`${outfit.className} block text-[13.5px] leading-[1.65] text-slate-600 transition-colors duration-200 hover:text-[#0e2547]`}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
 
-      {/* Bottom bar */}
+      {/* Bottom bar — unchanged */}
       <div className="border-t border-slate-100 bg-[#f7f8fa]">
         <div className="content-container px-4 sm:px-6 lg:px-10">
           <div className="mx-auto flex max-w-[1320px] flex-col gap-2.5 py-4 md:flex-row md:items-center md:justify-between">

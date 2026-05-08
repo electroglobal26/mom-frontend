@@ -115,7 +115,6 @@ const values = [
   },
 ]
 
-// ── CaseStudies lazy loaded to avoid server component conflict ────────────────
 import dynamic from "next/dynamic"
 const CaseStudies = dynamic(
   () => import("@modules/home/components/case-studies"),
@@ -153,9 +152,13 @@ export default function AboutClient({ countryCode }: { countryCode: string }) {
         </div>
 
         <div className="content-container relative px-4 sm:px-6 lg:px-10">
-          <div className="mx-auto grid max-w-[1320px] items-center gap-10 lg:grid-cols-[1fr_420px]">
+          {/*
+            Mobile: single column (grid col hidden on mobile via `hidden lg:block`)
+            Desktop: two-column grid
+          */}
+          <div className="mx-auto max-w-[1320px] lg:grid lg:grid-cols-[1fr_420px] lg:items-center lg:gap-10">
 
-            {/* LEFT */}
+            {/* LEFT — always visible on all screen sizes */}
             <div>
               <motion.p
                 className={`${mansalva.className} mb-4 text-[20px] font-bold leading-none text-[#e61e73]`}
@@ -250,10 +253,10 @@ export default function AboutClient({ countryCode }: { countryCode: string }) {
               </motion.div>
             </div>
 
-            {/* RIGHT — image + doodles */}
+            {/* RIGHT — hero image with doodles: hidden on mobile, visible on desktop */}
             <div
               ref={doodleContainerRef}
-              className="relative mx-auto w-full max-w-[420px]"
+              className="relative mx-auto hidden w-full max-w-[420px] lg:block"
               style={{ padding: "32px 24px 24px" }}
             >
               <div
@@ -357,7 +360,7 @@ export default function AboutClient({ countryCode }: { countryCode: string }) {
         </div>
       </section>
 
-      {/* ── FOUNDER / STORY ── */}
+      {/* ── FOUNDER / STORY ── (unchanged) */}
       <section className="relative overflow-hidden bg-[#f3f4f6] py-16 lg:py-20">
         <div className="content-container px-4 sm:px-6 lg:px-10">
           <div className="mx-auto grid max-w-[1320px] gap-8 lg:grid-cols-[380px_1fr] lg:items-start">
@@ -411,7 +414,7 @@ export default function AboutClient({ countryCode }: { countryCode: string }) {
         </div>
       </section>
 
-      {/* ── VALUES ── */}
+      {/* ── VALUES ── (unchanged) */}
       <section className="relative overflow-hidden bg-white py-16 lg:py-20">
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute left-[10%] top-[15%] h-[120px] w-[300px] rounded-full bg-[#f5f5f7] blur-3xl" />
@@ -467,7 +470,7 @@ export default function AboutClient({ countryCode }: { countryCode: string }) {
       <StatsStrip />
       <CaseStudies countryCode={countryCode} />
 
-      {/* ── FINAL CTA ── */}
+      {/* ── FINAL CTA ── (unchanged) */}
       <section className="relative overflow-hidden bg-[#0e2547] py-16 lg:py-24">
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute left-1/2 top-[18%] h-[140px] w-[420px] -translate-x-1/2 rounded-full bg-white/10 blur-3xl" />

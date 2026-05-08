@@ -54,7 +54,7 @@ function ScrollReveal({
 
 const services = [
   {
-    label: "Performance",
+    label: "Marketing",
     title: "Performance Marketing",
     description:
       "We run ad campaigns that bring the right audience, improve how they interact with the brand, and turn them into customers — so your ad spend leads to better conversions, lower cost, and consistent growth.",

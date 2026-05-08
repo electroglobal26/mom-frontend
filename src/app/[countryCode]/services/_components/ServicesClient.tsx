@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { motion, useReducedMotion } from "motion/react"
+import { motion, useReducedMotion, AnimatePresence } from "motion/react"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { Epilogue, Outfit, Mansalva } from "next/font/google"
 import type { Service } from "@lib/data/services"
@@ -25,6 +25,49 @@ const WEB_AI_SLUGS = [
   "ai-automation",
   "ai-agentic-service",
   "ai-video-generation",
+]
+
+const FAQS = [
+  {
+    q: "What services does Mommantum provide for D2C brands?",
+    a: "Mommantum provides performance marketing, SEO, AEO, GEO, social media marketing, CRO, AI automation, AI video generation, web development, and D2C branding services to help brands grow faster online.",
+  },
+  {
+    q: "How does your performance marketing service help increase sales?",
+    a: "Our performance marketing service uses Meta Ads and Google Ads with audience targeting, creative testing, campaign optimization, and scaling strategies to generate real revenue and lower customer acquisition costs.",
+  },
+  {
+    q: "What is included in your SEO, AEO and GEO services?",
+    a: "Our SEO services include keyword strategy, ecommerce SEO, product page optimization, blog content creation, FAQ setup, structured content, and optimization for AI search platforms and answer engines.",
+  },
+  {
+    q: "Do you offer social media marketing and content creation?",
+    a: "Yes. We create social media strategies, content calendars, reels, captions, graphics, and profile optimization to help brands stay active and build trust on platforms like Instagram, LinkedIn, and YouTube.",
+  },
+  {
+    q: "What is CRO and why is it important for ecommerce brands?",
+    a: "CRO or Conversion Rate Optimization helps improve your website and landing pages so more visitors become customers. This includes funnel analysis, CTA improvements, and product page optimization.",
+  },
+  {
+    q: "Can Mommantum build ecommerce websites and web apps?",
+    a: "Yes. We develop fast and scalable ecommerce websites, custom web applications, and business platforms designed for better performance, conversions, and growth.",
+  },
+  {
+    q: "What types of AI automation services do you offer?",
+    a: "We offer AI workflow automation, task automation, customer support automation, AI chat systems, and automated business processes to save time and improve efficiency.",
+  },
+  {
+    q: "What are AI Agentic Services?",
+    a: "AI Agentic Services are custom AI agents that can handle multi-step business tasks, customer interactions, workflow automation, and smart decision-making processes for businesses.",
+  },
+  {
+    q: "Do you create AI generated videos for brands?",
+    a: "Yes. We create AI generated videos for ads, reels, social media content, explainers, and brand storytelling using text-to-video and image-to-video AI tools.",
+  },
+  {
+    q: "How can Mommantum help scale a D2C brand?",
+    a: "Mommantum helps D2C brands scale with branding strategy, SEO, paid ads, retention marketing, CRO, AI automation, and content systems that improve revenue, reduce CAC, and increase conversions.",
+  },
 ]
 
 type ScrollState = "idle" | "visible" | "resting"
@@ -112,6 +155,19 @@ const WebAiIconSvg = () => (
   </svg>
 )
 
+// ─── FAQ Icon ─────────────────────────────────────────────────────────────────
+const FaqIcon = () => (
+  <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+    <rect width="44" height="44" rx="12" fill="#e8f6ff" />
+    <circle cx="22" cy="19" r="6" stroke="#0ea5e9" strokeWidth="2.2" />
+    <path d="M20 17.5 C20 16.4 21 15.5 22 15.5 C23.1 15.5 24 16.4 24 17.5 C24 18.5 23.2 19.3 22 20 L22 21"
+      stroke="#0ea5e9" strokeWidth="2" strokeLinecap="round" />
+    <circle cx="22" cy="22.5" r="0.8" fill="#0ea5e9" />
+    <path d="M14 29 C14 26.2 17.6 24 22 24 C26.4 24 30 26.2 30 29"
+      stroke="#0ea5e9" strokeWidth="2.2" strokeLinecap="round" />
+  </svg>
+)
+
 // ─── CENTERED Section Heading ────────────────────────────────────────────────
 function SectionHeading({
   label, icon, title, description,
@@ -124,20 +180,13 @@ function SectionHeading({
   return (
     <Reveal offset={20} amount={0.3}>
       <div className="mb-10 border-b border-slate-200 pb-8 text-center">
-        {/* Icon — centered */}
         <div className="flex justify-center mb-3">{icon}</div>
-
-        {/* Label */}
         <p className={`${mansalva.className} text-[15px] text-[#e61e73]`}>
           {label}
         </p>
-
-        {/* Title */}
         <h2 className={`${epilogue.className} mt-1 text-[28px] font-extrabold tracking-[-0.05em] text-[#0e2547] lg:text-[36px]`}>
           {title}
         </h2>
-
-        {/* Description — max-width centered */}
         <p className={`${outfit.className} mt-3 mx-auto max-w-[520px] text-[14px] leading-[1.8] text-slate-600`}>
           {description}
         </p>
@@ -146,7 +195,7 @@ function SectionHeading({
   )
 }
 
-// ─── Service Card (text left-aligned inside card, card itself in centered grid) ─
+// ─── Service Card ─────────────────────────────────────────────────────────────
 function ServiceCard({
   item, index, theme,
 }: {
@@ -176,18 +225,15 @@ function ServiceCard({
         onMouseEnter={() => setIsHov(true)}
         onMouseLeave={() => setIsHov(false)}
       >
-        {/* Top row: pill + number */}
         <div className="flex items-center justify-between gap-3">
           <span className={`${mansalva.className} svc-pill`}>{item.shortLabel}</span>
           <span className={`${epilogue.className} svc-num`}>{padNum}</span>
         </div>
 
-        {/* Card title — centered */}
         <h3 className={`${epilogue.className} mt-4 text-center text-[22px] font-extrabold leading-[1.08] tracking-[-0.04em] text-[#0e2547] lg:text-[26px]`}>
           {item.title}
         </h3>
 
-        {/* Description — centered */}
         <p className={`${outfit.className} mt-3 text-center text-[13px] leading-[1.8] text-slate-600`}>
           {item.description}
         </p>
@@ -198,7 +244,6 @@ function ServiceCard({
           Includes
         </p>
 
-        {/* Bullet points — left-aligned for readability */}
         <ul className="flex-1 space-y-2">
           {item.points.slice(0, 4).map((point) => (
             <li
@@ -213,7 +258,6 @@ function ServiceCard({
 
         <div className="mt-6" />
 
-        {/* CTA — centered */}
         <div className="flex justify-center mt-auto">
           <LocalizedClientLink
             href={`/services/${item.slug}`}
@@ -228,7 +272,7 @@ function ServiceCard({
   )
 }
 
-// ─── Grid: 3-col, orphan card centered ───────────────────────────────────────
+// ─── Service Grid ─────────────────────────────────────────────────────────────
 function ServiceGrid({
   items,
   accentMap,
@@ -243,7 +287,6 @@ function ServiceGrid({
     <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
       {items.map((item, index) => {
         const isOrphan  = remainder === 1 && index === items.length - 1
-        // Two orphans: second-to-last shifts right by 1 on lg
         const isOrphan2 = remainder === 2 && index === items.length - 2
 
         return (
@@ -251,9 +294,9 @@ function ServiceGrid({
             key={item.slug}
             className={
               isOrphan
-                ? "sm:col-span-2 lg:col-span-1 lg:col-start-2"   // single orphan: center col
+                ? "sm:col-span-2 lg:col-span-1 lg:col-start-2"
                 : isOrphan2
-                ? "lg:col-start-1"                                 // pair: natural centering via justify
+                ? "lg:col-start-1"
                 : ""
             }
           >
@@ -265,6 +308,147 @@ function ServiceGrid({
           </div>
         )
       })}
+    </div>
+  )
+}
+
+// ─── FAQ Accordion Item ───────────────────────────────────────────────────────
+function FaqItem({
+  q, a, index, isOpen, onToggle,
+}: {
+  q: string
+  a: string
+  index: number
+  isOpen: boolean
+  onToggle: () => void
+}) {
+  const padNum = String(index + 1).padStart(2, "0")
+
+  return (
+    <Reveal delay={index * 0.05} offset={20} amount={0.1}>
+      <div
+        className={`faq-item${isOpen ? " faq-open" : ""}`}
+        style={{
+          border: `1.5px solid ${isOpen ? "#e61e73" : "#ebebef"}`,
+          boxShadow: isOpen
+            ? "0 8px 32px rgba(230,30,115,0.08), 0 0 0 1px #fbb6d4"
+            : "0 2px 10px rgba(0,0,0,0.03)",
+        }}
+      >
+        <button
+          className="faq-trigger w-full"
+          onClick={onToggle}
+          aria-expanded={isOpen}
+        >
+          {/* Number badge */}
+          <span
+            className={`${epilogue.className} faq-num`}
+            style={{
+              background: isOpen ? "#fff0f6" : "#f7f8fa",
+              color: isOpen ? "#e61e73" : "#94a3b8",
+              border: `1.5px solid ${isOpen ? "#fbb6d4" : "#e2e8f0"}`,
+            }}
+          >
+            {padNum}
+          </span>
+
+          {/* Question text */}
+          <span
+            className={`${epilogue.className} faq-question`}
+            style={{ color: isOpen ? "#0e2547" : "#1e3a5f" }}
+          >
+            {q}
+          </span>
+
+          {/* Toggle icon */}
+          <span
+            className="faq-icon"
+            style={{
+              background: isOpen ? "#e61e73" : "#f1f5f9",
+              color: isOpen ? "#fff" : "#64748b",
+              transform: isOpen ? "rotate(45deg)" : "rotate(0deg)",
+            }}
+          >
+            +
+          </span>
+        </button>
+
+        <AnimatePresence initial={false}>
+          {isOpen && (
+            <motion.div
+              key="answer"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1, transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] } }}
+              exit={{ height: 0, opacity: 0, transition: { duration: 0.25, ease: [0.4, 0, 1, 1] } }}
+              style={{ overflow: "hidden" }}
+            >
+              <div className="faq-answer">
+                {/* Accent line */}
+                <div className="faq-answer-bar" />
+                <p className={`${outfit.className} faq-answer-text`}>{a}</p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </Reveal>
+  )
+}
+
+// ─── FAQ Section ──────────────────────────────────────────────────────────────
+function FaqSection() {
+  const [openIndex, setOpenIndex] = useState<number | null>(0)
+
+  const toggle = (i: number) => setOpenIndex((prev) => (prev === i ? null : i))
+
+  // Split into two columns for desktop
+  const leftFaqs  = FAQS.filter((_, i) => i % 2 === 0)
+  const rightFaqs = FAQS.filter((_, i) => i % 2 !== 0)
+
+  return (
+    <div className="mt-16">
+      <SectionHeading
+        label="FAQ"
+        icon={<FaqIcon />}
+        title="Frequently Asked Questions"
+        description="Everything you need to know about Mommantum's services and how we help D2C brands grow faster."
+      />
+
+      {/* Two-column FAQ grid on desktop, single-column on mobile */}
+      <div className="grid gap-3 lg:grid-cols-2 lg:gap-4">
+        {/* Left column */}
+        <div className="flex flex-col gap-3">
+          {leftFaqs.map((faq, colIdx) => {
+            const globalIdx = colIdx * 2
+            return (
+              <FaqItem
+                key={globalIdx}
+                q={faq.q}
+                a={faq.a}
+                index={globalIdx}
+                isOpen={openIndex === globalIdx}
+                onToggle={() => toggle(globalIdx)}
+              />
+            )
+          })}
+        </div>
+        {/* Right column */}
+        <div className="flex flex-col gap-3">
+          {rightFaqs.map((faq, colIdx) => {
+            const globalIdx = colIdx * 2 + 1
+            return (
+              <FaqItem
+                key={globalIdx}
+                q={faq.q}
+                a={faq.a}
+                index={globalIdx}
+                isOpen={openIndex === globalIdx}
+                onToggle={() => toggle(globalIdx)}
+              />
+            )
+          })}
+        </div>
+      </div>
     </div>
   )
 }
@@ -284,6 +468,7 @@ export default function ServicesClient({ services }: { services: Service[] }) {
       style={{ background: "#f7f8fa" }}
     >
       <style>{`
+        /* ── Service Cards ── */
         .svc-card {
           position: relative;
           background: #ffffff;
@@ -364,6 +549,84 @@ export default function ServicesClient({ services }: { services: Service[] }) {
         }
         .svc-cta:hover .cta-arrow { transform: translateX(4px); }
         .svc-divider { height: 1px; background: #f1f5f9; margin: 14px 0 12px; }
+
+        /* ── FAQ Accordion ── */
+        .faq-item {
+          background: #ffffff;
+          border-radius: 16px;
+          overflow: hidden;
+          transition: border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+        .faq-trigger {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 18px 20px;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          text-align: left;
+          width: 100%;
+          -webkit-tap-highlight-color: transparent;
+        }
+        .faq-trigger:focus-visible {
+          outline: 2px solid #e61e73;
+          outline-offset: -2px;
+          border-radius: 14px;
+        }
+        .faq-num {
+          flex-shrink: 0;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 34px; height: 34px;
+          border-radius: 9px;
+          font-size: 11px; font-weight: 800;
+          letter-spacing: 0.03em;
+          transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+        }
+        .faq-question {
+          flex: 1;
+          font-size: 14px;
+          font-weight: 700;
+          line-height: 1.45;
+          letter-spacing: -0.02em;
+          transition: color 0.2s ease;
+        }
+        @media (min-width: 1024px) {
+          .faq-question { font-size: 15px; }
+        }
+        .faq-icon {
+          flex-shrink: 0;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 28px; height: 28px;
+          border-radius: 8px;
+          font-size: 18px;
+          font-weight: 300;
+          line-height: 1;
+          transition: background 0.25s ease, color 0.25s ease, transform 0.3s cubic-bezier(0.16,1,0.3,1);
+        }
+        .faq-answer {
+          display: flex;
+          gap: 14px;
+          padding: 0 20px 20px 20px;
+        }
+        .faq-answer-bar {
+          flex-shrink: 0;
+          width: 3px;
+          border-radius: 99px;
+          background: linear-gradient(180deg, #e61e73, #9333ea);
+          align-self: stretch;
+          min-height: 100%;
+        }
+        .faq-answer-text {
+          font-size: 13px;
+          line-height: 1.85;
+          color: #475569;
+          margin: 0;
+        }
       `}</style>
 
       {/* Background blobs */}
@@ -377,21 +640,16 @@ export default function ServicesClient({ services }: { services: Service[] }) {
       <div className="content-container relative px-4 sm:px-6 lg:px-10">
         <div className="mx-auto max-w-[1320px]">
 
-          {/* ── Page Header — two-column spread layout ───────────────────── */}
+          {/* ── Page Header ──────────────────────────────────────────────── */}
           <div className="mb-16 lg:mb-20">
-
-            {/* Label — left */}
             <Reveal offset={20} amount={0.5}>
               <p className={`${mansalva.className} mb-4 text-[20px] text-[#e61e73]`}>
                 Our Services
               </p>
             </Reveal>
 
-            {/* Title row: headline left, description+stats pushed right */}
             <Reveal delay={0.08} offset={28} amount={0.4}>
               <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between lg:gap-16">
-
-                {/* LEFT — Big headline, full left side */}
                 <h1 className={`${epilogue.className} flex-shrink-0 text-[40px] font-extrabold leading-[1.0] tracking-[-0.06em] text-[#0e2547] sm:text-[52px] lg:text-[64px] xl:text-[80px]`}>
                   Built to grow
                   <br />
@@ -408,7 +666,6 @@ export default function ServicesClient({ services }: { services: Service[] }) {
                   </span>
                 </h1>
 
-                {/* RIGHT — description + stats, aligned to bottom of headline */}
                 <div className="lg:max-w-[420px] lg:pb-2">
                   <Reveal delay={0.14} offset={16} amount={0.4}>
                     <p className={`${outfit.className} text-[15px] leading-[1.9] text-slate-600 lg:text-[16px]`}>
@@ -439,7 +696,6 @@ export default function ServicesClient({ services }: { services: Service[] }) {
                     </div>
                   </Reveal>
                 </div>
-
               </div>
             </Reveal>
           </div>
@@ -500,6 +756,9 @@ export default function ServicesClient({ services }: { services: Service[] }) {
               </div>
             </div>
           </Reveal>
+
+          {/* ── FAQ Section ──────────────────────────────────────────────── */}
+          <FaqSection />
 
         </div>
       </div>

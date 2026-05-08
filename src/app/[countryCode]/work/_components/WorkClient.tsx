@@ -239,7 +239,7 @@ export default function WorkClient({ params, caseStudies, testimonials, teamMemb
 
             <Reveal delay={0.14} offset={16} amount={0.4}>
               <p className={`${outfit.className} mt-5 max-w-[580px] text-[16px] leading-[1.9] text-slate-600`}>
-                Work we have done for brands across D2C, F&B, engineering, and ecommerce.
+                Work we have done for brands across D2C and ecommerce.
                 Every project here had a real problem, a real strategy, and real results.
               </p>
             </Reveal>
