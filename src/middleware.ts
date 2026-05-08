@@ -70,32 +70,33 @@ export async function middleware(request: NextRequest) {
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api/") ||
-    pathname.includes(".") 
+    pathname.includes(".")
   ) {
     return NextResponse.next()
   }
 
-  // ── 2. /admin-login — handle separately, no Medusa logic ──
+  // ── 2. SITEMAP — pass through without any country code redirect ──
+  if (pathname.startsWith("/sitemap")) {
+    return NextResponse.next()
+  }
+
+  // ── 3. /admin-login — handle separately, no Medusa logic ──
   if (pathname === "/admin-login") {
-    // Already logged in → go to dashboard
     if (adminCookie && adminCookie === adminSecret) {
       return NextResponse.redirect(new URL("/admin", request.url))
     }
-    // Not logged in → show login page
     return NextResponse.next()
   }
 
-  // ── 3. /admin/* routes — check cookie, no Medusa logic ──
+  // ── 4. /admin/* routes — check cookie, no Medusa logic ──
   if (pathname.startsWith("/admin")) {
-    // Not logged in → go to login
     if (!adminCookie || adminCookie !== adminSecret) {
       return NextResponse.redirect(new URL("/admin-login", request.url))
     }
-    // Logged in → show admin page
     return NextResponse.next()
   }
 
-  // ── 4. MEDUSA REGION LOGIC — only for storefront pages ──
+  // ── 5. MEDUSA REGION LOGIC — only for storefront pages ──
   const regionMap = await getRegionMap()
 
   if (!regionMap || regionMap.size === 0) {

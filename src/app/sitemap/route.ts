@@ -1,3 +1,4 @@
+// app/sitemap/route.ts  →  serves /sitemap.xml (the index)
 import { NextResponse } from "next/server"
 
 export async function GET() {
@@ -6,11 +7,11 @@ export async function GET() {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
-    <loc>${baseUrl}/sitemap/pages.xml</loc>
+    <loc>${baseUrl}/sitemap/pages</loc>
     <lastmod>${new Date().toISOString()}</lastmod>
   </sitemap>
   <sitemap>
-    <loc>${baseUrl}/sitemap/blogs.xml</loc>
+    <loc>${baseUrl}/sitemap/blogs</loc>
     <lastmod>${new Date().toISOString()}</lastmod>
   </sitemap>
 </sitemapindex>`
