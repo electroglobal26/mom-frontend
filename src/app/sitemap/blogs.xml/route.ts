@@ -1,4 +1,3 @@
-// app/sitemap/blogs/route.ts  →  serves /sitemap/blogs
 import { NextResponse } from "next/server"
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://mommantum.com"
@@ -18,10 +17,12 @@ export async function GET() {
     const res = await fetch(`${BACKEND_URL}/custom/blog/posts`, {
       next: { revalidate: 3600 },
     })
+    if (!res.ok) throw new Error(`Backend returned ${res.status}`)
     const data = await res.json()
     blogs = data.posts || []
-  } catch {
-    // Backend unreachable — return an empty but valid sitemap
+  } catch (err) {
+    console.error("[sitemap/blogs] Failed to fetch blog posts:", err)
+    // Returns empty but valid sitemap — check NEXT_PUBLIC_MEDUSA_BACKEND_URL in deployment env vars
   }
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
