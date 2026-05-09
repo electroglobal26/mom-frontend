@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation"
+import { Metadata } from "next"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import SeoJsonLd from "@modules/common/components/seo-json-ld"
 import { getServices, getService } from "@lib/data/services"
+import { buildSeoMetadata } from "@lib/data/seo"
 import { Epilogue, Outfit, Mansalva } from "next/font/google"
 import FaqAccordion from "./_components/FaqAccordion"
 
@@ -17,13 +20,45 @@ export async function generateStaticParams() {
   return services.map((service) => ({ slug: service.slug }))
 }
 
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params
+  const service = await getService(params.slug)
+
+  if (!service) return {}
+
+  return buildSeoMetadata(
+    [
+      `service:${params.slug}`,
+      `services:${params.slug}`,
+      `service-${params.slug}`,
+      `services-${params.slug}`,
+      params.slug,
+    ],
+    {
+      title: `${service.title} | Mommantum`,
+      description: service.description || service.intro,
+      canonicalPath: `/services/${params.slug}`,
+      image: service.image,
+      keywords: [service.shortLabel, service.title],
+    }
+  )
+}
+
 export default async function ServiceDetailPage(props: Props) {
   const params = await props.params
   const service = await getService(params.slug)
   if (!service) return notFound()
+  const seoKeys = [
+    `service:${params.slug}`,
+    `services:${params.slug}`,
+    `service-${params.slug}`,
+    `services-${params.slug}`,
+    params.slug,
+  ]
 
   return (
     <main className="relative overflow-hidden bg-[#f7f8fa] pt-14 pb-20 lg:pt-20 lg:pb-24">
+      <SeoJsonLd pageKeys={seoKeys} />
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute left-[4%] top-[10%] h-[140px] w-[420px] rounded-full bg-white/45 blur-3xl" />
         <div className="absolute right-[8%] top-[12%] h-[140px] w-[360px] rounded-full bg-white/35 blur-3xl" />

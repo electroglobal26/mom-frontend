@@ -1,5 +1,6 @@
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
+import { buildSeoMetadata } from "@lib/data/seo"
 import { listProducts } from "@lib/data/products"
 import { getRegion, listRegions } from "@lib/data/regions"
 import ProductTemplate from "@modules/products/templates"
@@ -57,16 +58,16 @@ function getImagesForVariant(
   selectedVariantId?: string
 ) {
   if (!selectedVariantId || !product.variants) {
-    return product.images
+    return product.images || []
   }
 
   const variant = product.variants!.find((v) => v.id === selectedVariantId)
-  if (!variant || !variant.images.length) {
-    return product.images
+  if (!variant?.images?.length) {
+    return product.images || []
   }
 
   const imageIdsMap = new Map(variant.images.map((i) => [i.id, true]))
-  return product.images!.filter((i) => imageIdsMap.has(i.id))
+  return (product.images || []).filter((i) => imageIdsMap.has(i.id))
 }
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
@@ -87,15 +88,21 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     notFound()
   }
 
-  return {
-    title: `${product.title} | Medusa Store`,
-    description: `${product.title}`,
-    openGraph: {
+  return buildSeoMetadata(
+    [
+      `product:${handle}`,
+      `products:${handle}`,
+      `product-${handle}`,
+      handle,
+    ],
+    {
       title: `${product.title} | Medusa Store`,
-      description: `${product.title}`,
-      images: product.thumbnail ? [product.thumbnail] : [],
-    },
-  }
+      description: product.description || `${product.title}`,
+      canonicalPath: `/products/${handle}`,
+      image: product.thumbnail,
+      keywords: product.tags?.map((tag) => tag.value).filter(Boolean),
+    }
+  )
 }
 
 export default async function ProductPage(props: Props) {

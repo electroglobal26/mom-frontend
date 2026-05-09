@@ -1,7 +1,10 @@
 import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
+import { Metadata } from "next"
+import SeoJsonLd from "@modules/common/components/seo-json-ld"
 import { getCaseStudies, getCaseStudy } from "@lib/data/case-studies"
+import { buildSeoMetadata } from "@lib/data/seo"
 import { Epilogue, Outfit, Mansalva } from "next/font/google"
 
 const epilogue = Epilogue({ subsets: ["latin"], weight: ["700", "800"] })
@@ -17,15 +20,47 @@ export async function generateStaticParams() {
   return studies.map((item) => ({ slug: item.slug }))
 }
 
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params
+  const study = await getCaseStudy(slug)
+
+  if (!study) return {}
+
+  return buildSeoMetadata(
+    [
+      `work:${slug}`,
+      `case-study:${slug}`,
+      `case-studies:${slug}`,
+      `work-${slug}`,
+      slug,
+    ],
+    {
+      title: `${study.title} | Mommantum Work`,
+      description: study.tagline || study.about || study.challenge,
+      canonicalPath: `/work/${slug}`,
+      image: study.image,
+      keywords: [study.category, study.title],
+    }
+  )
+}
+
 export default async function CaseStudyDetailPage({ params }: Props) {
   const { slug, countryCode } = await params
   const study = await getCaseStudy(slug)
   if (!study) return notFound()
+  const seoKeys = [
+    `work:${slug}`,
+    `case-study:${slug}`,
+    `case-studies:${slug}`,
+    `work-${slug}`,
+    slug,
+  ]
 
   const accent = study.accent || "#e61e73"
 
   return (
     <main className="relative overflow-hidden bg-[#f7f8fa] pt-14 pb-20 lg:pt-20 lg:pb-24">
+      <SeoJsonLd pageKeys={seoKeys} />
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute left-[4%] top-[10%] h-[140px] w-[420px] rounded-full bg-white/45 blur-3xl" />
         <div className="absolute right-[8%] top-[12%] h-[140px] w-[360px] rounded-full bg-white/35 blur-3xl" />

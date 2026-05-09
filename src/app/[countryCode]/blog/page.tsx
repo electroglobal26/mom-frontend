@@ -1,19 +1,26 @@
 import Image from "next/image"
+import { Metadata } from "next"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import SeoJsonLd from "@modules/common/components/seo-json-ld"
 import { getBlogPosts } from "@lib/data/blog-posts"
+import { buildSeoMetadata } from "@lib/data/seo"
 import { Epilogue, Outfit, Mansalva } from "next/font/google"
 
 const epilogue = Epilogue({ subsets: ["latin"], weight: ["700", "800"] })
 const outfit = Outfit({ subsets: ["latin"], weight: ["400", "500", "700"] })
 const mansalva = Mansalva({ subsets: ["latin"], weight: ["400"] })
 
+export async function generateMetadata(): Promise<Metadata> {
+  return buildSeoMetadata(["blog"], {
+    title: "Blog | Mommantum",
+    description:
+      "Read Mommantum insights on performance marketing, SEO, branding, content, ecommerce growth, and AI workflows.",
+    canonicalPath: "/blog",
+  })
+}
+
 export default async function BlogPage() {
   const blogPosts = await getBlogPosts()
-
-  console.log("=== BLOG DEBUG ===")
-  console.log("Backend URL:", process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL)
-  console.log("Posts count:", blogPosts.length)
-  console.log("First post:", blogPosts[0]?.title || "none")
 
   const [featured, ...rest] = blogPosts
 
@@ -32,7 +39,7 @@ export default async function BlogPage() {
 
   const popular = blogPosts.slice(0, 5)
 
-  function formatDate(dateStr: string) {
+  function formatDate(dateStr: string | null | undefined) {
     if (!dateStr) return ""
     return new Date(dateStr).toLocaleDateString("en-IN", {
       year: "numeric",
@@ -43,6 +50,7 @@ export default async function BlogPage() {
 
   return (
     <main className="relative overflow-hidden bg-[#f3f4f6] pt-14 pb-18 lg:pt-18 lg:pb-22">
+      <SeoJsonLd pageKeys={["blog"]} />
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute left-[5%] top-[8%] h-[130px] w-[400px] rounded-full bg-white/45 blur-3xl" />
         <div className="absolute right-[6%] top-[10%] h-[140px] w-[340px] rounded-full bg-white/40 blur-3xl" />
@@ -61,8 +69,8 @@ export default async function BlogPage() {
                 <span className="absolute bottom-[6px] left-0 -z-10 h-[13px] w-[58%] bg-[#ef6a99]" />
               </span>
             </h1>
-            <p className={`${outfit.className} mt-5 max-w-[560px] text-[16px] leading-8text-slate-600`}>
-             We write about what we see working, what is not working, and how brands can grow without wasting time and money on the wrong things. If you run a D2C brand or an ecommerce business and want to get better at performance marketing, branding, content, or just marketing in general, this is the right place.
+            <p className={`${outfit.className} mt-5 max-w-[560px] text-[16px] leading-8 text-slate-600`}>
+              We write about what we see working, what is not working, and how brands can grow without wasting time and money on the wrong things. If you run a D2C brand or an ecommerce business and want to get better at performance marketing, branding, content, or just marketing in general, this is the right place.
             </p>
           </div>
 
@@ -108,7 +116,7 @@ export default async function BlogPage() {
                       {featured.title}
                     </LocalizedClientLink>
                   </h2>
-                  <p className={`${outfit.className} mt-3 text-[15px] leading-[1.85]text-slate-600`}>
+                  <p className={`${outfit.className} mt-3 text-[15px] leading-[1.85] text-slate-600`}>
                     {featured.excerpt}
                   </p>
                   <LocalizedClientLink
@@ -128,10 +136,7 @@ export default async function BlogPage() {
               <div className="space-y-8">
                 {rest.map((post) => (
                   <article key={post.slug} className="group flex gap-5">
-                    <LocalizedClientLink
-                      href={`/blog/${post.slug}`}
-                      className="shrink-0"
-                    >
+                    <LocalizedClientLink href={`/blog/${post.slug}`} className="shrink-0">
                       <div className="overflow-hidden rounded-[14px] shadow-[0_8px_24px_rgba(0,0,0,0.07)]">
                         <div className="relative h-[110px] w-[160px]">
                           {post.featured_image ? (
@@ -169,7 +174,7 @@ export default async function BlogPage() {
                           {post.title}
                         </LocalizedClientLink>
                       </h3>
-                      <p className={`${outfit.className} mt-1.5 line-clamp-2 text-[14px] leading-[1.7]text-slate-600`}>
+                      <p className={`${outfit.className} mt-1.5 line-clamp-2 text-[14px] leading-[1.7] text-slate-600`}>
                         {post.excerpt}
                       </p>
                     </div>

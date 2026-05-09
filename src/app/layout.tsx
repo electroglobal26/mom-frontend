@@ -1,8 +1,8 @@
-import { getBaseURL } from "@lib/util/env"
 import { Metadata } from "next"
 import "styles/globals.css"
 import { Cormorant_Garamond, DM_Sans } from "next/font/google"
 import Script from "next/script"
+import { buildSeoMetadata } from "@lib/data/seo"
 
 const logoFont = Cormorant_Garamond({
   subsets: ["latin"],
@@ -13,11 +13,13 @@ const bodyFont = DM_Sans({
   subsets: ["latin"],
 })
 
-export const metadata: Metadata = {
-  metadataBase: new URL(getBaseURL()),
-  title: "Mommantum | Digital Marketing Agency Jaipur",
-  description:
-    "Mommantum is a Jaipur-based digital marketing agency helping D2C and B2B brands grow with strategy, creative systems, SEO, and performance marketing.",
+export async function generateMetadata(): Promise<Metadata> {
+  return buildSeoMetadata(["site", "default"], {
+    title: "Mommantum | Digital Marketing Agency Jaipur",
+    description:
+      "Mommantum is a Jaipur-based digital marketing agency helping D2C and B2B brands grow with strategy, creative systems, SEO, and performance marketing.",
+    canonicalPath: "/",
+  })
 }
 
 export default function RootLayout(props: { children: React.ReactNode }) {

@@ -2,17 +2,19 @@ import Image from "next/image"
 import { notFound } from "next/navigation"
 import { Metadata } from "next"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import SeoJsonLd from "@modules/common/components/seo-json-ld"
 import { getBlogPost, getBlogPosts } from "@lib/data/blog-posts"
+import { buildSeoMetadata } from "@lib/data/seo"
 import { Epilogue, Outfit, Mansalva } from "next/font/google"
 
 const epilogue = Epilogue({ subsets: ["latin"], weight: ["700", "800"] })
 const outfit = Outfit({ subsets: ["latin"], weight: ["400", "500", "700"] })
 const mansalva = Mansalva({ subsets: ["latin"], weight: ["400"] })
 
-// ── KEY FIX 1: Allow new slugs not in generateStaticParams ───────────────────
+// ── CRITICAL: allow slugs not known at build time to render on-demand ─────────
 export const dynamicParams = true
 
-// ── KEY FIX 2: Revalidate every 60s so new posts appear without redeploy ─────
+// ── Revalidate every 60s so new posts appear on Vercel without redeploy ───────
 export const revalidate = 60
 
 export async function generateMetadata(props: {
@@ -21,25 +23,32 @@ export async function generateMetadata(props: {
   const params = await props.params
   const post = await getBlogPost(params.slug)
   if (!post) return {}
-  return {
-    title: post.meta_title || post.title,
-    description: post.meta_description || post.excerpt,
-    openGraph: {
+
+  return buildSeoMetadata(
+    [
+      `blog:${params.slug}`,
+      `blog-post:${params.slug}`,
+      `post:${params.slug}`,
+      `blog-${params.slug}`,
+      params.slug,
+    ],
+    {
       title: post.meta_title || post.title,
-      description: post.meta_description || post.excerpt,
-      images: post.featured_image ? [post.featured_image] : [],
-    },
-  }
+      description: post.meta_description || post.excerpt || "",
+      canonicalPath: `/blog/${params.slug}`,
+      image: post.featured_image,
+      type: "article",
+      keywords: [post.category_id || ""],
+    }
+  )
 }
 
-// ── KEY FIX 3: Only pre-render published posts, limit to recent 10 ───────────
 export async function generateStaticParams() {
   try {
     const posts = await getBlogPosts()
-    // Only pre-build the 10 most recent — rest built on demand
+    // Only pre-build recent 10 — rest render on-demand via dynamicParams = true
     return posts.slice(0, 10).map((post) => ({ slug: post.slug }))
   } catch {
-    // If fetch fails at build time, don't crash the build
     return []
   }
 }
@@ -48,8 +57,7 @@ export default async function BlogDetailPage(props: {
   params: Promise<{ slug: string; countryCode: string }>
 }) {
   const params = await props.params
-  
-  // ── KEY FIX 4: Wrap in try/catch so errors return 404 not 500 ─────────────
+
   let post
   try {
     post = await getBlogPost(params.slug)
@@ -59,20 +67,30 @@ export default async function BlogDetailPage(props: {
   }
 
   if (!post) return notFound()
+  const seoKeys = [
+    `blog:${params.slug}`,
+    `blog-post:${params.slug}`,
+    `post:${params.slug}`,
+    `blog-${params.slug}`,
+    params.slug,
+  ]
 
-  function formatDate(dateStr: string) {
+  function formatDate(dateStr: string | null | undefined) {
     if (!dateStr) return ""
-    return new Date(dateStr).toLocaleDateString("en-IN", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    })
+    try {
+      return new Date(dateStr).toLocaleDateString("en-IN", {
+        year: "numeric", month: "long", day: "numeric",
+      })
+    } catch {
+      return ""
+    }
   }
 
   const validImages = post.image_urls?.filter(Boolean) || []
 
   return (
     <main className="relative overflow-hidden bg-[#f3f4f6] pt-14 pb-20 lg:pt-18 lg:pb-24">
+      <SeoJsonLd pageKeys={seoKeys} />
 
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute left-[4%] top-[5%] h-[180px] w-[500px] rounded-full bg-white/50 blur-3xl" />
@@ -88,16 +106,9 @@ export default async function BlogDetailPage(props: {
           padding-bottom: 10px; border-bottom: 2px solid #f1f5f9;
         }
         .blog-content h2:first-child { margin-top: 0; }
-        .blog-content h3 {
-          font-size: 20px; font-weight: 700; color: #0e2547;
-          margin: 28px 0 10px; line-height: 1.2;
-        }
-        .blog-content h4 {
-          font-size: 17px; font-weight: 700; color: #1e3a5f; margin: 20px 0 8px;
-        }
-        .blog-content p {
-          font-size: 16px; line-height: 2; color: #475569; margin: 14px 0;
-        }
+        .blog-content h3 { font-size: 20px; font-weight: 700; color: #0e2547; margin: 28px 0 10px; line-height: 1.2; }
+        .blog-content h4 { font-size: 17px; font-weight: 700; color: #1e3a5f; margin: 20px 0 8px; }
+        .blog-content p { font-size: 16px; line-height: 2; color: #475569; margin: 14px 0; }
         .blog-content strong { font-weight: 700; color: #0e2547; }
         .blog-content em { font-style: italic; }
         .blog-content u { text-decoration: underline; }
@@ -107,22 +118,17 @@ export default async function BlogDetailPage(props: {
           display: flex; align-items: flex-start; gap: 12px;
           font-size: 16px; line-height: 1.85; color: #475569;
           margin: 10px 0; padding: 10px 14px;
-          background: #f8fafc; border-radius: 10px;
-          border-left: 3px solid #e61e73;
+          background: #f8fafc; border-radius: 10px; border-left: 3px solid #e61e73;
         }
         .blog-content ul li::before {
           content: ""; display: inline-block; width: 7px; height: 7px;
           border-radius: 50%; background: #e61e73; flex-shrink: 0; margin-top: 9px;
         }
-        .blog-content ol {
-          padding-left: 0; margin: 20px 0;
-          counter-reset: ol-counter; list-style: none;
-        }
+        .blog-content ol { padding-left: 0; margin: 20px 0; counter-reset: ol-counter; list-style: none; }
         .blog-content ol li {
           counter-increment: ol-counter; display: flex; align-items: flex-start;
           gap: 14px; font-size: 16px; line-height: 1.85; color: #475569;
-          margin: 10px 0; padding: 10px 14px;
-          background: #f8fafc; border-radius: 10px;
+          margin: 10px 0; padding: 10px 14px; background: #f8fafc; border-radius: 10px;
         }
         .blog-content ol li::before {
           content: counter(ol-counter); display: flex; align-items: center;
@@ -137,34 +143,16 @@ export default async function BlogDetailPage(props: {
           font-size: 17px; line-height: 1.85; font-style: italic;
           box-shadow: 0 4px 14px rgba(230,30,115,0.08);
         }
-        .blog-content a {
-          color: #e61e73; text-decoration: none; font-weight: 600;
-          border-bottom: 1px solid rgba(230,30,115,0.3); transition: border-color 0.2s;
-        }
+        .blog-content a { color: #e61e73; text-decoration: none; font-weight: 600; border-bottom: 1px solid rgba(230,30,115,0.3); transition: border-color 0.2s; }
         .blog-content a:hover { border-bottom-color: #e61e73; }
-        .blog-content img {
-          max-width: 100%; border-radius: 16px;
-          box-shadow: 0 12px 32px rgba(0,0,0,0.1); margin: 24px auto; display: block;
-        }
-        .blog-content hr {
-          border: none; height: 2px;
-          background: linear-gradient(90deg, #e61e73, transparent);
-          margin: 32px 0; border-radius: 2px;
-        }
+        .blog-content img { max-width: 100%; border-radius: 16px; box-shadow: 0 12px 32px rgba(0,0,0,0.1); margin: 24px auto; display: block; }
+        .blog-content hr { border: none; height: 2px; background: linear-gradient(90deg, #e61e73, transparent); margin: 32px 0; border-radius: 2px; }
         .blog-content .ql-align-center { text-align: center; }
         .blog-content .ql-align-right { text-align: right; }
         .blog-content .ql-align-justify { text-align: justify; }
-        .faq-item {
-          background: white; border-radius: 16px; overflow: hidden;
-          box-shadow: 0 4px 16px rgba(0,0,0,0.05); border: 1px solid #f1f5f9;
-          transition: box-shadow 0.2s, transform 0.2s;
-        }
+        .faq-item { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; transition: box-shadow 0.2s, transform 0.2s; }
         .faq-item:hover { box-shadow: 0 8px 28px rgba(0,0,0,0.08); transform: translateY(-1px); }
-        .img-card {
-          overflow: hidden; border-radius: 20px;
-          box-shadow: 0 12px 36px rgba(0,0,0,0.1);
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
+        .img-card { overflow: hidden; border-radius: 20px; box-shadow: 0 12px 36px rgba(0,0,0,0.1); transition: transform 0.3s ease, box-shadow 0.3s ease; }
         .img-card:hover { transform: translateY(-4px); box-shadow: 0 20px 50px rgba(0,0,0,0.13); }
         .img-card img { width: 100%; object-fit: cover; display: block; transition: transform 0.5s ease; }
         .img-card:hover img { transform: scale(1.03); }
@@ -219,12 +207,8 @@ export default async function BlogDetailPage(props: {
                   </span>
                 </div>
                 <div>
-                  <p className={`${epilogue.className} text-[15px] font-extrabold text-[#0e2547]`}>
-                    {post.author_name}
-                  </p>
-                  <p className={`${outfit.className} text-[12px] text-slate-400`}>
-                    Author · Mommantum
-                  </p>
+                  <p className={`${epilogue.className} text-[15px] font-extrabold text-[#0e2547]`}>{post.author_name}</p>
+                  <p className={`${outfit.className} text-[12px] text-slate-400`}>Author · Mommantum</p>
                 </div>
               </div>
             )}
@@ -234,61 +218,43 @@ export default async function BlogDetailPage(props: {
           {post.featured_image && (
             <div className="mt-10 overflow-hidden rounded-[24px] shadow-[0_24px_60px_rgba(0,0,0,0.12)]">
               <div className="relative aspect-[16/9] w-full">
-                <Image
-                  src={post.featured_image}
-                  alt={post.title}
-                  fill
-                  className="object-cover"
-                  priority
-                />
+                <Image src={post.featured_image} alt={post.title} fill className="object-cover" priority />
               </div>
             </div>
           )}
 
-          {/* Article content */}
+          {/* Article content — null-safe */}
           <div className="mt-10 overflow-hidden rounded-[24px] bg-white shadow-[0_8px_32px_rgba(0,0,0,0.06)]">
-            <div
-              className="h-[4px] w-full"
-              style={{ background: "linear-gradient(90deg, #e61e73, #9333ea, #0ea5e9)" }}
-            />
+            <div className="h-[4px] w-full" style={{ background: "linear-gradient(90deg, #e61e73, #9333ea, #0ea5e9)" }} />
             <div className="p-7 lg:p-12">
-              <div
-                className="blog-content"
-                dangerouslySetInnerHTML={{ __html: post.content }}
-              />
+              {post.content ? (
+                <div className="blog-content" dangerouslySetInnerHTML={{ __html: post.content }} />
+              ) : (
+                <p className={`${outfit.className} text-[16px] text-slate-400 italic`}>Content coming soon.</p>
+              )}
             </div>
           </div>
 
           {/* Extra images */}
           {validImages.length > 0 && (
             <div className="mt-10">
-              <p className={`${mansalva.className} mb-6 text-[18px] text-[#e61e73]`}>
-                More from this article
-              </p>
+              <p className={`${mansalva.className} mb-6 text-[18px] text-[#e61e73]`}>More from this article</p>
               {validImages.length === 1 && (
-                <div className="img-card">
-                  <img src={validImages[0]} alt={`${post.title} image 1`} style={{ maxHeight: "520px" }} />
-                </div>
+                <div className="img-card"><img src={validImages[0]} alt={`${post.title} image 1`} style={{ maxHeight: "520px" }} /></div>
               )}
               {validImages.length === 2 && (
                 <div className="grid gap-5 sm:grid-cols-2">
                   {validImages.map((img, i) => (
-                    <div key={i} className="img-card">
-                      <img src={img} alt={`${post.title} image ${i + 1}`} style={{ maxHeight: "400px" }} />
-                    </div>
+                    <div key={i} className="img-card"><img src={img} alt={`${post.title} image ${i + 1}`} style={{ maxHeight: "400px" }} /></div>
                   ))}
                 </div>
               )}
               {validImages.length === 3 && (
                 <div className="flex flex-col gap-5">
-                  <div className="img-card">
-                    <img src={validImages[0]} alt={`${post.title} image 1`} style={{ maxHeight: "480px" }} />
-                  </div>
+                  <div className="img-card"><img src={validImages[0]} alt={`${post.title} image 1`} style={{ maxHeight: "480px" }} /></div>
                   <div className="grid gap-5 sm:grid-cols-2">
                     {validImages.slice(1).map((img, i) => (
-                      <div key={i} className="img-card">
-                        <img src={img} alt={`${post.title} image ${i + 2}`} style={{ maxHeight: "340px" }} />
-                      </div>
+                      <div key={i} className="img-card"><img src={img} alt={`${post.title} image ${i + 2}`} style={{ maxHeight: "340px" }} /></div>
                     ))}
                   </div>
                 </div>
@@ -296,9 +262,7 @@ export default async function BlogDetailPage(props: {
               {validImages.length >= 4 && (
                 <div className="grid gap-5 sm:grid-cols-2">
                   {validImages.map((img, i) => (
-                    <div key={i} className="img-card">
-                      <img src={img} alt={`${post.title} image ${i + 1}`} style={{ maxHeight: "360px" }} />
-                    </div>
+                    <div key={i} className="img-card"><img src={img} alt={`${post.title} image ${i + 1}`} style={{ maxHeight: "360px" }} /></div>
                   ))}
                 </div>
               )}
@@ -324,15 +288,10 @@ export default async function BlogDetailPage(props: {
                       >
                         {String(i + 1).padStart(2, "0")}
                       </div>
-                      <h3 className={`${epilogue.className} text-[17px] font-extrabold leading-[1.3] text-[#0e2547]`}>
-                        {faq.question}
-                      </h3>
+                      <h3 className={`${epilogue.className} text-[17px] font-extrabold leading-[1.3] text-[#0e2547]`}>{faq.question}</h3>
                     </div>
                     <div className="px-6 pb-6 pt-4">
-                      <p
-                        className={`${outfit.className} text-[15px] leading-[1.9] text-slate-600`}
-                        style={{ paddingLeft: "46px" }}
-                      >
+                      <p className={`${outfit.className} text-[15px] leading-[1.9] text-slate-600`} style={{ paddingLeft: "46px" }}>
                         {faq.answer}
                       </p>
                     </div>

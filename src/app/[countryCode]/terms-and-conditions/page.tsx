@@ -1,9 +1,19 @@
+import { Metadata } from "next"
 import { Epilogue, Outfit, Mansalva } from "next/font/google"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import { buildSeoMetadata } from "@lib/data/seo"
 
 const epilogue = Epilogue({ subsets: ["latin"], weight: ["700", "800"] })
 const outfit = Outfit({ subsets: ["latin"], weight: ["400", "500"] })
 const mansalva = Mansalva({ subsets: ["latin"], weight: ["400"] })
+
+export async function generateMetadata(): Promise<Metadata> {
+  return buildSeoMetadata(["terms-and-conditions", "terms"], {
+    title: "Terms & Conditions | Mommantum",
+    description: "Read the terms and conditions for using Mommantum services and website.",
+    canonicalPath: "/terms-and-conditions",
+  })
+}
 
 export default function TermsAndConditionsPage() {
   return (

@@ -1,11 +1,15 @@
 import { Metadata } from "next"
 
+import { buildSeoMetadata } from "@lib/data/seo"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import StoreTemplate from "@modules/store/templates"
 
-export const metadata: Metadata = {
-  title: "Store",
-  description: "Explore all of our products.",
+export async function generateMetadata(): Promise<Metadata> {
+  return buildSeoMetadata(["store", "shop"], {
+    title: "Store",
+    description: "Explore all of our products.",
+    canonicalPath: "/store",
+  })
 }
 
 type Params = {

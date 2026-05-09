@@ -1,9 +1,19 @@
+import { Metadata } from "next"
 import { Epilogue, Outfit, Mansalva } from "next/font/google"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import { buildSeoMetadata } from "@lib/data/seo"
 
 const epilogue = Epilogue({ subsets: ["latin"], weight: ["700", "800"] })
 const outfit = Outfit({ subsets: ["latin"], weight: ["400", "500"] })
 const mansalva = Mansalva({ subsets: ["latin"], weight: ["400"] })
+
+export async function generateMetadata(): Promise<Metadata> {
+  return buildSeoMetadata(["privacy-policy", "privacy"], {
+    title: "Privacy Policy | Mommantum",
+    description: "Read how Mommantum collects, uses, and protects information on its website.",
+    canonicalPath: "/privacy-policy",
+  })
+}
 
 export default function PrivacyPolicyPage() {
   return (

@@ -2,6 +2,7 @@ import { Metadata } from "next"
 import { notFound } from "next/navigation"
 export const dynamic = "force-dynamic";
 
+import { buildSeoMetadata } from "@lib/data/seo"
 import { getCollectionByHandle, listCollections } from "@lib/data/collections"
 import { listRegions } from "@lib/data/regions"
 import { StoreCollection, StoreRegion } from "@medusajs/types"
@@ -59,12 +60,19 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     notFound()
   }
 
-  const metadata = {
-    title: `${collection.title} | Medusa Store`,
-    description: `${collection.title} collection`,
-  } as Metadata
-
-  return metadata
+  return buildSeoMetadata(
+    [
+      `collection:${params.handle}`,
+      `collections:${params.handle}`,
+      `collection-${params.handle}`,
+      params.handle,
+    ],
+    {
+      title: `${collection.title} | Medusa Store`,
+      description: `${collection.title} collection`,
+      canonicalPath: `/collections/${params.handle}`,
+    }
+  )
 }
 
 export default async function CollectionPage(props: Props) {

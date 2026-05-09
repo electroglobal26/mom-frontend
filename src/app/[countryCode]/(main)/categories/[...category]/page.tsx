@@ -1,6 +1,7 @@
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
 
+import { buildSeoMetadata } from "@lib/data/seo"
 import { getCategoryByHandle, listCategories } from "@lib/data/categories"
 import { listRegions } from "@lib/data/regions"
 import { StoreRegion } from "@medusajs/types"
@@ -51,13 +52,21 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
     const description = productCategory.description ?? `${title} category.`
 
-    return {
-      title: `${title} | Medusa Store`,
-      description,
-      alternates: {
-        canonical: `${params.category.join("/")}`,
-      },
-    }
+    const categoryPath = params.category.join("/")
+
+    return buildSeoMetadata(
+      [
+        `category:${categoryPath}`,
+        `categories:${categoryPath}`,
+        `category-${params.category.at(-1)}`,
+        params.category.at(-1),
+      ],
+      {
+        title: `${title} | Medusa Store`,
+        description,
+        canonicalPath: `/categories/${categoryPath}`,
+      }
+    )
   } catch (error) {
     notFound()
   }
