@@ -75,6 +75,15 @@ export default async function BlogDetailPage(props: {
     params.slug,
   ]
 
+  let popularPosts: Awaited<ReturnType<typeof getBlogPosts>> = []
+  try {
+    popularPosts = (await getBlogPosts())
+      .filter((item) => item.slug !== params.slug)
+      .slice(0, 5)
+  } catch {
+    popularPosts = []
+  }
+
   function formatDate(dateStr: string | null | undefined) {
     if (!dateStr) return ""
     try {
@@ -136,6 +145,66 @@ export default async function BlogDetailPage(props: {
           border-radius: 50%; background: #0e2547; color: white;
           font-size: 12px; font-weight: 800; flex-shrink: 0; margin-top: 2px;
         }
+        .blog-content h2:first-child {
+          border-bottom: 0; margin-bottom: 16px; padding-bottom: 0;
+          text-align: center;
+        }
+        .blog-content h2:first-child + ol {
+          counter-reset: toc-section; display: flex; flex-direction: column; gap: 14px;
+          margin: 18px 0 36px; padding: 20px;
+          border: 1px solid #e2e8f0; border-radius: 18px;
+          background: #f8fafc; list-style: none;
+        }
+        .blog-content h2:first-child + ol li {
+          background: white; border: 1px solid #edf2f7; border-left: 0;
+          box-shadow: 0 8px 22px rgba(14,37,71,0.04);
+        }
+        .blog-content h2:first-child + ol > li {
+          counter-increment: toc-section; display: block;
+          position: relative; margin: 0; padding: 16px 16px 16px 58px;
+          border-radius: 14px;
+        }
+        .blog-content h2:first-child + ol > li::before {
+          content: counter(toc-section); width: 30px; min-width: 30px; height: 30px;
+          display: inline-flex; align-items: center; justify-content: center;
+          position: absolute; left: 16px; top: 16px;
+          border-radius: 999px; background: #0e2547; color: white;
+          font-size: 13px; font-weight: 800; margin-top: 0;
+        }
+        .blog-content h2:first-child + ol > li > a,
+        .blog-content h2:first-child + ol > li > p,
+        .blog-content h2:first-child + ol > li > span {
+          color: #0e2547; font-weight: 800;
+          line-height: 1.55; border-bottom: 0;
+        }
+        .blog-content h2:first-child + ol ol {
+          display: flex; flex-direction: column; gap: 10px;
+          margin: 14px 0 0; padding: 0; list-style: none;
+        }
+        .blog-content h2:first-child + ol ol li {
+          display: flex; align-items: flex-start; gap: 12px;
+          margin: 0; padding: 12px 14px;
+          border-radius: 12px;
+        }
+        .blog-content h2:first-child + ol ol li::before {
+          content: none;
+        }
+        .blog-content h2:first-child + ol ol a,
+        .blog-content h2:first-child + ol ol p,
+        .blog-content h2:first-child + ol ol span {
+          color: #334155; border-bottom: 0; font-weight: 700; line-height: 1.6;
+          margin: 0;
+        }
+        .blog-content h2:first-child + ol ol span:first-child,
+        .blog-content h2:first-child + ol ol strong:first-child {
+          flex: 0 0 44px; color: #64748b; font-size: 13px;
+        }
+        @media (max-width: 640px) {
+          .blog-content h2:first-child + ol { padding: 14px; }
+          .blog-content h2:first-child + ol > li {
+            padding: 14px 14px 14px 52px;
+          }
+        }
         .blog-content blockquote {
           border-left: 4px solid #e61e73; padding: 16px 22px; margin: 24px 0;
           background: linear-gradient(135deg, #fff5f8 0%, #fff0f5 100%);
@@ -150,8 +219,6 @@ export default async function BlogDetailPage(props: {
         .blog-content .ql-align-center { text-align: center; }
         .blog-content .ql-align-right { text-align: right; }
         .blog-content .ql-align-justify { text-align: justify; }
-        .faq-item { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; transition: box-shadow 0.2s, transform 0.2s; }
-        .faq-item:hover { box-shadow: 0 8px 28px rgba(0,0,0,0.08); transform: translateY(-1px); }
         .img-card { overflow: hidden; border-radius: 20px; box-shadow: 0 12px 36px rgba(0,0,0,0.1); transition: transform 0.3s ease, box-shadow 0.3s ease; }
         .img-card:hover { transform: translateY(-4px); box-shadow: 0 20px 50px rgba(0,0,0,0.13); }
         .img-card img { width: 100%; object-fit: cover; display: block; transition: transform 0.5s ease; }
@@ -159,7 +226,7 @@ export default async function BlogDetailPage(props: {
       `}</style>
 
       <div className="content-container relative px-4 sm:px-6 lg:px-10">
-        <div className="mx-auto max-w-[860px]">
+        <div className="mx-auto max-w-[1180px]">
 
           <LocalizedClientLink
             href="/blog"
@@ -224,7 +291,9 @@ export default async function BlogDetailPage(props: {
           )}
 
           {/* Article content — null-safe */}
-          <div className="mt-10 overflow-hidden rounded-[24px] bg-white shadow-[0_8px_32px_rgba(0,0,0,0.06)]">
+          <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
+            <div className="min-w-0">
+          <div className="overflow-hidden rounded-[24px] bg-white shadow-[0_8px_32px_rgba(0,0,0,0.06)]">
             <div className="h-[4px] w-full" style={{ background: "linear-gradient(90deg, #e61e73, #9333ea, #0ea5e9)" }} />
             <div className="p-7 lg:p-12">
               {post.content ? (
@@ -269,38 +338,6 @@ export default async function BlogDetailPage(props: {
             </div>
           )}
 
-          {/* FAQs */}
-          {post.faqs && post.faqs.length > 0 && (
-            <div className="mt-14">
-              <div className="mb-8">
-                <p className={`${mansalva.className} text-[16px] text-[#e61e73]`}>Got questions?</p>
-                <h2 className={`${epilogue.className} mt-1 text-[28px] font-extrabold tracking-[-0.04em] text-[#0e2547] lg:text-[36px]`}>
-                  Frequently Asked Questions
-                </h2>
-              </div>
-              <div className="space-y-4">
-                {post.faqs.map((faq, i) => (
-                  <div key={i} className="faq-item">
-                    <div className="flex items-start gap-4 p-6" style={{ borderBottom: "1px solid #f8fafc" }}>
-                      <div
-                        className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-full text-[13px] font-extrabold text-white"
-                        style={{ background: "linear-gradient(135deg, #e61e73, #9333ea)" }}
-                      >
-                        {String(i + 1).padStart(2, "0")}
-                      </div>
-                      <h3 className={`${epilogue.className} text-[17px] font-extrabold leading-[1.3] text-[#0e2547]`}>{faq.question}</h3>
-                    </div>
-                    <div className="px-6 pb-6 pt-4">
-                      <p className={`${outfit.className} text-[15px] leading-[1.9] text-slate-600`} style={{ paddingLeft: "46px" }}>
-                        {faq.answer}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Bottom CTA */}
           <div
             className="relative mt-14 overflow-hidden rounded-[24px] p-8 text-center shadow-[0_18px_50px_rgba(14,37,71,0.2)] lg:p-12"
@@ -326,6 +363,38 @@ export default async function BlogDetailPage(props: {
                 View More Articles ›
               </LocalizedClientLink>
             </div>
+          </div>
+
+            </div>
+
+            {popularPosts.length > 0 && (
+              <aside className="rounded-[24px] bg-white p-6 shadow-[0_8px_32px_rgba(0,0,0,0.06)] lg:sticky lg:top-24">
+                <h2 className={`${epilogue.className} text-[22px] font-extrabold tracking-[-0.04em] text-[#0e2547]`}>
+                  Popular articles
+                </h2>
+                <div className="mt-6 grid gap-5">
+                  {popularPosts.map((item, i) => (
+                    <LocalizedClientLink
+                      key={item.slug}
+                      href={`/blog/${item.slug}`}
+                      className="group grid grid-cols-[28px_1fr] gap-3"
+                    >
+                      <span className={`${epilogue.className} pt-0.5 text-[13px] font-extrabold text-[#99dcf8]`}>
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <span>
+                        <span className={`${epilogue.className} block text-[15px] font-extrabold leading-[1.25] tracking-[-0.02em] text-[#0e2547] transition-colors group-hover:text-[#e61e73]`}>
+                          {item.title}
+                        </span>
+                        <span className={`${outfit.className} mt-1.5 block text-[12px] text-slate-400`}>
+                          {formatDate(item.published_at)}
+                        </span>
+                      </span>
+                    </LocalizedClientLink>
+                  ))}
+                </div>
+              </aside>
+            )}
           </div>
 
         </div>

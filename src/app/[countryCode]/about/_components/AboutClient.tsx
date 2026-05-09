@@ -152,13 +152,9 @@ export default function AboutClient({ countryCode }: { countryCode: string }) {
         </div>
 
         <div className="content-container relative px-4 sm:px-6 lg:px-10">
-          {/*
-            Mobile: single column (grid col hidden on mobile via `hidden lg:block`)
-            Desktop: two-column grid
-          */}
           <div className="mx-auto max-w-[1320px] lg:grid lg:grid-cols-[1fr_420px] lg:items-center lg:gap-10">
 
-            {/* LEFT — always visible on all screen sizes */}
+            {/* LEFT */}
             <div>
               <motion.p
                 className={`${mansalva.className} mb-4 text-[20px] font-bold leading-none text-[#e61e73]`}
@@ -253,7 +249,7 @@ export default function AboutClient({ countryCode }: { countryCode: string }) {
               </motion.div>
             </div>
 
-            {/* RIGHT — hero image with doodles: hidden on mobile, visible on desktop */}
+            {/* RIGHT — hidden on mobile, visible on desktop */}
             <div
               ref={doodleContainerRef}
               className="relative mx-auto hidden w-full max-w-[420px] lg:block"
@@ -360,7 +356,7 @@ export default function AboutClient({ countryCode }: { countryCode: string }) {
         </div>
       </section>
 
-      {/* ── FOUNDER / STORY ── (unchanged) */}
+      {/* ── FOUNDER / STORY ── */}
       <section className="relative overflow-hidden bg-[#f3f4f6] py-16 lg:py-20">
         <div className="content-container px-4 sm:px-6 lg:px-10">
           <div className="mx-auto grid max-w-[1320px] gap-8 lg:grid-cols-[380px_1fr] lg:items-start">
@@ -390,21 +386,34 @@ export default function AboutClient({ countryCode }: { countryCode: string }) {
                   The team behind your growth
                 </h2>
                 <div className="mt-5 h-[4px] w-[52px] rounded-full bg-[#e61e73]" />
+
+                {/* ── Updated founder story ── */}
                 <p className={`${outfit.className} mt-6 max-w-[820px] text-[16px] leading-[1.95] text-slate-600 lg:text-[17px]`}>
-                  Mommantum is built around one clear belief — brands grow faster when
-                  creative, performance, and execution are aligned. Instead of treating
-                  content, ads, and strategy as separate things, we build systems where
-                  each piece supports the other.
+                  Hi, I&apos;m Kuldeep Ahir, founder of Mommantum. For me, business has always
+                  been about solving problems. Over the last 5 years, I&apos;ve worked closely
+                  with startups and D2C brands, helping them grow through better marketing,
+                  stronger systems, and smarter execution. From scaling my own ventures to
+                  contributing to the growth of other brands, I&apos;ve spent years understanding
+                  what actually drives business growth in competitive markets.
                 </p>
                 <p className={`${outfit.className} mt-4 max-w-[820px] text-[16px] leading-[1.95] text-slate-600 lg:text-[17px]`}>
-                  From D2C brands to local businesses and product-led companies, our work
-                  focuses on helping brands look sharper, communicate better, and convert
-                  more consistently. We are not here just to make content. We are here to
-                  build momentum.
+                  I&apos;m deeply passionate about marketing because I believe it&apos;s one of the
+                  biggest growth levers for any startup or business. The reality is, many
+                  founders have great products but struggle to stand out, acquire customers
+                  consistently, or scale profitably. That&apos;s where I come in.
                 </p>
+                <p className={`${outfit.className} mt-4 max-w-[820px] text-[16px] leading-[1.95] text-slate-600 lg:text-[17px]`}>
+                  At Mommantum, we focus on building growth systems through performance
+                  marketing, SEO, AI automations, and conversion-focused strategies that
+                  help brands grow with clarity and direction. I&apos;m constantly learning,
+                  experimenting, and working hands-on every day because growth never stops
+                  evolving.
+                </p>
+
                 <div className="mt-8 rounded-[14px] border-l-[4px] border-[#9333ea] bg-[#f5eeff] px-6 py-4">
                   <p className={`${outfit.className} text-[15px] leading-[1.85] text-[#4c1d95]`}>
-                    &ldquo;We are not here just to make content. We are here to build momentum.&rdquo;
+                    &ldquo;For me, it&apos;s not just about running campaigns or building strategies.
+                    It&apos;s about helping founders win.&rdquo;
                   </p>
                 </div>
               </div>
@@ -414,7 +423,7 @@ export default function AboutClient({ countryCode }: { countryCode: string }) {
         </div>
       </section>
 
-      {/* ── VALUES ── (unchanged) */}
+      {/* ── VALUES ── */}
       <section className="relative overflow-hidden bg-white py-16 lg:py-20">
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute left-[10%] top-[15%] h-[120px] w-[300px] rounded-full bg-[#f5f5f7] blur-3xl" />
@@ -470,7 +479,7 @@ export default function AboutClient({ countryCode }: { countryCode: string }) {
       <StatsStrip />
       <CaseStudies countryCode={countryCode} />
 
-      {/* ── FINAL CTA ── (unchanged) */}
+      {/* ── FINAL CTA ── */}
       <section className="relative overflow-hidden bg-[#0e2547] py-16 lg:py-24">
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute left-1/2 top-[18%] h-[140px] w-[420px] -translate-x-1/2 rounded-full bg-white/10 blur-3xl" />
