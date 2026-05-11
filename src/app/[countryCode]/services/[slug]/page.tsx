@@ -4,9 +4,11 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import SeoJsonLd from "@modules/common/components/seo-json-ld"
 import ManualSeoSchema from "@modules/common/components/manual-seo-schema"
 import { getServices, getService } from "@lib/data/services"
-import { buildSeoMetadata } from "@lib/data/seo"
+import { buildSeoMetadata, getSeoSetting } from "@lib/data/seo"
 import { Epilogue, Outfit, Mansalva } from "next/font/google"
 import FaqAccordion from "./_components/FaqAccordion"
+
+export const revalidate = 60
 
 const epilogue = Epilogue({ subsets: ["latin"], weight: ["700", "800"] })
 const outfit = Outfit({ subsets: ["latin"], weight: ["400", "500", "700"] })
@@ -47,8 +49,12 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
 export default async function ServiceDetailPage(props: Props) {
   const params = await props.params
-  const service = await getService(params.slug)
-  const allServices = await getServices()
+  const [service, allServices, seoSetting] = await Promise.all([
+    getService(params.slug),
+    getServices(),
+    getSeoSetting(`service:${params.slug}`)
+  ])
+
   if (!service) return notFound()
   const seoKeys = [
     `service:${params.slug}`,
@@ -64,14 +70,13 @@ export default async function ServiceDetailPage(props: Props) {
       <ManualSeoSchema 
         type="service" 
         data={{
+          ...(seoSetting || {}),
           service_title: service.title,
-          meta_description: service.description || service.intro,
+          meta_description: seoSetting?.meta_description || service.description || service.intro,
           service_url: `https://www.mommantum.com/in/services/${params.slug}`,
           service_image: service.image,
-          primary_keyword: service.shortLabel,
-          secondary_keyword_1: service.title,
           other_services: allServices.filter(s => s.slug !== params.slug).slice(0, 5),
-          faq_json_10: service.faqs?.map(f => ({
+          faq_json_10: (seoSetting as any)?.faq_section || service.faqs?.map(f => ({
             "@type": "Question",
             "name": f.question,
             "acceptedAnswer": {

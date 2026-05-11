@@ -1,12 +1,14 @@
 import { Metadata } from "next"
 import { Epilogue, Outfit, Mansalva } from "next/font/google"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import { buildSeoMetadata } from "@lib/data/seo"
+import { buildSeoMetadata, getSeoSetting } from "@lib/data/seo"
 import ManualSeoSchema from "@modules/common/components/manual-seo-schema"
 
 const epilogue = Epilogue({ subsets: ["latin"], weight: ["700", "800"] })
 const outfit = Outfit({ subsets: ["latin"], weight: ["400", "500"] })
 const mansalva = Mansalva({ subsets: ["latin"], weight: ["400"] })
+
+export const revalidate = 60
 
 export async function generateMetadata(): Promise<Metadata> {
   return buildSeoMetadata(["privacy-policy", "privacy"], {
@@ -16,17 +18,19 @@ export async function generateMetadata(): Promise<Metadata> {
   })
 }
 
-export default function PrivacyPolicyPage() {
+export default async function PrivacyPolicyPage() {
+  const seoSetting = await getSeoSetting("privacy-policy")
+
   return (
     <main className="relative overflow-hidden bg-[#f7f8fa] pt-14 pb-20 lg:pt-20 lg:pb-24">
       <ManualSeoSchema 
         type="normal" 
         data={{
-          page_title: "Privacy Policy | Mommantum",
-          meta_description: "Read how Mommantum collects, uses, and protects information on its website.",
+          ...(seoSetting || {}),
+          page_title: seoSetting?.meta_title || "Privacy Policy | Mommantum",
+          meta_description: seoSetting?.meta_description || "Read how Mommantum collects, uses, and protects information on its website.",
           page_url: "https://www.mommantum.com/in/privacy-policy",
-          primary_keyword: "Privacy Policy",
-          faq_json_10: []
+          faq_json_10: (seoSetting as any)?.faq_section || []
         }} 
       />
       <div className="pointer-events-none absolute inset-0 overflow-hidden">

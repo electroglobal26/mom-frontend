@@ -17,6 +17,7 @@ export type BlogPost = {
   author_name: string | null
   status: string
   published_at: string | null
+  updated_at: string | null
   meta_title: string | null
   meta_description: string | null
   faqs: FAQ[]
@@ -43,6 +44,7 @@ function mapPost(p: any): BlogPost {
     author_name: p.author_name || null,
     status: p.status || "draft",
     published_at: p.published_at || null,
+    updated_at: p.updated_at || null,
     meta_title: p.meta_title || null,
     meta_description: p.meta_description || null,
     faqs: p.faqs || [],

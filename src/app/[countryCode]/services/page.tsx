@@ -1,9 +1,11 @@
 import { Metadata } from "next"
 import { getServices } from "@lib/data/services"
-import { buildSeoMetadata } from "@lib/data/seo"
+import { buildSeoMetadata, getSeoSetting } from "@lib/data/seo"
 import SeoJsonLd from "@modules/common/components/seo-json-ld"
 import ManualSeoSchema from "@modules/common/components/manual-seo-schema"
 import ServicesClient from "./_components/ServicesClient"
+
+export const revalidate = 60
 
 export async function generateMetadata(): Promise<Metadata> {
   return buildSeoMetadata(["services"], {
@@ -15,19 +17,23 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ServicesPage() {
-  const services = await getServices()
+  const [services, seoSetting] = await Promise.all([
+    getServices(),
+    getSeoSetting("services")
+  ])
+
   return (
     <>
       <SeoJsonLd pageKeys={["services"]} />
       <ManualSeoSchema 
         type="collection" 
         data={{
-          category_title: "Services | Mommantum",
-          meta_description: "Explore Mommantum services across performance marketing, SEO, content, web development, and growth systems.",
+          ...(seoSetting || {}),
+          category_title: seoSetting?.meta_title || "Services | Mommantum",
+          meta_description: seoSetting?.meta_description || "Explore Mommantum services across performance marketing, SEO, content, web development, and growth systems.",
           category_url: "https://www.mommantum.com/in/services",
-          primary_keyword: "Digital Marketing Services",
           services: services,
-          faq_json_10: []
+          faq_json_10: (seoSetting as any)?.faq_section || []
         }} 
       />
       <ServicesClient services={services} />

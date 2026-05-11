@@ -1,8 +1,10 @@
 import { Metadata } from "next"
-import { buildSeoMetadata } from "@lib/data/seo"
+import { buildSeoMetadata, getSeoSetting } from "@lib/data/seo"
 import SeoJsonLd from "@modules/common/components/seo-json-ld"
 import ManualSeoSchema from "@modules/common/components/manual-seo-schema"
 import ContactClient from "./_components/ContactClient"
+
+export const revalidate = 60
 
 export async function generateMetadata(): Promise<Metadata> {
   return buildSeoMetadata(["contact"], {
@@ -13,18 +15,20 @@ export async function generateMetadata(): Promise<Metadata> {
   })
 }
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const seoSetting = await getSeoSetting("contact")
+
   return (
     <>
       <SeoJsonLd pageKeys={["contact"]} />
       <ManualSeoSchema 
         type="normal" 
         data={{
-          page_title: "Contact | Mommantum",
-          meta_description: "Contact Mommantum to discuss growth strategy, performance marketing, SEO, web development, and AI workflow projects.",
+          ...(seoSetting || {}),
+          page_title: seoSetting?.meta_title || "Contact | Mommantum",
+          meta_description: seoSetting?.meta_description || "Contact Mommantum to discuss growth strategy, performance marketing, SEO, web development, and AI workflow projects.",
           page_url: "https://www.mommantum.com/in/contact",
-          primary_keyword: "Contact Digital Marketing Agency",
-          faq_json_10: []
+          faq_json_10: (seoSetting as any)?.faq_section || []
         }} 
       />
       <ContactClient />

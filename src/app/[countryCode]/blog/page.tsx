@@ -4,12 +4,14 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import SeoJsonLd from "@modules/common/components/seo-json-ld"
 import ManualSeoSchema from "@modules/common/components/manual-seo-schema"
 import { getBlogPosts } from "@lib/data/blog-posts"
-import { buildSeoMetadata } from "@lib/data/seo"
+import { buildSeoMetadata, getSeoSetting } from "@lib/data/seo"
 import { Epilogue, Outfit, Mansalva } from "next/font/google"
 
 const epilogue = Epilogue({ subsets: ["latin"], weight: ["700", "800"] })
 const outfit = Outfit({ subsets: ["latin"], weight: ["400", "500", "700"] })
 const mansalva = Mansalva({ subsets: ["latin"], weight: ["400"] })
+
+export const revalidate = 60
 
 export async function generateMetadata(): Promise<Metadata> {
   return buildSeoMetadata(["blog"], {
@@ -21,7 +23,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function BlogPage() {
-  const blogPosts = await getBlogPosts()
+  const [blogPosts, seoSetting] = await Promise.all([
+    getBlogPosts(),
+    getSeoSetting("blog")
+  ])
 
   const [featured, ...rest] = blogPosts
 
@@ -55,10 +60,11 @@ export default async function BlogPage() {
       <ManualSeoSchema 
         type="blog-listing" 
         data={{
-          category_title: "Blog | Mommantum",
-          meta_description: "Read Mommantum insights on performance marketing, SEO, branding, content, ecommerce growth, and AI workflows.",
+          ...(seoSetting || {}),
+          category_title: seoSetting?.meta_title || "Blog | Mommantum",
+          meta_description: seoSetting?.meta_description || "Read Mommantum insights on performance marketing, SEO, branding, content, ecommerce growth, and AI workflows.",
           blog_posts: blogPosts,
-          faq_json_10: []
+          faq_json_10: (seoSetting as any)?.faq_section || []
         }} 
       />
       <div className="pointer-events-none absolute inset-0 overflow-hidden">

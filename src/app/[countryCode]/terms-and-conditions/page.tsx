@@ -1,12 +1,14 @@
 import { Metadata } from "next"
 import { Epilogue, Outfit, Mansalva } from "next/font/google"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import { buildSeoMetadata } from "@lib/data/seo"
+import { buildSeoMetadata, getSeoSetting } from "@lib/data/seo"
 import ManualSeoSchema from "@modules/common/components/manual-seo-schema"
 
 const epilogue = Epilogue({ subsets: ["latin"], weight: ["700", "800"] })
 const outfit = Outfit({ subsets: ["latin"], weight: ["400", "500"] })
 const mansalva = Mansalva({ subsets: ["latin"], weight: ["400"] })
+
+export const revalidate = 60
 
 export async function generateMetadata(): Promise<Metadata> {
   return buildSeoMetadata(["terms-and-conditions", "terms"], {
@@ -16,17 +18,19 @@ export async function generateMetadata(): Promise<Metadata> {
   })
 }
 
-export default function TermsAndConditionsPage() {
+export default async function TermsAndConditionsPage() {
+  const seoSetting = await getSeoSetting("terms-and-conditions")
+
   return (
     <main className="relative overflow-hidden bg-[#f7f8fa] pt-14 pb-20 lg:pt-20 lg:pb-24">
       <ManualSeoSchema 
         type="normal" 
         data={{
-          page_title: "Terms & Conditions | Mommantum",
-          meta_description: "Read the terms and conditions for using Mommantum services and website.",
+          ...(seoSetting || {}),
+          page_title: seoSetting?.meta_title || "Terms & Conditions | Mommantum",
+          meta_description: seoSetting?.meta_description || "Read the terms and conditions for using Mommantum services and website.",
           page_url: "https://www.mommantum.com/in/terms-and-conditions",
-          primary_keyword: "Terms and Conditions",
-          faq_json_10: []
+          faq_json_10: (seoSetting as any)?.faq_section || []
         }} 
       />
       <div className="pointer-events-none absolute inset-0 overflow-hidden">

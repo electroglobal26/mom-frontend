@@ -5,7 +5,7 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import SeoJsonLd from "@modules/common/components/seo-json-ld"
 import ManualSeoSchema from "@modules/common/components/manual-seo-schema"
 import { getBlogPost, getBlogPosts } from "@lib/data/blog-posts"
-import { buildSeoMetadata } from "@lib/data/seo"
+import { buildSeoMetadata, getSeoSetting } from "@lib/data/seo"
 import { Epilogue, Outfit, Mansalva } from "next/font/google"
 
 const epilogue = Epilogue({ subsets: ["latin"], weight: ["700", "800"] })
@@ -73,10 +73,14 @@ export default async function BlogDetailPage(props: {
   ]
 
   let popularPosts: Awaited<ReturnType<typeof getBlogPosts>> = []
+  let seoSetting = null
   try {
-    popularPosts = (await getBlogPosts())
-      .filter((item) => item.slug !== params.slug)
-      .slice(0, 5)
+    const [posts, seo] = await Promise.all([
+      getBlogPosts(),
+      getSeoSetting(`blog:${params.slug}`)
+    ])
+    popularPosts = posts.filter((item) => item.slug !== params.slug).slice(0, 5)
+    seoSetting = seo
   } catch {
     popularPosts = []
   }
@@ -100,8 +104,9 @@ export default async function BlogDetailPage(props: {
       <ManualSeoSchema 
         type="blog" 
         data={{
+          ...(seoSetting || {}),
           title: post.title,
-          meta_description: post.meta_description || post.excerpt || "",
+          meta_description: seoSetting?.meta_description || post.meta_description || post.excerpt || "",
           featured_image: post.featured_image,
           published_date: post.published_at,
           modified_date: post.updated_at || post.published_at,
@@ -109,12 +114,11 @@ export default async function BlogDetailPage(props: {
           page_url: `https://www.mommantum.com/in/blog/${params.slug}`,
           category_name: post.category_id || "Growth",
           category_slug: post.category_id?.toLowerCase().replace(/\s+/g, "-") || "growth",
-          primary_keyword: post.category_id,
           recent_posts: popularPosts.map(p => ({
             title: p.title,
             url: `https://www.mommantum.com/in/blog/${p.slug}`
           })),
-          faq_json_10: [] // Can be filled via admin SEO setting
+          faq_json_10: (seoSetting as any)?.faq_section || []
         }} 
       />
 
@@ -298,14 +302,6 @@ export default async function BlogDetailPage(props: {
             )}
           </div>
 
-          {/* Cover image */}
-          {post.featured_image && (
-            <div className="mt-10 overflow-hidden rounded-[24px] shadow-[0_24px_60px_rgba(0,0,0,0.12)]">
-              <div className="relative aspect-[16/9] w-full">
-                <Image src={post.featured_image} alt={post.title} fill className="object-cover" priority />
-              </div>
-            </div>
-          )}
 
           {/* Article content — null-safe */}
           <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
@@ -313,8 +309,22 @@ export default async function BlogDetailPage(props: {
           <div className="overflow-hidden rounded-[24px] bg-white shadow-[0_8px_32px_rgba(0,0,0,0.06)]">
             <div className="h-[4px] w-full" style={{ background: "linear-gradient(90deg, #e61e73, #9333ea, #0ea5e9)" }} />
             <div className="p-7 lg:p-12">
+              {/* Featured image moved inside to align with text */}
+              {post.featured_image && (
+                <div className="mb-10 overflow-hidden rounded-[24px] shadow-[0_24px_60px_rgba(0,0,0,0.12)]">
+                  <div className="relative aspect-[16/9] w-full">
+                    <Image src={post.featured_image} alt={post.title} fill className="object-cover" priority />
+                  </div>
+                </div>
+              )}
+
               {post.content ? (
-                <div className="blog-content" dangerouslySetInnerHTML={{ __html: post.content }} />
+                <div 
+                  className="blog-content" 
+                  dangerouslySetInnerHTML={{ 
+                    __html: post.content.replace(/\[Featured Image[^\]]*\]/gi, "") 
+                  }} 
+                />
               ) : (
                 <p className={`${outfit.className} text-[16px] text-slate-400 italic`}>Content coming soon.</p>
               )}
