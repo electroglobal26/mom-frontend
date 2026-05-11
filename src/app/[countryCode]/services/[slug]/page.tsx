@@ -2,6 +2,7 @@ import { notFound } from "next/navigation"
 import { Metadata } from "next"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import SeoJsonLd from "@modules/common/components/seo-json-ld"
+import ManualSeoSchema from "@modules/common/components/manual-seo-schema"
 import { getServices, getService } from "@lib/data/services"
 import { buildSeoMetadata } from "@lib/data/seo"
 import { Epilogue, Outfit, Mansalva } from "next/font/google"
@@ -47,6 +48,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 export default async function ServiceDetailPage(props: Props) {
   const params = await props.params
   const service = await getService(params.slug)
+  const allServices = await getServices()
   if (!service) return notFound()
   const seoKeys = [
     `service:${params.slug}`,
@@ -59,6 +61,26 @@ export default async function ServiceDetailPage(props: Props) {
   return (
     <main className="relative overflow-hidden bg-[#f7f8fa] pt-14 pb-20 lg:pt-20 lg:pb-24">
       <SeoJsonLd pageKeys={seoKeys} />
+      <ManualSeoSchema 
+        type="service" 
+        data={{
+          service_title: service.title,
+          meta_description: service.description || service.intro,
+          service_url: `https://www.mommantum.com/in/services/${params.slug}`,
+          service_image: service.image,
+          primary_keyword: service.shortLabel,
+          secondary_keyword_1: service.title,
+          other_services: allServices.filter(s => s.slug !== params.slug).slice(0, 5),
+          faq_json_10: service.faqs?.map(f => ({
+            "@type": "Question",
+            "name": f.question,
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": f.answer
+            }
+          })) || []
+        }} 
+      />
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute left-[4%] top-[10%] h-[140px] w-[420px] rounded-full bg-white/45 blur-3xl" />
         <div className="absolute right-[8%] top-[12%] h-[140px] w-[360px] rounded-full bg-white/35 blur-3xl" />
@@ -85,7 +107,7 @@ export default async function ServiceDetailPage(props: Props) {
               <h1 className={`${epilogue.className} mt-3 max-w-[780px] text-[36px] font-extrabold leading-[0.97] tracking-[-0.06em] text-[#0e2547] sm:text-[48px] lg:text-[62px]`}>
                 {service.title}
               </h1>
-              <p className={`${outfit.className} mt-6 max-w-[720px] text-[17px] leading-[1.95]text-slate-600`}>
+              <p className={`${outfit.className} mt-6 max-w-[720px] text-[17px] leading-[1.95] text-slate-600`}>
                 {service.intro}
               </p>
             </div>
@@ -99,7 +121,7 @@ export default async function ServiceDetailPage(props: Props) {
                 {service.outcomes.map((item) => (
                   <li
                     key={item}
-                    className={`${outfit.className} flex items-start gap-3 text-[15px] leading-[1.8]text-slate-600`}
+                    className={`${outfit.className} flex items-start gap-3 text-[15px] leading-[1.8] text-slate-600`}
                   >
                     <span className="mt-[10px] h-2 w-2 shrink-0 rounded-full bg-[#e61e73]" />
                     <span>{item}</span>
@@ -117,7 +139,7 @@ export default async function ServiceDetailPage(props: Props) {
             <h2 className={`${epilogue.className} mt-3 max-w-[860px] text-[26px] font-extrabold leading-[1.05] tracking-[-0.05em] text-[#0e2547] lg:text-[38px]`}>
               We build this service as part of a larger growth system, not as a disconnected deliverable.
             </h2>
-            <p className={`${outfit.className} mt-5 max-w-[920px] text-[16px] leading-[1.95]text-slate-600`}>
+            <p className={`${outfit.className} mt-5 max-w-[920px] text-[16px] leading-[1.95] text-slate-600`}>
               Strong service work happens when business goals, communication, positioning, and execution move together. That is why our process stays focused on clarity, consistency, and meaningful outcomes instead of isolated activity. Every recommendation and every output should strengthen the brand as a whole.
             </p>
           </div>
@@ -132,7 +154,7 @@ export default async function ServiceDetailPage(props: Props) {
                 {service.points.map((item) => (
                   <li
                     key={item}
-                    className={`${outfit.className} flex items-start gap-3 text-[15px] leading-[1.8]text-slate-600`}
+                    className={`${outfit.className} flex items-start gap-3 text-[15px] leading-[1.8] text-slate-600`}
                   >
                     <span className="mt-[10px] h-2 w-2 shrink-0 rounded-full bg-[#ef6a99]" />
                     <span>{item}</span>
@@ -145,10 +167,10 @@ export default async function ServiceDetailPage(props: Props) {
               <h3 className={`${epilogue.className} text-[24px] font-extrabold tracking-[-0.04em] text-[#0e2547]`}>
                 Why it matters
               </h3>
-              <p className={`${outfit.className} mt-5 text-[15px] leading-[1.95]text-slate-600`}>
+              <p className={`${outfit.className} mt-5 text-[15px] leading-[1.95] text-slate-600`}>
                 Running ads without a clear system leads to wasted budget. We focus on what actually drives growth. When the right audience sees the right message and lands on a clear page, they are more likely to buy.
               </p>
-              <p className={`${outfit.className} mt-4 text-[15px] leading-[1.95]text-slate-600`}>
+              <p className={`${outfit.className} mt-4 text-[15px] leading-[1.95] text-slate-600`}>
                 This helps you increase sales, lower your customer acquisition cost, improve your ROAS, and build repeat customers — not just one-time buyers.
               </p>
               <div className="mt-8">

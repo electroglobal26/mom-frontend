@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 import { Metadata } from "next"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import SeoJsonLd from "@modules/common/components/seo-json-ld"
+import ManualSeoSchema from "@modules/common/components/manual-seo-schema"
 import { getBlogPost, getBlogPosts } from "@lib/data/blog-posts"
 import { buildSeoMetadata } from "@lib/data/seo"
 import { Epilogue, Outfit, Mansalva } from "next/font/google"
@@ -11,10 +12,7 @@ const epilogue = Epilogue({ subsets: ["latin"], weight: ["700", "800"] })
 const outfit = Outfit({ subsets: ["latin"], weight: ["400", "500", "700"] })
 const mansalva = Mansalva({ subsets: ["latin"], weight: ["400"] })
 
-// ── CRITICAL: allow slugs not known at build time to render on-demand ─────────
 export const dynamicParams = true
-
-// ── Revalidate every 60s so new posts appear on Vercel without redeploy ───────
 export const revalidate = 60
 
 export async function generateMetadata(props: {
@@ -46,7 +44,6 @@ export async function generateMetadata(props: {
 export async function generateStaticParams() {
   try {
     const posts = await getBlogPosts()
-    // Only pre-build recent 10 — rest render on-demand via dynamicParams = true
     return posts.slice(0, 10).map((post) => ({ slug: post.slug }))
   } catch {
     return []
@@ -100,6 +97,26 @@ export default async function BlogDetailPage(props: {
   return (
     <main className="relative overflow-hidden bg-[#f3f4f6] pt-14 pb-20 lg:pt-18 lg:pb-24">
       <SeoJsonLd pageKeys={seoKeys} />
+      <ManualSeoSchema 
+        type="blog" 
+        data={{
+          title: post.title,
+          meta_description: post.meta_description || post.excerpt || "",
+          featured_image: post.featured_image,
+          published_date: post.published_at,
+          modified_date: post.updated_at || post.published_at,
+          author: post.author_name,
+          page_url: `https://www.mommantum.com/in/blog/${params.slug}`,
+          category_name: post.category_id || "Growth",
+          category_slug: post.category_id?.toLowerCase().replace(/\s+/g, "-") || "growth",
+          primary_keyword: post.category_id,
+          recent_posts: popularPosts.map(p => ({
+            title: p.title,
+            url: `https://www.mommantum.com/in/blog/${p.slug}`
+          })),
+          faq_json_10: [] // Can be filled via admin SEO setting
+        }} 
+      />
 
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute left-[4%] top-[5%] h-[180px] w-[500px] rounded-full bg-white/50 blur-3xl" />

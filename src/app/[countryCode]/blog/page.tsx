@@ -2,6 +2,7 @@ import Image from "next/image"
 import { Metadata } from "next"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import SeoJsonLd from "@modules/common/components/seo-json-ld"
+import ManualSeoSchema from "@modules/common/components/manual-seo-schema"
 import { getBlogPosts } from "@lib/data/blog-posts"
 import { buildSeoMetadata } from "@lib/data/seo"
 import { Epilogue, Outfit, Mansalva } from "next/font/google"
@@ -51,6 +52,15 @@ export default async function BlogPage() {
   return (
     <main className="relative overflow-hidden bg-[#f3f4f6] pt-14 pb-18 lg:pt-18 lg:pb-22">
       <SeoJsonLd pageKeys={["blog"]} />
+      <ManualSeoSchema 
+        type="blog-listing" 
+        data={{
+          category_title: "Blog | Mommantum",
+          meta_description: "Read Mommantum insights on performance marketing, SEO, branding, content, ecommerce growth, and AI workflows.",
+          blog_posts: blogPosts,
+          faq_json_10: []
+        }} 
+      />
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute left-[5%] top-[8%] h-[130px] w-[400px] rounded-full bg-white/45 blur-3xl" />
         <div className="absolute right-[6%] top-[10%] h-[140px] w-[340px] rounded-full bg-white/40 blur-3xl" />

@@ -2,6 +2,7 @@ import { Metadata } from "next"
 import { Epilogue, Outfit, Mansalva } from "next/font/google"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { buildSeoMetadata } from "@lib/data/seo"
+import ManualSeoSchema from "@modules/common/components/manual-seo-schema"
 
 const epilogue = Epilogue({ subsets: ["latin"], weight: ["700", "800"] })
 const outfit = Outfit({ subsets: ["latin"], weight: ["400", "500"] })
@@ -18,6 +19,16 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function TermsAndConditionsPage() {
   return (
     <main className="relative overflow-hidden bg-[#f7f8fa] pt-14 pb-20 lg:pt-20 lg:pb-24">
+      <ManualSeoSchema 
+        type="normal" 
+        data={{
+          page_title: "Terms & Conditions | Mommantum",
+          meta_description: "Read the terms and conditions for using Mommantum services and website.",
+          page_url: "https://www.mommantum.com/in/terms-and-conditions",
+          primary_keyword: "Terms and Conditions",
+          faq_json_10: []
+        }} 
+      />
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute left-[4%] top-[8%] h-[140px] w-[420px] rounded-full bg-white/45 blur-3xl" />
         <div className="absolute right-[8%] top-[12%] h-[140px] w-[360px] rounded-full bg-white/35 blur-3xl" />

@@ -88,7 +88,7 @@ export async function getSeoSetting(pageKey: string): Promise<SeoSetting | null>
   try {
     const res = await fetch(
       `${BACKEND_URL}/custom/seo?page_key=${encodeURIComponent(pageKey)}`,
-      { next: { revalidate: 60 } }
+      { next: { revalidate: 10 } }
     )
 
     if (!res.ok) return null
@@ -123,7 +123,10 @@ export async function buildSeoMetadata(
 
   const title = setting?.meta_title || fallback.title
   const description = setting?.meta_description || fallback.description
-  const canonical = setting?.canonical_url || absoluteUrl(fallback.canonicalPath)
+  const canonical = setting?.slug 
+    ? absoluteUrl(setting.slug) 
+    : (setting?.canonical_url || absoluteUrl(fallback.canonicalPath))
+    
   const ogImage = setting?.og_image || fallback.image
   const twitterImage = setting?.twitter_image || setting?.og_image || fallback.image
   const keywords = compactKeywords(setting, fallback)
