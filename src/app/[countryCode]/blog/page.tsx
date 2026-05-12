@@ -64,7 +64,12 @@ export default async function BlogPage() {
           category_title: seoSetting?.meta_title || "Blog | Mommantum",
           meta_description: seoSetting?.meta_description || "Read Mommantum insights on performance marketing, SEO, branding, content, ecommerce growth, and AI workflows.",
           blog_posts: blogPosts,
-          faq_json_10: (seoSetting as any)?.faq_section || []
+          primary_keyword: (seoSetting as any)?.primary_keyword || "Digital Marketing Blog",
+          secondary_keyword_1: (seoSetting as any)?.secondary_keywords?.[0] || "",
+          secondary_keyword_2: (seoSetting as any)?.secondary_keywords?.[1] || "",
+          secondary_keyword_3: (seoSetting as any)?.secondary_keywords?.[2] || "",
+          secondary_keyword_4: (seoSetting as any)?.secondary_keywords?.[3] || "",
+          faq_json_10: (seoSetting as any)?.faq_section || [],
         }} 
       />
       <div className="pointer-events-none absolute inset-0 overflow-hidden">

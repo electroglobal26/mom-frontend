@@ -234,7 +234,7 @@ export default function NavBar() {
                   <ServicesDropdown />
                 </div>
                 <LocalizedClientLink href="/about" className="nav-link">About</LocalizedClientLink>
-                <LocalizedClientLink href="/work"  className="nav-link">Work</LocalizedClientLink>
+                <LocalizedClientLink href="/work"  className="nav-link">Case Studies</LocalizedClientLink>
                 <LocalizedClientLink href="/blog"  className="nav-link">Blog</LocalizedClientLink>
                 <LocalizedClientLink href="/contact" className="nav-cta">
                   Let&apos;s Talk <span aria-hidden>→</span>

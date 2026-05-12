@@ -3,20 +3,20 @@
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
 const leftServices = [
-  { name: "Performance Marketing — Meta & Google Ads", link: "/services/performance-marketing" },
-  { name: "Conversion Rate Optimization (CRO)", link: "/services/conversion-rate-optimization" },
-  { name: "SEO — AEO & GEO", link: "/services/search-engine-optimization" },
-  { name: "Script & Copywriting", link: "/services/script-copywriting" },
+  { name: "Performance marketing - meta ads, google ads", link: "/services/performance-marketing" },
+  { name: "Social media marketing - SMO and Content Creation", link: "/services/social-media-marketing" },
+  { name: "SEO - AEO & GEO", link: "/services/search-engine-optimization" },
   { name: "D2C Branding & Scale Growth", link: "/services/d2c-branding-scale-growth" },
-  { name: "Social Media Marketing (SMO & Content)", link: "/services/social-media-marketing" },
+  { name: "CRO - Conversion Rate Optimization", link: "/services/conversion-rate-optimization" },
+  { name: "Script & Copywriting", link: "/services/script-copywriting" },
   { name: "Strategy & Consulting", link: "/services/strategy-consulting" },
 ]
 
 const rightServices = [
-  { name: "Web and App Development", link: "/services/web-app-development" },
-  { name: "AI Automation", link: "/services/ai-automation" },
-  { name: "AI Agentic Service", link: "/services/ai-agentic-service" },
-  { name: "AI Video Generation", link: "/services/ai-video-generation" },
+  { name: "Web and app development", link: "/services/web-app-development" },
+  { name: "Ai automation", link: "/services/ai-automation" },
+  { name: "Ai agentic service", link: "/services/ai-agentic-service" },
+  { name: "Ai Video generation", link: "/services/ai-video-generation" },
 ]
 
 // Performance icon

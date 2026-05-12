@@ -19,20 +19,20 @@ const companyLinks = [
 ]
 
 const performanceServices = [
-  { name: "Performance Marketing", href: "/services/performance-marketing" },
-  { name: "Conversion Rate Optimization", href: "/services/conversion-rate-optimization" },
-  { name: "SEO — AEO & GEO", href: "/services/search-engine-optimization" },
-  { name: "Script & Copywriting", href: "/services/script-copywriting" },
+  { name: "Performance marketing - meta ads, google ads", href: "/services/performance-marketing" },
+  { name: "Social media marketing - SMO and Content Creation", href: "/services/social-media-marketing" },
+  { name: "SEO - AEO & GEO", href: "/services/search-engine-optimization" },
   { name: "D2C Branding & Scale Growth", href: "/services/d2c-branding-scale-growth" },
-  { name: "Social Media Marketing", href: "/services/social-media-marketing" },
+  { name: "CRO - Conversion Rate Optimization", href: "/services/conversion-rate-optimization" },
+  { name: "Script & Copywriting", href: "/services/script-copywriting" },
   { name: "Strategy & Consulting", href: "/services/strategy-consulting" },
 ]
 
 const webAiServices = [
-  { name: "Web & App Development", href: "/services/web-app-development" },
-  { name: "AI Automation", href: "/services/ai-automation" },
-  { name: "AI Agentic Service", href: "/services/ai-agentic-service" },
-  { name: "AI Video Generation", href: "/services/ai-video-generation" },
+  { name: "Web and app development", href: "/services/web-app-development" },
+  { name: "Ai automation", href: "/services/ai-automation" },
+  { name: "Ai agentic service", href: "/services/ai-agentic-service" },
+  { name: "Ai Video generation", href: "/services/ai-video-generation" },
 ]
 
 const articleLinks = [
@@ -57,6 +57,12 @@ const InstagramIcon = () => (
 const LinkedInIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="17" height="17" fill="currentColor">
     <path d="M20.447 20.452H16.89v-5.569c0-1.327-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a1.983 1.983 0 1 1 0-3.966 1.983 1.983 0 0 1 0 3.966zm1.997 13.019H3.34V9h3.994v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+  </svg>
+)
+
+const FacebookIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="17" height="17" fill="currentColor">
+    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
   </svg>
 )
 
@@ -196,6 +202,13 @@ export default function Footer() {
           transform: translateY(-3px) scale(1.08);
           box-shadow: 0 8px 20px rgba(0,119,181,0.3);
         }
+        .footer-social-btn.facebook:hover {
+          border-color: transparent;
+          color: white;
+          background: #1877f2;
+          transform: translateY(-3px) scale(1.08);
+          box-shadow: 0 8px 20px rgba(24,119,242,0.3);
+        }
       `}</style>
 
       <div className="content-container relative px-4 sm:px-6 lg:px-10">
@@ -288,6 +301,11 @@ export default function Footer() {
                 className="footer-social-btn linkedin">
                 <LinkedInIcon />
               </Link>
+              <Link href="https://www.facebook.com/profile.php?id=61585107904273"
+                target="_blank" rel="noopener noreferrer" aria-label="Facebook"
+                className="footer-social-btn facebook">
+                <FacebookIcon />
+              </Link>
             </div>
           </div>
 
@@ -368,6 +386,13 @@ export default function Footer() {
                   className="footer-social-btn linkedin"
                 >
                   <LinkedInIcon />
+                </Link>
+                <Link
+                  href="https://www.facebook.com/profile.php?id=61585107904273"
+                  target="_blank" rel="noopener noreferrer" aria-label="Facebook"
+                  className="footer-social-btn facebook"
+                >
+                  <FacebookIcon />
                 </Link>
               </div>
             </div>

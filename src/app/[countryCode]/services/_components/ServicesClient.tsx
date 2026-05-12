@@ -12,11 +12,11 @@ const mansalva = Mansalva({ subsets: ["latin"], weight: ["400"] })
 
 const PERFORMANCE_SLUGS = [
   "performance-marketing",
-  "conversion-rate-optimization",
-  "search-engine-optimization",
-  "script-copywriting",
-  "d2c-branding-scale-growth",
   "social-media-marketing",
+  "search-engine-optimization",
+  "d2c-branding-scale-growth",
+  "conversion-rate-optimization",
+  "script-copywriting",
   "strategy-consulting",
 ]
 
@@ -455,8 +455,8 @@ function FaqSection() {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function ServicesClient({ services }: { services: Service[] }) {
-  const performanceServices = services.filter(s => PERFORMANCE_SLUGS.includes(s.slug))
-  const webAiServices       = services.filter(s => WEB_AI_SLUGS.includes(s.slug))
+  const performanceServices = PERFORMANCE_SLUGS.map(slug => services.find(s => s.slug === slug)).filter(Boolean) as Service[]
+  const webAiServices       = WEB_AI_SLUGS.map(slug => services.find(s => s.slug === slug)).filter(Boolean) as Service[]
   const uncategorized       = services.filter(s =>
     !PERFORMANCE_SLUGS.includes(s.slug) && !WEB_AI_SLUGS.includes(s.slug)
   )
