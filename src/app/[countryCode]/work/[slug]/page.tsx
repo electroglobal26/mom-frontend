@@ -48,6 +48,7 @@ export default async function CaseStudyDetailPage({ params }: Props) {
   const { slug, countryCode } = await params
   const study = await getCaseStudy(slug)
   if (!study) return notFound()
+
   const seoKeys = [
     `work:${slug}`,
     `case-study:${slug}`,
@@ -57,10 +58,73 @@ export default async function CaseStudyDetailPage({ params }: Props) {
   ]
 
   const accent = study.accent || "#e61e73"
+  const caseStudyUrl = `https://www.mommantum.com/in/work/${slug}`
+  const publishedDate = (study as any).published_at || ""
+  const updatedDate = (study as any).updated_at || (study as any).published_at || ""
+  const secondaryKeywords: string[] = (study as any).secondary_keywords || []
+
+  const schemaJson = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://www.mommantum.com/#organization",
+        "name": "Mommantum",
+        "url": "https://www.mommantum.com",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://www.mommantum.com/logo.png",
+        },
+        "sameAs": [
+          "https://www.instagram.com/mommantummedia?igsh=OXpxZ3Y0aTAxMTk4",
+          "https://www.linkedin.com/company/mommantum-media",
+          "https://www.facebook.com/profile.php?id=61585107904273",
+        ],
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": `${caseStudyUrl}#breadcrumb`,
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.mommantum.com/in" },
+          { "@type": "ListItem", "position": 2, "name": "Work", "item": "https://www.mommantum.com/in/work" },
+          { "@type": "ListItem", "position": 3, "name": study.title, "item": caseStudyUrl },
+        ],
+      },
+      {
+        "@type": "Article",
+        "@id": `${caseStudyUrl}#article`,
+        "mainEntityOfPage": { "@type": "WebPage", "@id": caseStudyUrl },
+        "headline": `${study.title} | Mommantum Work`,
+        "description": study.tagline || study.about || study.challenge || "",
+        "image": [study.image],
+        "datePublished": publishedDate,
+        "dateModified": updatedDate,
+        "author": { "@type": "Organization", "name": "Mommantum" },
+        "publisher": { "@id": "https://www.mommantum.com/#organization" },
+        "about": { "@type": "Thing", "name": study.category || "" },
+        "mentions": { "@type": "Organization", "name": study.title || "" },
+        "keywords": [
+          study.category || "",
+          study.title || "",
+          secondaryKeywords[0] || "",
+          secondaryKeywords[1] || "",
+          secondaryKeywords[2] || "",
+          secondaryKeywords[3] || "",
+        ].filter(Boolean),
+      },
+    ],
+  }
 
   return (
     <main className="relative overflow-hidden bg-[#f7f8fa] pt-14 pb-20 lg:pt-20 lg:pb-24">
       <SeoJsonLd pageKeys={seoKeys} />
+
+      {/* ── Case Study JSON-LD Schema ── */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaJson) }}
+      />
+
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute left-[4%] top-[10%] h-[140px] w-[420px] rounded-full bg-white/45 blur-3xl" />
         <div className="absolute right-[8%] top-[12%] h-[140px] w-[360px] rounded-full bg-white/35 blur-3xl" />

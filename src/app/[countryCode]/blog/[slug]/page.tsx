@@ -16,6 +16,294 @@ const mansalva = Mansalva({ subsets: ["latin"], weight: ["400"] })
 export const dynamicParams = true
 export const revalidate = 60
 
+// ─────────────────────────────────────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────────────────────────────────────
+
+function escHtml(str: string): string {
+  return str
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+}
+
+// Strip all HTML tags and decode entities — returns plain text
+function stripTags(html: string): string {
+  return html
+    .replace(/<[^>]+>/g, "")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, " ")
+    .trim()
+}
+
+// Extract first href from an HTML string
+function extractHref(html: string): string | null {
+  const m = html.match(/href="([^"]*)"/)
+  return m ? m[1] : null
+}
+
+// ── Parse <li> items from a flat list HTML string ────────────────────────────
+// Uses a simple character-level parser to handle nested tags correctly
+function parseLiItems(listHtml: string): { innerHtml: string }[] {
+  const items: { innerHtml: string }[] = []
+  let i = 0
+  const len = listHtml.length
+
+  while (i < len) {
+    // Find opening <li
+    const start = listHtml.indexOf("<li", i)
+    if (start === -1) break
+
+    // Find end of opening tag >
+    const openEnd = listHtml.indexOf(">", start)
+    if (openEnd === -1) break
+
+    // Now find the matching </li> — track nesting
+    let depth = 1
+    let j = openEnd + 1
+
+    while (j < len && depth > 0) {
+      if (listHtml.startsWith("<li", j)) {
+        depth++
+        j += 3
+      } else if (listHtml.startsWith("</li>", j)) {
+        depth--
+        if (depth === 0) break
+        j += 5
+      } else {
+        j++
+      }
+    }
+
+    const innerHtml = listHtml.slice(openEnd + 1, j)
+    items.push({ innerHtml })
+    i = j + 5 // skip past </li>
+  }
+
+  return items
+}
+
+// ── Extract the first nested list (<ol> or <ul>) from an HTML string ─────────
+// Returns the nested list HTML and the content before it (the main item text)
+function extractNestedList(html: string): { listHtml: string; beforeHtml: string } | null {
+  const match = html.match(/<(ol|ul)[^>]*>/)
+  if (!match || match.index === undefined) return null
+
+  const tag = match[1]
+  const openTag = `<${tag}`
+  const closeTag = `</${tag}>`
+  const start = match.index
+
+  let depth = 1
+  let i = start + match[0].length
+
+  while (i < html.length && depth > 0) {
+    if (html.startsWith(openTag, i)) {
+      depth++
+      i += openTag.length
+    } else if (html.startsWith(closeTag, i)) {
+      depth--
+      if (depth === 0) break
+      i += closeTag.length
+    } else {
+      i++
+    }
+  }
+
+  return {
+    beforeHtml: html.slice(0, start),
+    listHtml: html.slice(start, i + closeTag.length),
+  }
+}
+
+function buildTocHtml(listHtml: string): string {
+  const liItems = parseLiItems(listHtml)
+  if (!liItems.length) return listHtml
+
+  type SubItem = { prefix: string; label: string; href: string | null }
+  type Group   = { num: number; text: string; href: string | null; subs: SubItem[] }
+
+  const groups: Group[] = []
+  let mainCounter = 0
+
+  for (const { innerHtml } of liItems) {
+    // Check if this <li> contains a nested list (sub-items as children)
+    const nested = extractNestedList(innerHtml)
+
+    if (nested) {
+      // The text/anchor before the nested list = the main item label
+      const mainText = stripTags(nested.beforeHtml).trim()
+      const mainHref = extractHref(nested.beforeHtml)
+      mainCounter++
+      const clean = mainText.replace(/^\d+\.?\s+/, "").trim() || mainText
+
+      // Parse sub-items from the nested list
+      const subLiItems = parseLiItems(nested.listHtml)
+      const subs: SubItem[] = subLiItems.map((sub, idx) => {
+        const rawText = stripTags(sub.innerHtml)
+        const href = extractHref(sub.innerHtml)
+        const prefixMatch = rawText.match(/^(\d+\.\d+)\s*/)
+        const prefix = prefixMatch ? prefixMatch[1] : `${mainCounter}.${idx + 1}`
+        const label = rawText.replace(/^(\d+\.\d+)\s*/, "").trim()
+        return { prefix, label, href }
+      })
+
+      groups.push({ num: mainCounter, text: clean, href: mainHref, subs })
+    } else {
+      // Flat structure — fall back to text-pattern matching on "1.1" prefixes
+      const rawText = stripTags(innerHtml)
+      const href = extractHref(innerHtml)
+      const SUB_RE = /^(\d+\.\d+)\s*/
+
+      if (SUB_RE.test(rawText)) {
+        const m = rawText.match(SUB_RE)!
+        const prefix = m[1]
+        const label  = rawText.replace(SUB_RE, "").trim()
+        if (groups.length) {
+          groups[groups.length - 1].subs.push({ prefix, label, href })
+        }
+      } else {
+        mainCounter++
+        const clean = rawText.replace(/^\d+\.?\s+/, "").trim() || rawText
+        groups.push({ num: mainCounter, text: clean, href, subs: [] })
+      }
+    }
+  }
+
+  if (!groups.length) return listHtml
+
+  const rows = groups.map((g) => {
+    const mainHref = g.href ? ` href="${g.href}"` : ""
+    const mainTag  = g.href ? "a" : "div"
+
+    const mainRow = `
+      <${mainTag}${mainHref} style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:14px;background:white;border:1px solid #edf2f7;box-shadow:0 2px 8px rgba(14,37,71,.04);text-decoration:none;width:100%;box-sizing:border-box;transition:border-color .2s,box-shadow .2s,transform .2s;" class="toc-item-main">
+        <span style="display:flex;align-items:center;justify-content:center;min-width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#0e2547,#1e4a8a);color:white;font-size:13px;font-weight:800;flex-shrink:0;margin-top:1px;">${g.num}</span>
+        <span style="font-size:15px;font-weight:700;color:#0e2547;line-height:1.45;">${escHtml(g.text)}</span>
+      </${mainTag}>`
+
+    const subRows = g.subs.map((s) => {
+      const subHref = s.href ? ` href="${s.href}"` : ""
+      const subTag  = s.href ? "a" : "div"
+      return `
+        <${subTag}${subHref} style="display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:10px;background:#f8fafc;border:1px solid #f1f5f9;width:100%;box-sizing:border-box;text-decoration:none;transition:background .2s,border-color .2s;" class="toc-item-sub">
+          <span style="flex-shrink:0;min-width:38px;font-size:11px;font-weight:800;color:#64748b;background:#e2e8f0;border-radius:6px;padding:3px 7px;text-align:center;">${escHtml(s.prefix)}</span>
+          <span style="font-size:14px;font-weight:600;color:#334155;line-height:1.45;">${escHtml(s.label)}</span>
+        </${subTag}>`
+    }).join("")
+
+    const subBlock = g.subs.length
+      ? `<div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;">${subRows}</div>`
+      : ""
+
+    return `
+<div style="display:flex;flex-direction:column;margin-bottom:12px;background:white;border-radius:16px;border:1.5px solid #edf2f7;padding:12px;box-shadow:0 2px 12px rgba(14,37,71,.05);">
+  ${mainRow}
+  ${subBlock}
+</div>`
+  }).join("")
+
+  return `
+<div style="margin:0 0 40px;border:1.5px solid #e2e8f0;border-radius:20px;background:linear-gradient(135deg,#f8faff 0%,#f0f4ff 100%);overflow:hidden;box-shadow:0 4px 24px rgba(14,37,71,.06);">
+  <div style="display:flex;align-items:center;gap:10px;padding:16px 24px;background:linear-gradient(135deg,#0e2547,#1e4a8a);">
+    <span style="width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">📋</span>
+    <span style="font-size:15px;font-weight:800;color:white;letter-spacing:.05em;text-transform:uppercase;">Table of Contents</span>
+  </div>
+  <div style="padding:16px 20px 20px;display:flex;flex-direction:column;">${rows}</div>
+</div>`
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CONTENT TRANSFORMER
+// ─────────────────────────────────────────────────────────────────────────────
+
+function transformContent(html: string): string {
+  if (!html) return html
+
+  // 1. Strip [Featured Image ...] placeholders
+  html = html.replace(/\[Featured Image[^\]]*\]/gi, "")
+
+  // 2. Strip author byline paragraphs containing ·
+  html = html.replace(/<p[^>]*>[^<]*·[^<]*<\/p>/gi, "")
+
+  // 3. Strip date · min read paragraphs
+  html = html.replace(
+    /<p[^>]*>(?:(?!<\/p>).)*?(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4}(?:(?!<\/p>).)*?min read(?:(?!<\/p>).)*?<\/p>/gi,
+    ""
+  )
+
+  // 4. Strip FAQ h2 + everything after it until next h2 or end
+  html = html.replace(
+    /<h2[^>]*>(?:(?!<\/h2>).)*?(?:faq|frequently asked|common questions|questions and answers|q&amp;a)(?:(?!<\/h2>).)*?<\/h2>(?:(?!<h2).)*?(?=<h2|$)/gi,
+    ""
+  )
+
+  // 5. Rewrite Table of Contents
+  // Find "table of contents" or "contents" h2 + immediately following ol/ul
+  let result = ""
+  let lastIndex = 0
+
+  const tempRegex = /<h2[^>]*>(?:(?!<\/h2>).)*?(?:table of contents|contents)(?:(?!<\/h2>).)*?<\/h2>/gi
+  let tocMatch: RegExpExecArray | null
+
+  while ((tocMatch = tempRegex.exec(html)) !== null) {
+    const h2End = tocMatch.index + tocMatch[0].length
+
+    // Find the opening tag of the list right after h2 (skip whitespace)
+    const afterH2 = html.slice(h2End).trimStart()
+    const listTagMatch = afterH2.match(/^(<(?:ol|ul)[^>]*>)/)
+    if (!listTagMatch) continue
+
+    const listTagOffset = h2End + (html.slice(h2End).length - afterH2.length)
+    const listTag = listTagMatch[1]
+    const isOl = listTag.startsWith("<ol")
+    const closeTag = isOl ? "</ol>" : "</ul>"
+    const openTag  = isOl ? "<ol" : "<ul"
+
+    // Find matching close tag with depth tracking
+    let depth = 1
+    let i = listTagOffset + listTag.length
+
+    while (i < html.length && depth > 0) {
+      if (html.startsWith(openTag, i)) {
+        depth++
+        i += openTag.length
+      } else if (html.startsWith(closeTag, i)) {
+        depth--
+        if (depth === 0) break
+        i += closeTag.length
+      } else {
+        i++
+      }
+    }
+
+    const listEnd = i + closeTag.length
+    const listHtml = html.slice(listTagOffset, listEnd)
+
+    // Replace the h2 + list with transformed TOC
+    result += html.slice(lastIndex, tocMatch.index)
+    result += buildTocHtml(listHtml)
+    lastIndex = listEnd
+  }
+
+  result += html.slice(lastIndex)
+  return result
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// METADATA + STATIC PARAMS
+// ─────────────────────────────────────────────────────────────────────────────
+
 export async function generateMetadata(props: {
   params: Promise<{ slug: string; countryCode: string }>
 }): Promise<Metadata> {
@@ -51,6 +339,10 @@ export async function generateStaticParams() {
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// PAGE
+// ─────────────────────────────────────────────────────────────────────────────
+
 export default async function BlogDetailPage(props: {
   params: Promise<{ slug: string; countryCode: string }>
 }) {
@@ -65,6 +357,7 @@ export default async function BlogDetailPage(props: {
   }
 
   if (!post) return notFound()
+
   const seoKeys = [
     `blog:${params.slug}`,
     `blog-post:${params.slug}`,
@@ -78,7 +371,7 @@ export default async function BlogDetailPage(props: {
   try {
     const [posts, seo] = await Promise.all([
       getBlogPosts(),
-      getSeoSetting(`blog:${params.slug}`)
+      getSeoSetting(`blog:${params.slug}`),
     ])
     popularPosts = posts.filter((item) => item.slug !== params.slug).slice(0, 5)
     seoSetting = seo
@@ -98,6 +391,7 @@ export default async function BlogDetailPage(props: {
   }
 
   const validImages = post.image_urls?.filter(Boolean) || []
+  const processedContent = post.content ? transformContent(post.content) : null
 
   return (
     <main className="relative overflow-hidden bg-[#f3f4f6] pt-14 pb-20 lg:pt-18 lg:pb-24">
@@ -110,17 +404,15 @@ export default async function BlogDetailPage(props: {
           meta_description: seoSetting?.meta_description || post.meta_description || post.excerpt || "",
           featured_image: post.featured_image,
           published_date: post.published_at,
-          modified_date: post.updated_at || post.published_at,
+          modified_date: (post as any).updated_at || post.published_at,
           page_url: `https://www.mommantum.com/in/blog/${params.slug}`,
           category_name: post.category_id || "Digital Marketing",
-          // keyword fields from seoSetting (populated via admin SEO panel)
           primary_keyword: (seoSetting as any)?.primary_keyword || post.category_id || "",
           secondary_keyword_1: (seoSetting as any)?.secondary_keywords?.[0] || "",
           secondary_keyword_2: (seoSetting as any)?.secondary_keywords?.[1] || "",
           secondary_keyword_3: (seoSetting as any)?.secondary_keywords?.[2] || "",
           secondary_keyword_4: (seoSetting as any)?.secondary_keywords?.[3] || "",
           secondary_keyword_5: (seoSetting as any)?.secondary_keywords?.[4] || "",
-          // FAQs from post (shown in schema)
           faq_json_10: (post.faqs || []).map((f: any) => ({
             question: f.question,
             answer: f.answer,
@@ -128,7 +420,6 @@ export default async function BlogDetailPage(props: {
         }}
       />
 
-      {/* Background blobs */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute left-[4%] top-[5%] h-[180px] w-[500px] rounded-full bg-white/50 blur-3xl" />
         <div className="absolute right-[6%] top-[8%] h-[160px] w-[400px] rounded-full bg-white/40 blur-3xl" />
@@ -136,31 +427,20 @@ export default async function BlogDetailPage(props: {
       </div>
 
       <style>{`
-        /* ─── Base blog typography ─────────────────────────────────────────── */
         .blog-content { font-family: inherit; }
-
         .blog-content h2 {
           font-size: 26px; font-weight: 800; color: #0e2547;
           letter-spacing: -0.04em; margin: 40px 0 16px; line-height: 1.1;
           padding-bottom: 10px; border-bottom: 2px solid #f1f5f9;
         }
-        .blog-content h3 {
-          font-size: 20px; font-weight: 700; color: #0e2547;
-          margin: 28px 0 10px; line-height: 1.2;
-        }
-        .blog-content h4 {
-          font-size: 17px; font-weight: 700; color: #1e3a5f;
-          margin: 20px 0 8px;
-        }
-        .blog-content p {
-          font-size: 16px; line-height: 2; color: #475569; margin: 14px 0;
-        }
+        .blog-content h3 { font-size: 20px; font-weight: 700; color: #0e2547; margin: 28px 0 10px; line-height: 1.2; }
+        .blog-content h4 { font-size: 17px; font-weight: 700; color: #1e3a5f; margin: 20px 0 8px; }
+        .blog-content p  { font-size: 16px; line-height: 2; color: #475569; margin: 14px 0; }
         .blog-content strong { font-weight: 700; color: #0e2547; }
         .blog-content em { font-style: italic; }
-        .blog-content u { text-decoration: underline; }
-        .blog-content s { text-decoration: line-through; color: #94a3b8; }
+        .blog-content u  { text-decoration: underline; }
+        .blog-content s  { text-decoration: line-through; color: #94a3b8; }
 
-        /* ─── Unordered list ───────────────────────────────────────────────── */
         .blog-content ul { list-style: none; padding: 0; margin: 20px 0; }
         .blog-content ul li {
           display: flex; align-items: flex-start; gap: 12px;
@@ -172,17 +452,11 @@ export default async function BlogDetailPage(props: {
           content: ""; display: inline-block; width: 7px; height: 7px;
           border-radius: 50%; background: #e61e73; flex-shrink: 0; margin-top: 9px;
         }
-
-        /* ─── Ordered list ─────────────────────────────────────────────────── */
-        .blog-content ol {
-          padding-left: 0; margin: 20px 0;
-          counter-reset: ol-counter; list-style: none;
-        }
+        .blog-content ol { padding-left: 0; margin: 20px 0; counter-reset: ol-counter; list-style: none; }
         .blog-content ol li {
           counter-increment: ol-counter; display: flex; align-items: flex-start;
           gap: 14px; font-size: 16px; line-height: 1.85; color: #475569;
-          margin: 10px 0; padding: 10px 14px;
-          background: #f8fafc; border-radius: 10px;
+          margin: 10px 0; padding: 10px 14px; background: #f8fafc; border-radius: 10px;
         }
         .blog-content ol li::before {
           content: counter(ol-counter); display: flex; align-items: center;
@@ -191,397 +465,39 @@ export default async function BlogDetailPage(props: {
           font-size: 12px; font-weight: 800; flex-shrink: 0; margin-top: 2px;
         }
 
-        /* ─── TABLE OF CONTENTS ────────────────────────────────────────────── */
-        /*
-          Convention: the very first <h2> in the post is labelled
-          "Table of Contents" (or similar). The <ol> immediately after it
-          becomes the TOC block.
-        */
-        .blog-content .toc-wrapper {
-          margin: 0 0 40px;
-          border: 1.5px solid #e2e8f0;
-          border-radius: 20px;
-          background: linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%);
-          overflow: hidden;
-          box-shadow: 0 4px 24px rgba(14,37,71,0.06);
-        }
-        .blog-content .toc-header {
-          display: flex; align-items: center; gap: 10px;
-          padding: 16px 24px;
-          background: linear-gradient(135deg, #0e2547, #1e4a8a);
-          border-bottom: none;
-        }
-        .blog-content .toc-header-icon {
-          width: 28px; height: 28px; border-radius: 8px;
-          background: rgba(255,255,255,0.15);
-          display: flex; align-items: center; justify-content: center;
-          font-size: 14px; flex-shrink: 0;
-        }
-        .blog-content .toc-header-title {
-          font-size: 15px; font-weight: 800;
-          color: white; letter-spacing: -0.02em;
-          text-transform: uppercase; tracking: 0.05em;
-        }
-        .blog-content .toc-list {
-          counter-reset: toc-main;
-          list-style: none; padding: 16px 20px 20px; margin: 0;
-          display: flex; flex-direction: column; gap: 4px;
-          background: transparent;
-        }
-        .blog-content .toc-list > li {
-          list-style: none; margin: 0 0 6px; padding: 0;
-          background: none; border: none;
-          display: block; width: 100%;
-          counter-increment: none;
-        }
-        .blog-content .toc-list > li::before { content: none !important; }
-
-        .blog-content .toc-item-main {
-          display: flex; align-items: flex-start; gap: 12px;
-          padding: 10px 14px; border-radius: 12px;
-          background: white;
-          border: 1px solid #edf2f7;
-          box-shadow: 0 2px 8px rgba(14,37,71,0.04);
-          text-decoration: none;
-          transition: all 0.2s ease;
-          width: 100%;
-          box-sizing: border-box;
-        }
-        .blog-content .toc-item-main:hover {
-          border-color: #e61e73;
-          box-shadow: 0 4px 16px rgba(230,30,115,0.1);
+        .toc-item-main:hover {
+          border-color: #e61e73 !important;
+          box-shadow: 0 4px 16px rgba(230,30,115,.1) !important;
           transform: translateX(3px);
         }
-        .blog-content .toc-num {
-          display: flex; align-items: center; justify-content: center;
-          min-width: 28px; height: 28px; border-radius: 8px;
-          background: linear-gradient(135deg, #0e2547, #1e4a8a);
-          color: white; font-size: 12px; font-weight: 800;
-          flex-shrink: 0; margin-top: 1px;
-        }
-        .blog-content .toc-text {
-          font-size: 15px; font-weight: 700; color: #0e2547;
-          line-height: 1.4; padding-top: 5px;
-        }
-        /* Sub-items — rendered BELOW the parent heading, indented */
-        .blog-content .toc-sub-list {
-          list-style: none;
-          padding: 4px 0 8px 44px;
-          margin: 0;
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
-          width: 100%;
-        }
-        .blog-content .toc-sub-list li {
-          background: none; border: none; margin: 0; padding: 0;
-          display: block; width: 100%;
-        }
-        .blog-content .toc-sub-list li::before { content: none; }
-        .blog-content .toc-item-sub {
-          display: flex; align-items: center; gap: 8px;
-          padding: 6px 12px; border-radius: 8px;
-          color: #475569; font-size: 14px; font-weight: 600;
-          text-decoration: none;
-          transition: all 0.2s ease;
-        }
-        .blog-content .toc-item-sub::before {
-          content: "";
-          width: 5px; height: 5px; border-radius: 50%;
-          background: #cbd5e1; flex-shrink: 0;
-          transition: background 0.2s ease;
-        }
-        .blog-content .toc-item-sub:hover {
-          background: #f0f4ff; color: #e61e73;
-        }
-        .blog-content .toc-item-sub:hover::before { background: #e61e73; }
-        .blog-content .toc-sub-prefix {
-          flex-shrink: 0; min-width: 34px;
-          font-size: 11px; font-weight: 700; color: #94a3b8;
-          font-variant-numeric: tabular-nums;
+        .toc-item-sub:hover {
+          background: #f0f4ff !important;
+          border-color: #e61e73 !important;
         }
 
-        /* ─── FAQ ACCORDION ────────────────────────────────────────────────── */
-        /*
-          The JS below detects FAQ headings + following content and wraps them.
-          These styles power the accordion UI.
-        */
-        .faq-section-wrapper {
-          margin: 40px 0;
-        }
-        .faq-section-title {
-          display: flex; align-items: center; gap: 10px;
-          font-size: 26px; font-weight: 800; color: #0e2547;
-          letter-spacing: -0.04em; margin-bottom: 20px;
-        }
-        .faq-section-title-badge {
-          display: inline-flex; align-items: center; justify-content: center;
-          padding: 3px 12px; border-radius: 999px;
-          background: linear-gradient(135deg, #e61e73, #9333ea);
-          color: white; font-size: 12px; font-weight: 700;
-          letter-spacing: 0.04em; text-transform: uppercase;
-        }
-        .faq-accordion {
-          display: flex; flex-direction: column; gap: 10px;
-        }
-        .faq-item {
-          border: 1.5px solid #e2e8f0;
-          border-radius: 16px;
-          background: white;
-          overflow: hidden;
-          box-shadow: 0 2px 8px rgba(14,37,71,0.04);
-          transition: box-shadow 0.3s ease, border-color 0.3s ease;
-        }
-        .faq-item.open {
-          border-color: #e61e73;
-          box-shadow: 0 6px 24px rgba(230,30,115,0.1);
-        }
-        .faq-question {
-          width: 100%; display: flex; align-items: center;
-          justify-content: space-between; gap: 16px;
-          padding: 18px 22px; cursor: pointer;
-          background: none; border: none; text-align: left;
-          font-size: 16px; font-weight: 700; color: #0e2547;
-          line-height: 1.4;
-          transition: color 0.2s ease;
-        }
-        .faq-question:hover { color: #e61e73; }
-        .faq-item.open .faq-question { color: #e61e73; }
-        .faq-icon {
-          flex-shrink: 0; width: 28px; height: 28px;
-          border-radius: 8px; display: flex; align-items: center; justify-content: center;
-          background: #f1f5f9;
-          transition: background 0.3s ease, transform 0.3s ease;
-        }
-        .faq-item.open .faq-icon {
-          background: linear-gradient(135deg, #e61e73, #9333ea);
-          transform: rotate(45deg);
-        }
-        .faq-icon svg { width: 14px; height: 14px; }
-        .faq-item.open .faq-icon svg { stroke: white; }
-        .faq-item:not(.open) .faq-icon svg { stroke: #64748b; }
-        .faq-answer {
-          max-height: 0; overflow: hidden;
-          transition: max-height 0.35s ease, padding 0.3s ease;
-          padding: 0 22px;
-        }
-        .faq-item.open .faq-answer {
-          max-height: 800px;
-          padding: 0 22px 20px;
-        }
-        .faq-answer-inner {
-          font-size: 15px; line-height: 1.85; color: #475569;
-          padding-top: 4px;
-          border-top: 1px solid #f1f5f9;
-          padding-top: 16px;
-        }
-        .faq-answer-inner p { margin: 8px 0; color: #475569; font-size: 15px; line-height: 1.85; }
-        .faq-answer-inner ul, .faq-answer-inner ol { margin: 10px 0; padding-left: 20px; }
-        .faq-answer-inner li { margin: 6px 0; }
-
-        /* ─── Misc blog content styles ─────────────────────────────────────── */
         .blog-content blockquote {
           border-left: 4px solid #e61e73; padding: 16px 22px; margin: 24px 0;
-          background: linear-gradient(135deg, #fff5f8 0%, #fff0f5 100%);
+          background: linear-gradient(135deg,#fff5f8 0%,#fff0f5 100%);
           border-radius: 0 12px 12px 0; color: #475569;
           font-size: 17px; line-height: 1.85; font-style: italic;
-          box-shadow: 0 4px 14px rgba(230,30,115,0.08);
+          box-shadow: 0 4px 14px rgba(230,30,115,.08);
         }
-        .blog-content a {
-          color: #e61e73; text-decoration: none; font-weight: 600;
-          border-bottom: 1px solid rgba(230,30,115,0.3);
-          transition: border-color 0.2s;
-        }
+        .blog-content a { color: #e61e73; text-decoration: none; font-weight: 600; border-bottom: 1px solid rgba(230,30,115,.3); transition: border-color .2s; }
         .blog-content a:hover { border-bottom-color: #e61e73; }
-        .blog-content img {
-          max-width: 100%; border-radius: 16px;
-          box-shadow: 0 12px 32px rgba(0,0,0,0.1);
-          margin: 24px auto; display: block;
-        }
-        .blog-content hr {
-          border: none; height: 2px;
-          background: linear-gradient(90deg, #e61e73, transparent);
-          margin: 32px 0; border-radius: 2px;
-        }
+        .blog-content img { max-width: 100%; border-radius: 16px; box-shadow: 0 12px 32px rgba(0,0,0,.1); margin: 24px auto; display: block; }
+        .blog-content hr { border: none; height: 2px; background: linear-gradient(90deg,#e61e73,transparent); margin: 32px 0; border-radius: 2px; }
         .blog-content .ql-align-center { text-align: center; }
-        .blog-content .ql-align-right { text-align: right; }
+        .blog-content .ql-align-right  { text-align: right; }
         .blog-content .ql-align-justify { text-align: justify; }
 
-        /* ─── Image cards ──────────────────────────────────────────────────── */
-        .img-card {
-          overflow: hidden; border-radius: 20px;
-          box-shadow: 0 12px 36px rgba(0,0,0,0.1);
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .img-card:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 20px 50px rgba(0,0,0,0.13);
-        }
-        .img-card img {
-          width: 100%; object-fit: cover; display: block;
-          transition: transform 0.5s ease; margin: 0;
-          border-radius: 0; box-shadow: none;
-        }
+        .img-card { overflow: hidden; border-radius: 20px; box-shadow: 0 12px 36px rgba(0,0,0,.1); transition: transform .3s ease, box-shadow .3s ease; }
+        .img-card:hover { transform: translateY(-4px); box-shadow: 0 20px 50px rgba(0,0,0,.13); }
+        .img-card img { width: 100%; object-fit: cover; display: block; transition: transform .5s ease; margin: 0; border-radius: 0; box-shadow: none; }
         .img-card:hover img { transform: scale(1.03); }
 
-        /* ─── Popular Articles sidebar ─────────────────────────────────────── */
-        .popular-sidebar {
-          position: sticky;
-          top: 96px;
-          align-self: flex-start;
-        }
-
-        @media (max-width: 1024px) {
-          .popular-sidebar { position: static; }
-        }
+        .popular-sidebar { position: sticky; top: 96px; align-self: flex-start; }
+        @media (max-width: 1024px) { .popular-sidebar { position: static; } }
       `}</style>
-
-      {/*
-        ── Client-side JS ──────────────────────────────────────────────────────
-        Runs after paint to:
-          1. Build a proper TOC (wrap the first h2 + following ol).
-          2. Convert FAQ sections into accordions.
-        Using dangerouslySetInnerHTML on a <script> tag is the correct Next.js
-        pattern for inline scripts in Server Components.
-      */}
-      <script dangerouslySetInnerHTML={{ __html: `
-        (function() {
-          function init() {
-            var content = document.querySelector('.blog-content');
-            if (!content) return;
-
-            /* ================================================================
-               1. TABLE OF CONTENTS
-               ================================================================
-               The CMS renders the TOC as a FLAT <ol> where every entry is a
-               top-level <li>.  Sub-headings are distinguished by a numeric
-               prefix like "1.1", "2.3" etc. at the START of the text.
-
-               Strategy:
-               • Find the h2 whose text is "Table of Contents" (or similar).
-               • Grab the immediately following <ol>.
-               • Walk every <li>:
-                   – If text starts with /^\\d+\\.\\d+/ → it is a sub-item.
-                   – Otherwise                          → it is a main item.
-               • Re-build a clean two-level structure.
-            ================================================================ */
-            var allH2s = Array.from(content.querySelectorAll('h2'));
-            var tocH2 = null;
-            for (var i = 0; i < allH2s.length; i++) {
-              var t = allH2s[i].textContent.trim().toLowerCase();
-              if (t === 'table of contents' || t === 'contents' || t === 'toc' ||
-                  t.includes('table of contents')) {
-                tocH2 = allH2s[i]; break;
-              }
-            }
-
-            if (tocH2) {
-              var nextEl = tocH2.nextElementSibling;
-              /* Also accept <ul> in case the CMS uses that */
-              if (nextEl && (nextEl.tagName === 'OL' || nextEl.tagName === 'UL')) {
-                var rawOl = nextEl;
-
-                /* ── Parse flat list into { main, subs[] } groups ── */
-                var SUB_RE = /^(\\d+\\.\\d+)\\s*/;   /* matches "1.1 ", "2.3 " etc. */
-                var groups = [];   /* [{label, text, href, subs:[{prefix,text,href}]}] */
-                var mainCounter = 0;
-
-                Array.from(rawOl.querySelectorAll(':scope > li')).forEach(function(li) {
-                  var rawText = li.textContent.trim();
-                  var anchor  = li.querySelector('a');
-                  var href    = anchor ? anchor.getAttribute('href') : null;
-
-                  if (SUB_RE.test(rawText)) {
-                    /* Sub-item – attach to last group */
-                    var prefix = rawText.match(SUB_RE)[1];
-                    var label  = rawText.replace(SUB_RE, '').trim();
-                    if (groups.length) {
-                      groups[groups.length - 1].subs.push({ prefix: prefix, text: label, href: href });
-                    }
-                  } else {
-                    /* Main item – strip leading "N " counter if present */
-                    mainCounter++;
-                    var cleanText = rawText.replace(/^\\d+\\.?\\s*/, '').trim() || rawText;
-                    groups.push({ num: mainCounter, text: cleanText, href: href, subs: [] });
-                  }
-                });
-
-                /* ── Build the new TOC DOM ── */
-                var wrapper = document.createElement('div');
-                wrapper.className = 'toc-wrapper';
-
-                var header = document.createElement('div');
-                header.className = 'toc-header';
-                header.innerHTML = '<div class="toc-header-icon">📋</div><span class="toc-header-title">Table of Contents</span>';
-                wrapper.appendChild(header);
-
-                var newList = document.createElement('ol');
-                newList.className = 'toc-list';
-
-                groups.forEach(function(g) {
-                  var li = document.createElement('li');
-
-                  /* Main entry */
-                  var mainEl = document.createElement(g.href ? 'a' : 'div');
-                  mainEl.className = 'toc-item-main';
-                  if (g.href) mainEl.setAttribute('href', g.href);
-                  mainEl.innerHTML =
-                    '<span class="toc-num">' + g.num + '</span>' +
-                    '<span class="toc-text">' + escHtml(g.text) + '</span>';
-                  li.appendChild(mainEl);
-
-                  /* Sub-entries */
-                  if (g.subs.length) {
-                    var subUl = document.createElement('ul');
-                    subUl.className = 'toc-sub-list';
-                    g.subs.forEach(function(s) {
-                      var subLi = document.createElement('li');
-                      var subEl = document.createElement(s.href ? 'a' : 'span');
-                      subEl.className = 'toc-item-sub';
-                      if (s.href) subEl.setAttribute('href', s.href);
-                      subEl.innerHTML =
-                        '<span class="toc-sub-prefix">' + escHtml(s.prefix) + '</span>' +
-                        '<span>' + escHtml(s.text) + '</span>';
-                      subLi.appendChild(subEl);
-                      subUl.appendChild(subLi);
-                    });
-                    li.appendChild(subUl);
-                  }
-
-                  newList.appendChild(li);
-                });
-
-                wrapper.appendChild(newList);
-
-                /* Swap in */
-                rawOl.parentNode.insertBefore(wrapper, tocH2);
-                tocH2.remove();
-                rawOl.remove();
-              }
-            }
-
-            /* ================================================================
-               2. FAQ ACCORDION — handled by BlogFaqAccordion client component.
-                  Nothing to do here.
-            ================================================================ */
-          }
-
-          /* tiny HTML-escape helper used in TOC builder */
-          function escHtml(str) {
-            return str
-              .replace(/&/g, '&amp;')
-              .replace(/</g, '&lt;')
-              .replace(/>/g, '&gt;')
-              .replace(/"/g, '&quot;');
-          }
-
-          if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', init);
-          } else {
-            init();
-          }
-        })();
-      ` }} />
 
       <div className="content-container relative px-4 sm:px-6 lg:px-10">
         <div className="mx-auto max-w-[1180px]">
@@ -622,16 +538,15 @@ export default async function BlogDetailPage(props: {
             )}
           </div>
 
-          {/* ── Two-column layout: article + sidebar ── */}
+          {/* Two-column layout */}
           <div className="mt-10 lg:grid lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start lg:gap-8">
 
-            {/* ── Main article column ── */}
+            {/* Main article */}
             <div className="min-w-0">
               <div className="overflow-hidden rounded-[24px] bg-white shadow-[0_8px_32px_rgba(0,0,0,0.06)]">
                 <div className="h-[4px] w-full" style={{ background: "linear-gradient(90deg, #e61e73, #9333ea, #0ea5e9)" }} />
                 <div className="p-7 lg:p-12">
 
-                  {/* Featured image */}
                   {post.featured_image && (
                     <div className="mb-10 overflow-hidden rounded-[24px] shadow-[0_24px_60px_rgba(0,0,0,0.12)]">
                       <div className="relative aspect-[16/9] w-full">
@@ -640,23 +555,12 @@ export default async function BlogDetailPage(props: {
                     </div>
                   )}
 
-                  {/* Blog content — strip FAQ sections; those are rendered below from post.faqs */}
-                  {post.content ? (
-                    <div
-                      className="blog-content"
-                      dangerouslySetInnerHTML={{
-                        __html: post.content
-                          .replace(/\[Featured Image[^\]]*\]/gi, "")
-                          .replace(/<p[^>]*>(?:(?!<\/p>)[\s\S])*?(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4}(?:(?!<\/p>)[\s\S])*?min read(?:(?!<\/p>)[\s\S])*?<\/p>/gi, "")
-                          // Strip any inline FAQ section (h2 containing faq/frequently asked + everything until next h2 or end)
-                          .replace(/<h2[^>]*>(?:(?!<\/h2>)[\s\S])*?(?:faq|frequently asked|common questions|questions and answers|q&amp;a|questions &amp; answers)(?:(?!<\/h2>)[\s\S])*?<\/h2>(?:(?!<h2)[\s\S])*?(?=<h2|$)/gi, "")
-                      }}
-                    />
+                  {processedContent ? (
+                    <div className="blog-content" dangerouslySetInnerHTML={{ __html: processedContent }} />
                   ) : (
                     <p className={`${outfit.className} text-[16px] text-slate-400 italic`}>Content coming soon.</p>
                   )}
 
-                  {/* ── FAQ Accordion — client component, always from post.faqs ── */}
                   <BlogFaqAccordion faqs={post.faqs || []} />
 
                 </div>
@@ -724,14 +628,11 @@ export default async function BlogDetailPage(props: {
               </div>
             </div>
 
-            {/* ── Sidebar: Popular Articles ── */}
+            {/* Sidebar */}
             {popularPosts.length > 0 && (
               <aside className="popular-sidebar mt-10 lg:mt-0">
-                {/* Popular Articles card */}
                 <div className="overflow-hidden rounded-[24px] bg-white shadow-[0_8px_32px_rgba(0,0,0,0.06)]">
-                  {/* Gradient top bar */}
                   <div className="h-[4px] w-full" style={{ background: "linear-gradient(90deg, #e61e73, #9333ea)" }} />
-
                   <div className="p-6">
                     <div className="mb-6 flex items-center gap-3">
                       <div
@@ -752,7 +653,6 @@ export default async function BlogDetailPage(props: {
                           href={`/blog/${item.slug}`}
                           className="group relative flex items-start gap-4 rounded-[14px] p-3 transition-all hover:bg-[#f8faff]"
                         >
-                          {/* Number badge */}
                           <span
                             className={`${epilogue.className} mt-[3px] flex h-[28px] w-[28px] flex-shrink-0 items-center justify-center rounded-[8px] text-[12px] font-extrabold text-white`}
                             style={{
@@ -765,7 +665,6 @@ export default async function BlogDetailPage(props: {
                           >
                             {String(i + 1).padStart(2, "0")}
                           </span>
-
                           <span className="min-w-0 flex-1">
                             <span className={`${epilogue.className} block text-[14px] font-extrabold leading-[1.3] tracking-[-0.02em] text-[#0e2547] transition-colors group-hover:text-[#e61e73] line-clamp-2`}>
                               {item.title}
@@ -776,20 +675,15 @@ export default async function BlogDetailPage(props: {
                               </span>
                             )}
                           </span>
-
-                          {/* Hover arrow */}
-                          <span className="mt-[5px] flex-shrink-0 text-[#e61e73] opacity-0 transition-opacity group-hover:opacity-100 text-[14px]">
-                            →
-                          </span>
+                          <span className="mt-[5px] flex-shrink-0 text-[#e61e73] opacity-0 transition-opacity group-hover:opacity-100 text-[14px]">→</span>
                         </LocalizedClientLink>
                       ))}
                     </div>
 
-                    {/* View all link */}
-                    <div className="mt-5 pt-5 border-t border-slate-100">
+                    <div className="mt-5 border-t border-slate-100 pt-5">
                       <LocalizedClientLink
                         href="/blog"
-                        className={`${epilogue.className} flex w-full items-center justify-center gap-2 rounded-[12px] py-3 text-[13px] font-extrabold uppercase tracking-[0.04em] text-white transition-all hover:opacity-90 hover:-translate-y-0.5`}
+                        className={`${epilogue.className} flex w-full items-center justify-center gap-2 rounded-[12px] py-3 text-[13px] font-extrabold uppercase tracking-[0.04em] text-white transition-all hover:opacity-90`}
                         style={{ background: "linear-gradient(135deg, #0e2547, #1e4a8a)" }}
                       >
                         View All Articles
@@ -802,7 +696,6 @@ export default async function BlogDetailPage(props: {
             )}
 
           </div>
-
         </div>
       </div>
     </main>
