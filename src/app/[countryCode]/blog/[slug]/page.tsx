@@ -7,7 +7,6 @@ import ManualSeoSchema from "@modules/common/components/manual-seo-schema"
 import { getBlogPost, getBlogPosts } from "@lib/data/blog-posts"
 import { buildSeoMetadata, getSeoSetting } from "@lib/data/seo"
 import { Epilogue, Outfit, Mansalva } from "next/font/google"
-import BlogFaqAccordion from "./_components/BlogFaqAccordion"
 
 const epilogue = Epilogue({ subsets: ["latin"], weight: ["700", "800"] })
 const outfit = Outfit({ subsets: ["latin"], weight: ["400", "500", "700"] })
@@ -242,10 +241,32 @@ function transformContent(html: string): string {
     ""
   )
 
-  // 4. Strip FAQ h2 + everything after it until next h2 or end
+  // 4. Fix N8N-generated sections:
+  //    - Keep N8N FAQ sections as-is (they are the source of truth)
+  //    - Strip inline background/color styles so Key Takeaways and Checklist render cleanly
+
+  // 4b. Strip inline background/color styles from ALL elements
+  //     so N8N-styled Key Takeaways and Checklist boxes render cleanly
   html = html.replace(
-    /<h2[^>]*>(?:(?!<\/h2>).)*?(?:faq|frequently asked|common questions|questions and answers|q&amp;a)(?:(?!<\/h2>).)*?<\/h2>(?:(?!<h2).)*?(?=<h2|$)/gi,
-    ""
+    /(<[a-z][a-z0-9]*\b[^>]*?\s)style="([^"]*)"/gi,
+    (match, prefix, styleValue) => {
+      // Remove background, background-color, color properties from inline styles
+      const cleaned = styleValue
+        .split(";")
+        .map((s: string) => s.trim())
+        .filter((s: string) => {
+          const prop = s.split(":")[0]?.trim().toLowerCase() ?? ""
+          return (
+            prop !== "background" &&
+            prop !== "background-color" &&
+            prop !== "color" &&
+            prop !== "border-color" &&
+            s.length > 0
+          )
+        })
+        .join("; ")
+      return cleaned ? `${prefix}style="${cleaned}"` : prefix.trimEnd()
+    }
   )
 
   // 5. Rewrite Table of Contents
@@ -490,6 +511,8 @@ export default async function BlogDetailPage(props: {
         .blog-content .ql-align-right  { text-align: right; }
         .blog-content .ql-align-justify { text-align: justify; }
 
+        /* Override N8N inline background colors — handled in transformContent */
+
         .img-card { overflow: hidden; border-radius: 20px; box-shadow: 0 12px 36px rgba(0,0,0,.1); transition: transform .3s ease, box-shadow .3s ease; }
         .img-card:hover { transform: translateY(-4px); box-shadow: 0 20px 50px rgba(0,0,0,.13); }
         .img-card img { width: 100%; object-fit: cover; display: block; transition: transform .5s ease; margin: 0; border-radius: 0; box-shadow: none; }
@@ -560,8 +583,6 @@ export default async function BlogDetailPage(props: {
                   ) : (
                     <p className={`${outfit.className} text-[16px] text-slate-400 italic`}>Content coming soon.</p>
                   )}
-
-                  <BlogFaqAccordion faqs={post.faqs || []} />
 
                 </div>
               </div>
