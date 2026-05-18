@@ -186,39 +186,39 @@ function buildTocHtml(listHtml: string): string {
     const mainTag  = g.href ? "a" : "div"
 
     const mainRow = `
-      <${mainTag}${mainHref} style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:14px;background:white;border:1px solid #edf2f7;box-shadow:0 2px 8px rgba(14,37,71,.04);text-decoration:none;width:100%;box-sizing:border-box;transition:border-color .2s,box-shadow .2s,transform .2s;" class="toc-item-main">
-        <span style="display:flex;align-items:center;justify-content:center;min-width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#0e2547,#1e4a8a);color:white;font-size:13px;font-weight:800;flex-shrink:0;margin-top:1px;">${g.num}</span>
-        <span style="font-size:15px;font-weight:700;color:#0e2547;line-height:1.45;">${escHtml(g.text)}</span>
+      <${mainTag}${mainHref} style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:12px;background:white;border:1px solid #edf2f7;box-shadow:0 2px 8px rgba(14,37,71,.04);text-decoration:none;width:100%;box-sizing:border-box;transition:border-color .2s,box-shadow .2s,transform .2s;" class="toc-item-main">
+        <span style="display:flex;align-items:center;justify-content:center;min-width:28px;width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#0e2547,#1e4a8a);color:white;font-size:12px;font-weight:800;flex-shrink:0;margin-top:1px;">${g.num}</span>
+        <span style="font-size:14px;font-weight:700;color:#0e2547;line-height:1.4;word-break:break-word;">${escHtml(g.text)}</span>
       </${mainTag}>`
 
     const subRows = g.subs.map((s) => {
       const subHref = s.href ? ` href="${s.href}"` : ""
       const subTag  = s.href ? "a" : "div"
       return `
-        <${subTag}${subHref} style="display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:10px;background:#f8fafc;border:1px solid #f1f5f9;width:100%;box-sizing:border-box;text-decoration:none;transition:background .2s,border-color .2s;" class="toc-item-sub">
-          <span style="flex-shrink:0;min-width:38px;font-size:11px;font-weight:800;color:#64748b;background:#e2e8f0;border-radius:6px;padding:3px 7px;text-align:center;">${escHtml(s.prefix)}</span>
-          <span style="font-size:14px;font-weight:600;color:#334155;line-height:1.45;">${escHtml(s.label)}</span>
+        <${subTag}${subHref} style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;background:#f8fafc;border:1px solid #f1f5f9;width:100%;box-sizing:border-box;text-decoration:none;transition:background .2s,border-color .2s;" class="toc-item-sub">
+          <span style="flex-shrink:0;min-width:36px;font-size:10px;font-weight:800;color:#64748b;background:#e2e8f0;border-radius:5px;padding:3px 6px;text-align:center;">${escHtml(s.prefix)}</span>
+          <span style="font-size:13px;font-weight:600;color:#334155;line-height:1.4;word-break:break-word;">${escHtml(s.label)}</span>
         </${subTag}>`
     }).join("")
 
     const subBlock = g.subs.length
-      ? `<div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;">${subRows}</div>`
+      ? `<div style="display:flex;flex-direction:column;gap:5px;margin-top:6px;">${subRows}</div>`
       : ""
 
     return `
-<div style="display:flex;flex-direction:column;margin-bottom:12px;background:white;border-radius:16px;border:1.5px solid #edf2f7;padding:12px;box-shadow:0 2px 12px rgba(14,37,71,.05);">
+<div style="display:flex;flex-direction:column;margin-bottom:10px;background:white;border-radius:14px;border:1.5px solid #edf2f7;padding:10px;box-shadow:0 2px 12px rgba(14,37,71,.05);">
   ${mainRow}
   ${subBlock}
 </div>`
   }).join("")
 
   return `
-<div style="margin:0 0 40px;border:1.5px solid #e2e8f0;border-radius:20px;background:linear-gradient(135deg,#f8faff 0%,#f0f4ff 100%);overflow:hidden;box-shadow:0 4px 24px rgba(14,37,71,.06);">
-  <div style="display:flex;align-items:center;gap:10px;padding:16px 24px;background:linear-gradient(135deg,#0e2547,#1e4a8a);">
-    <span style="width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">📋</span>
-    <span style="font-size:15px;font-weight:800;color:white;letter-spacing:.05em;text-transform:uppercase;">Table of Contents</span>
+<div style="margin:0 0 32px;border:1.5px solid #e2e8f0;border-radius:16px;background:linear-gradient(135deg,#f8faff 0%,#f0f4ff 100%);overflow:hidden;box-shadow:0 4px 24px rgba(14,37,71,.06);">
+  <div style="display:flex;align-items:center;gap:8px;padding:14px 16px;background:linear-gradient(135deg,#0e2547,#1e4a8a);">
+    <span style="width:24px;height:24px;border-radius:6px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;">📋</span>
+    <span style="font-size:13px;font-weight:800;color:white;letter-spacing:.05em;text-transform:uppercase;">Table of Contents</span>
   </div>
-  <div style="padding:16px 20px 20px;display:flex;flex-direction:column;">${rows}</div>
+  <div style="padding:14px 16px 16px;display:flex;flex-direction:column;">${rows}</div>
 </div>`
 }
 
@@ -241,33 +241,8 @@ function transformContent(html: string): string {
     ""
   )
 
-  // 4. Fix N8N-generated sections:
-  //    - Keep N8N FAQ sections as-is (they are the source of truth)
-  //    - Strip inline background/color styles so Key Takeaways and Checklist render cleanly
-
-  // 4b. Strip inline background/color styles from ALL elements
-  //     so N8N-styled Key Takeaways and Checklist boxes render cleanly
-  html = html.replace(
-    /(<[a-z][a-z0-9]*\b[^>]*?\s)style="([^"]*)"/gi,
-    (match, prefix, styleValue) => {
-      // Remove background, background-color, color properties from inline styles
-      const cleaned = styleValue
-        .split(";")
-        .map((s: string) => s.trim())
-        .filter((s: string) => {
-          const prop = s.split(":")[0]?.trim().toLowerCase() ?? ""
-          return (
-            prop !== "background" &&
-            prop !== "background-color" &&
-            prop !== "color" &&
-            prop !== "border-color" &&
-            s.length > 0
-          )
-        })
-        .join("; ")
-      return cleaned ? `${prefix}style="${cleaned}"` : prefix.trimEnd()
-    }
-  )
+  // 4. N8N FAQ sections are kept as-is (source of truth).
+  //    Key Takeaways and Checklist background/color overrides are handled via CSS below.
 
   // 5. Rewrite Table of Contents
   // Find "table of contents" or "contents" h2 + immediately following ol/ul
@@ -450,40 +425,80 @@ export default async function BlogDetailPage(props: {
       <style>{`
         .blog-content { font-family: inherit; }
         .blog-content h2 {
-          font-size: 26px; font-weight: 800; color: #0e2547;
-          letter-spacing: -0.04em; margin: 40px 0 16px; line-height: 1.1;
+          font-size: 22px; font-weight: 800; color: #0e2547;
+          letter-spacing: -0.04em; margin: 32px 0 14px; line-height: 1.1;
           padding-bottom: 10px; border-bottom: 2px solid #f1f5f9;
         }
-        .blog-content h3 { font-size: 20px; font-weight: 700; color: #0e2547; margin: 28px 0 10px; line-height: 1.2; }
-        .blog-content h4 { font-size: 17px; font-weight: 700; color: #1e3a5f; margin: 20px 0 8px; }
-        .blog-content p  { font-size: 16px; line-height: 2; color: #475569; margin: 14px 0; }
+        @media (min-width: 768px) {
+          .blog-content h2 { font-size: 26px; margin: 40px 0 16px; }
+        }
+        .blog-content h3 { font-size: 18px; font-weight: 700; color: #0e2547; margin: 24px 0 10px; line-height: 1.2; }
+        @media (min-width: 768px) {
+          .blog-content h3 { font-size: 20px; margin: 28px 0 10px; }
+        }
+        .blog-content h4 { font-size: 16px; font-weight: 700; color: #1e3a5f; margin: 18px 0 8px; }
+        @media (min-width: 768px) {
+          .blog-content h4 { font-size: 17px; margin: 20px 0 8px; }
+        }
+        .blog-content p  { font-size: 15px; line-height: 1.8; color: #475569; margin: 12px 0; }
+        @media (min-width: 768px) {
+          .blog-content p { font-size: 16px; line-height: 2; margin: 14px 0; }
+        }
         .blog-content strong { font-weight: 700; color: #0e2547; }
         .blog-content em { font-style: italic; }
         .blog-content u  { text-decoration: underline; }
         .blog-content s  { text-decoration: line-through; color: #94a3b8; }
 
-        .blog-content ul { list-style: none; padding: 0; margin: 20px 0; }
+        .blog-content ul { list-style: none; padding: 0; margin: 16px 0; }
+        @media (min-width: 768px) {
+          .blog-content ul { margin: 20px 0; }
+        }
         .blog-content ul li {
-          display: flex; align-items: flex-start; gap: 12px;
-          font-size: 16px; line-height: 1.85; color: #475569;
-          margin: 10px 0; padding: 10px 14px;
+          display: flex; align-items: flex-start; gap: 10px;
+          font-size: 15px; line-height: 1.7; color: #475569;
+          margin: 8px 0; padding: 10px 12px;
           background: #f8fafc; border-radius: 10px; border-left: 3px solid #e61e73;
         }
-        .blog-content ul li::before {
-          content: ""; display: inline-block; width: 7px; height: 7px;
-          border-radius: 50%; background: #e61e73; flex-shrink: 0; margin-top: 9px;
+        @media (min-width: 768px) {
+          .blog-content ul li {
+            gap: 12px; font-size: 16px; line-height: 1.85;
+            margin: 10px 0; padding: 10px 14px;
+          }
         }
-        .blog-content ol { padding-left: 0; margin: 20px 0; counter-reset: ol-counter; list-style: none; }
+        .blog-content ul li::before {
+          content: ""; display: inline-block; width: 6px; height: 6px;
+          border-radius: 50%; background: #e61e73; flex-shrink: 0; margin-top: 8px;
+        }
+        @media (min-width: 768px) {
+          .blog-content ul li::before {
+            width: 7px; height: 7px; margin-top: 9px;
+          }
+        }
+        .blog-content ol { padding-left: 0; margin: 16px 0; counter-reset: ol-counter; list-style: none; }
+        @media (min-width: 768px) {
+          .blog-content ol { margin: 20px 0; }
+        }
         .blog-content ol li {
           counter-increment: ol-counter; display: flex; align-items: flex-start;
-          gap: 14px; font-size: 16px; line-height: 1.85; color: #475569;
-          margin: 10px 0; padding: 10px 14px; background: #f8fafc; border-radius: 10px;
+          gap: 12px; font-size: 15px; line-height: 1.7; color: #475569;
+          margin: 8px 0; padding: 10px 12px; background: #f8fafc; border-radius: 10px;
+        }
+        @media (min-width: 768px) {
+          .blog-content ol li {
+            gap: 14px; font-size: 16px; line-height: 1.85;
+            margin: 10px 0; padding: 10px 14px;
+          }
         }
         .blog-content ol li::before {
           content: counter(ol-counter); display: flex; align-items: center;
-          justify-content: center; min-width: 26px; height: 26px;
+          justify-content: center; min-width: 24px; height: 24px;
           border-radius: 50%; background: #0e2547; color: white;
-          font-size: 12px; font-weight: 800; flex-shrink: 0; margin-top: 2px;
+          font-size: 11px; font-weight: 800; flex-shrink: 0; margin-top: 2px;
+        }
+        @media (min-width: 768px) {
+          .blog-content ol li::before {
+            min-width: 26px; height: 26px; font-size: 12px;
+          }
         }
 
         .toc-item-main:hover {
@@ -497,21 +512,50 @@ export default async function BlogDetailPage(props: {
         }
 
         .blog-content blockquote {
-          border-left: 4px solid #e61e73; padding: 16px 22px; margin: 24px 0;
+          border-left: 3px solid #e61e73; padding: 14px 16px; margin: 20px 0;
           background: linear-gradient(135deg,#fff5f8 0%,#fff0f5 100%);
-          border-radius: 0 12px 12px 0; color: #475569;
-          font-size: 17px; line-height: 1.85; font-style: italic;
+          border-radius: 0 10px 10px 0; color: #475569;
+          font-size: 15px; line-height: 1.7; font-style: italic;
           box-shadow: 0 4px 14px rgba(230,30,115,.08);
         }
-        .blog-content a { color: #e61e73; text-decoration: none; font-weight: 600; border-bottom: 1px solid rgba(230,30,115,.3); transition: border-color .2s; }
+        @media (min-width: 768px) {
+          .blog-content blockquote {
+            border-left: 4px solid #e61e73; padding: 16px 22px; margin: 24px 0;
+            border-radius: 0 12px 12px 0; font-size: 17px; line-height: 1.85;
+          }
+        }
+        .blog-content a { color: #e61e73; text-decoration: none; font-weight: 600; border-bottom: 1px solid rgba(230,30,115,.3); transition: border-color .2s; word-break: break-word; }
         .blog-content a:hover { border-bottom-color: #e61e73; }
-        .blog-content img { max-width: 100%; border-radius: 16px; box-shadow: 0 12px 32px rgba(0,0,0,.1); margin: 24px auto; display: block; }
-        .blog-content hr { border: none; height: 2px; background: linear-gradient(90deg,#e61e73,transparent); margin: 32px 0; border-radius: 2px; }
+        .blog-content img { max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,.08); margin: 20px auto; display: block; }
+        @media (min-width: 768px) {
+          .blog-content img { border-radius: 16px; box-shadow: 0 12px 32px rgba(0,0,0,.1); margin: 24px auto; }
+        }
+        .blog-content hr { border: none; height: 2px; background: linear-gradient(90deg,#e61e73,transparent); margin: 24px 0; border-radius: 2px; }
+        @media (min-width: 768px) {
+          .blog-content hr { margin: 32px 0; }
+        }
         .blog-content .ql-align-center { text-align: center; }
         .blog-content .ql-align-right  { text-align: right; }
         .blog-content .ql-align-justify { text-align: justify; }
 
         /* Override N8N inline background colors — handled in transformContent */
+
+        /* Fix N8N Key Takeaways / Checklist bad background and text colors */
+        .blog-content div[style], .blog-content section[style],
+        .blog-content p[style], .blog-content span[style],
+        .blog-content ul[style], .blog-content ol[style],
+        .blog-content li[style] {
+          background: transparent !important;
+          background-color: transparent !important;
+          color: inherit !important;
+          border-color: inherit !important;
+        }
+        /* Restore specific known good containers */
+        .blog-content div[style*="border"], .blog-content div[style*="padding"],
+        .blog-content div[style*="margin"], .blog-content div[style*="border-radius"] {
+          background: #f8fafc !important;
+          color: #334155 !important;
+        }
 
         .img-card { overflow: hidden; border-radius: 20px; box-shadow: 0 12px 36px rgba(0,0,0,.1); transition: transform .3s ease, box-shadow .3s ease; }
         .img-card:hover { transform: translateY(-4px); box-shadow: 0 20px 50px rgba(0,0,0,.13); }
@@ -533,45 +577,45 @@ export default async function BlogDetailPage(props: {
           </LocalizedClientLink>
 
           {/* Post header */}
-          <div className="mt-8">
-            <div className="flex flex-wrap items-center gap-3">
+          <div className="mt-6 sm:mt-8">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               {post.category_id && (
                 <span
-                  className={`${mansalva.className} inline-flex items-center rounded-full px-4 py-1 text-[14px] text-white`}
+                  className={`${mansalva.className} inline-flex items-center rounded-full px-3 py-1 text-[13px] text-white sm:px-4 sm:text-[14px]`}
                   style={{ background: "linear-gradient(135deg, #e61e73, #9333ea)" }}
                 >
                   {post.category_id}
                 </span>
               )}
               {post.published_at && (
-                <span className={`${outfit.className} text-[13px] font-semibold uppercase tracking-[0.05em] text-slate-400`}>
+                <span className={`${outfit.className} text-[12px] font-semibold uppercase tracking-[0.05em] text-slate-400 sm:text-[13px]`}>
                   {formatDate(post.published_at)}
                 </span>
               )}
             </div>
 
-            <h1 className={`${epilogue.className} mt-5 max-w-[820px] text-[32px] font-extrabold leading-[1.05] tracking-[-0.04em] text-[#0e2547] sm:text-[42px] lg:text-[54px]`}>
+            <h1 className={`${epilogue.className} mt-4 max-w-[820px] text-[28px] font-extrabold leading-[1.05] tracking-[-0.04em] text-[#0e2547] sm:mt-5 sm:text-[36px] lg:text-[54px]`}>
               {post.title}
             </h1>
 
             {post.excerpt && (
-              <p className={`${outfit.className} mt-5 max-w-[700px] text-[17px] leading-[1.85] text-slate-600`}>
+              <p className={`${outfit.className} mt-4 max-w-[700px] text-[15px] leading-[1.7] text-slate-600 sm:mt-5 sm:text-[17px] sm:leading-[1.85]`}>
                 {post.excerpt}
               </p>
             )}
           </div>
 
           {/* Two-column layout */}
-          <div className="mt-10 lg:grid lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start lg:gap-8">
+          <div className="mt-10 flex flex-col gap-8 lg:grid lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start lg:gap-8">
 
             {/* Main article */}
             <div className="min-w-0">
-              <div className="overflow-hidden rounded-[24px] bg-white shadow-[0_8px_32px_rgba(0,0,0,0.06)]">
+              <div className="overflow-hidden rounded-[20px] bg-white shadow-[0_8px_32px_rgba(0,0,0,0.06)] lg:rounded-[24px]">
                 <div className="h-[4px] w-full" style={{ background: "linear-gradient(90deg, #e61e73, #9333ea, #0ea5e9)" }} />
-                <div className="p-7 lg:p-12">
+                <div className="p-5 sm:p-7 lg:p-12">
 
                   {post.featured_image && (
-                    <div className="mb-10 overflow-hidden rounded-[24px] shadow-[0_24px_60px_rgba(0,0,0,0.12)]">
+                    <div className="mb-8 overflow-hidden rounded-[20px] shadow-[0_20px_50px_rgba(0,0,0,0.1)] lg:mb-10 lg:rounded-[24px] lg:shadow-[0_24px_60px_rgba(0,0,0,0.12)]">
                       <div className="relative aspect-[16/9] w-full">
                         <Image src={post.featured_image} alt={post.title} fill className="object-cover" priority />
                       </div>
@@ -589,22 +633,22 @@ export default async function BlogDetailPage(props: {
 
               {/* Extra images */}
               {validImages.length > 0 && (
-                <div className="mt-10">
-                  <p className={`${mansalva.className} mb-6 text-[18px] text-[#e61e73]`}>More from this article</p>
+                <div className="mt-8 lg:mt-10">
+                  <p className={`${mansalva.className} mb-5 text-[16px] text-[#e61e73] lg:mb-6 lg:text-[18px]`}>More from this article</p>
                   {validImages.length === 1 && (
                     <div className="img-card"><img src={validImages[0]} alt={`${post.title} image 1`} style={{ maxHeight: "520px" }} /></div>
                   )}
                   {validImages.length === 2 && (
-                    <div className="grid gap-5 sm:grid-cols-2">
+                    <div className="grid gap-4 sm:grid-cols-2 lg:gap-5">
                       {validImages.map((img, i) => (
                         <div key={i} className="img-card"><img src={img} alt={`${post.title} image ${i + 1}`} style={{ maxHeight: "400px" }} /></div>
                       ))}
                     </div>
                   )}
                   {validImages.length === 3 && (
-                    <div className="flex flex-col gap-5">
+                    <div className="flex flex-col gap-4 lg:gap-5">
                       <div className="img-card"><img src={validImages[0]} alt={`${post.title} image 1`} style={{ maxHeight: "480px" }} /></div>
-                      <div className="grid gap-5 sm:grid-cols-2">
+                      <div className="grid gap-4 sm:grid-cols-2 lg:gap-5">
                         {validImages.slice(1).map((img, i) => (
                           <div key={i} className="img-card"><img src={img} alt={`${post.title} image ${i + 2}`} style={{ maxHeight: "340px" }} /></div>
                         ))}
@@ -612,7 +656,7 @@ export default async function BlogDetailPage(props: {
                     </div>
                   )}
                   {validImages.length >= 4 && (
-                    <div className="grid gap-5 sm:grid-cols-2">
+                    <div className="grid gap-4 sm:grid-cols-2 lg:gap-5">
                       {validImages.map((img, i) => (
                         <div key={i} className="img-card"><img src={img} alt={`${post.title} image ${i + 1}`} style={{ maxHeight: "360px" }} /></div>
                       ))}
@@ -623,24 +667,24 @@ export default async function BlogDetailPage(props: {
 
               {/* Bottom CTA */}
               <div
-                className="relative mt-14 overflow-hidden rounded-[24px] p-8 text-center shadow-[0_18px_50px_rgba(14,37,71,0.2)] lg:p-12"
+                className="relative mt-10 overflow-hidden rounded-[20px] p-6 text-center shadow-[0_16px_40px_rgba(14,37,71,0.18)] sm:p-8 lg:mt-14 lg:rounded-[24px] lg:p-12 lg:shadow-[0_18px_50px_rgba(14,37,71,0.2)]"
                 style={{ background: "linear-gradient(135deg, #0e2547 0%, #1a3a6b 50%, #0e2547 100%)" }}
               >
                 <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-10">
-                  <div className="absolute left-[10%] top-[20%] h-24 w-24 rounded-full bg-[#e61e73]" />
-                  <div className="absolute right-[15%] bottom-[20%] h-16 w-16 rounded-full bg-[#9333ea]" />
+                  <div className="absolute left-[10%] top-[20%] h-20 w-20 rounded-full bg-[#e61e73] lg:h-24 lg:w-24" />
+                  <div className="absolute right-[15%] bottom-[20%] h-14 w-14 rounded-full bg-[#9333ea] lg:h-16 lg:w-16" />
                 </div>
-                <p className={`${mansalva.className} relative text-[18px] text-[#ef6a99]`}>Want to read more?</p>
-                <h3 className={`${epilogue.className} relative mt-3 text-[26px] font-extrabold tracking-[-0.04em] text-white lg:text-[34px]`}>
+                <p className={`${mansalva.className} relative text-[16px] text-[#ef6a99] lg:text-[18px]`}>Want to read more?</p>
+                <h3 className={`${epilogue.className} relative mt-2 text-[22px] font-extrabold tracking-[-0.04em] text-white sm:text-[26px] lg:mt-3 lg:text-[34px]`}>
                   Explore all our articles
                 </h3>
-                <p className={`${outfit.className} relative mt-3 text-[15px] text-white/75`}>
+                <p className={`${outfit.className} relative mt-2 text-[14px] text-white/75 lg:mt-3 lg:text-[15px]`}>
                   Strategy, creative, and performance insights — all in one place.
                 </p>
-                <div className="relative mt-8">
+                <div className="relative mt-6 lg:mt-8">
                   <LocalizedClientLink
                     href="/blog"
-                    className={`${epilogue.className} inline-flex h-[52px] items-center justify-center rounded-[14px] px-10 text-[14px] font-extrabold uppercase tracking-[0.04em] text-white transition-all hover:opacity-90 hover:-translate-y-0.5`}
+                    className={`${epilogue.className} inline-flex h-[48px] items-center justify-center rounded-[12px] px-8 text-[13px] font-extrabold uppercase tracking-[0.04em] text-white transition-all hover:opacity-90 hover:-translate-y-0.5 lg:h-[52px] lg:rounded-[14px] lg:px-10 lg:text-[14px]`}
                     style={{ background: "linear-gradient(135deg, #e61e73, #9333ea)" }}
                   >
                     View More Articles ›
@@ -651,18 +695,18 @@ export default async function BlogDetailPage(props: {
 
             {/* Sidebar */}
             {popularPosts.length > 0 && (
-              <aside className="popular-sidebar mt-10 lg:mt-0">
-                <div className="overflow-hidden rounded-[24px] bg-white shadow-[0_8px_32px_rgba(0,0,0,0.06)]">
+              <aside className="popular-sidebar">
+                <div className="overflow-hidden rounded-[20px] bg-white shadow-[0_8px_32px_rgba(0,0,0,0.06)] lg:rounded-[24px]">
                   <div className="h-[4px] w-full" style={{ background: "linear-gradient(90deg, #e61e73, #9333ea)" }} />
-                  <div className="p-6">
-                    <div className="mb-6 flex items-center gap-3">
+                  <div className="p-5 sm:p-6">
+                    <div className="mb-5 flex items-center gap-2.5 sm:gap-3 lg:mb-6">
                       <div
-                        className="flex h-[36px] w-[36px] items-center justify-center rounded-[10px]"
+                        className="flex h-[32px] w-[32px] items-center justify-center rounded-[8px] sm:h-[36px] sm:w-[36px] lg:rounded-[10px]"
                         style={{ background: "linear-gradient(135deg, #0e2547, #1e4a8a)" }}
                       >
-                        <span className="text-[16px]">🔥</span>
+                        <span className="text-[14px] sm:text-[16px]">🔥</span>
                       </div>
-                      <h2 className={`${epilogue.className} text-[20px] font-extrabold tracking-[-0.03em] text-[#0e2547]`}>
+                      <h2 className={`${epilogue.className} text-[18px] font-extrabold tracking-[-0.03em] text-[#0e2547] sm:text-[20px]`}>
                         Popular Articles
                       </h2>
                     </div>
@@ -672,10 +716,10 @@ export default async function BlogDetailPage(props: {
                         <LocalizedClientLink
                           key={item.slug}
                           href={`/blog/${item.slug}`}
-                          className="group relative flex items-start gap-4 rounded-[14px] p-3 transition-all hover:bg-[#f8faff]"
+                          className="group relative flex items-start gap-3 rounded-[12px] p-2.5 transition-all hover:bg-[#f8faff] sm:gap-4 sm:rounded-[14px] sm:p-3"
                         >
                           <span
-                            className={`${epilogue.className} mt-[3px] flex h-[28px] w-[28px] flex-shrink-0 items-center justify-center rounded-[8px] text-[12px] font-extrabold text-white`}
+                            className={`${epilogue.className} mt-[2px] flex h-[26px] w-[26px] flex-shrink-0 items-center justify-center rounded-[7px] text-[11px] font-extrabold text-white sm:mt-[3px] sm:h-[28px] sm:w-[28px] sm:rounded-[8px] sm:text-[12px]`}
                             style={{
                               background: i === 0
                                 ? "linear-gradient(135deg, #e61e73, #9333ea)"
@@ -687,35 +731,23 @@ export default async function BlogDetailPage(props: {
                             {String(i + 1).padStart(2, "0")}
                           </span>
                           <span className="min-w-0 flex-1">
-                            <span className={`${epilogue.className} block text-[14px] font-extrabold leading-[1.3] tracking-[-0.02em] text-[#0e2547] transition-colors group-hover:text-[#e61e73] line-clamp-2`}>
+                            <span className={`${epilogue.className} block text-[13px] font-extrabold leading-[1.3] tracking-[-0.02em] text-[#0e2547] transition-colors group-hover:text-[#e61e73] line-clamp-2 sm:text-[14px]`}>
                               {item.title}
                             </span>
                             {item.published_at && (
-                              <span className={`${outfit.className} mt-1.5 block text-[11px] text-slate-400`}>
+                              <span className={`${outfit.className} mt-1 block text-[10px] text-slate-400 sm:mt-1.5 sm:text-[11px]`}>
                                 {formatDate(item.published_at)}
                               </span>
                             )}
                           </span>
-                          <span className="mt-[5px] flex-shrink-0 text-[#e61e73] opacity-0 transition-opacity group-hover:opacity-100 text-[14px]">→</span>
+                          <span className="mt-[4px] flex-shrink-0 text-[14px] text-slate-300 transition-colors group-hover:text-[#e61e73] sm:mt-[5px] sm:text-[16px]">›</span>
                         </LocalizedClientLink>
                       ))}
-                    </div>
-
-                    <div className="mt-5 border-t border-slate-100 pt-5">
-                      <LocalizedClientLink
-                        href="/blog"
-                        className={`${epilogue.className} flex w-full items-center justify-center gap-2 rounded-[12px] py-3 text-[13px] font-extrabold uppercase tracking-[0.04em] text-white transition-all hover:opacity-90`}
-                        style={{ background: "linear-gradient(135deg, #0e2547, #1e4a8a)" }}
-                      >
-                        View All Articles
-                        <span className="text-[16px]">→</span>
-                      </LocalizedClientLink>
                     </div>
                   </div>
                 </div>
               </aside>
             )}
-
           </div>
         </div>
       </div>
