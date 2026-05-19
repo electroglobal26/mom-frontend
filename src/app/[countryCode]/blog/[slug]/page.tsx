@@ -151,9 +151,9 @@ function buildTocHtml(listHtml: string): string {
       const subs: SubItem[] = subLiItems.map((sub, idx) => {
         const rawText = stripTags(sub.innerHtml)
         const href = extractHref(sub.innerHtml)
-        const prefixMatch = rawText.match(/^(\d+\.\d+)\s*/)
-        const prefix = prefixMatch ? prefixMatch[1] : `${mainCounter}.${idx + 1}`
-        const label = rawText.replace(/^(\d+\.\d+)\s*/, "").trim()
+        const prefixMatch = rawText.match(/^(\d+(?:\.\d+|[a-zA-Z]))[.)]?\s*/)
+        const prefix = prefixMatch ? prefixMatch[1] : `${mainCounter}${String.fromCharCode(97 + idx)}`
+        const label = rawText.replace(/^(\d+(?:\.\d+|[a-zA-Z]))[.)]?\s*/, "").trim()
         return { prefix, label, href }
       })
 
@@ -162,7 +162,7 @@ function buildTocHtml(listHtml: string): string {
       // Flat structure — fall back to text-pattern matching on "1.1" prefixes
       const rawText = stripTags(innerHtml)
       const href = extractHref(innerHtml)
-      const SUB_RE = /^(\d+\.\d+)\s*/
+      const SUB_RE = /^(\d+(?:\.\d+|[a-zA-Z]))[.)]?\s*/
 
       if (SUB_RE.test(rawText)) {
         const m = rawText.match(SUB_RE)!
@@ -186,40 +186,37 @@ function buildTocHtml(listHtml: string): string {
     const mainTag  = g.href ? "a" : "div"
 
     const mainRow = `
-      <${mainTag}${mainHref} style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:12px;background:white;border:1px solid #edf2f7;box-shadow:0 2px 8px rgba(14,37,71,.04);text-decoration:none;width:100%;box-sizing:border-box;transition:border-color .2s,box-shadow .2s,transform .2s;" class="toc-item-main">
-        <span style="display:flex;align-items:center;justify-content:center;min-width:28px;width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#0e2547,#1e4a8a);color:white;font-size:12px;font-weight:800;flex-shrink:0;margin-top:1px;">${g.num}</span>
-        <span style="font-size:14px;font-weight:700;color:#0e2547;line-height:1.4;word-break:break-word;">${escHtml(g.text)}</span>
+      <${mainTag}${mainHref} class="blog-toc-main">
+        <span class="blog-toc-number">${g.num}</span>
+        <span class="blog-toc-label">${escHtml(g.text)}</span>
       </${mainTag}>`
 
     const subRows = g.subs.map((s) => {
       const subHref = s.href ? ` href="${s.href}"` : ""
       const subTag  = s.href ? "a" : "div"
       return `
-        <${subTag}${subHref} style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;background:#f8fafc;border:1px solid #f1f5f9;width:100%;box-sizing:border-box;text-decoration:none;transition:background .2s,border-color .2s;" class="toc-item-sub">
-          <span style="flex-shrink:0;min-width:36px;font-size:10px;font-weight:800;color:#64748b;background:#e2e8f0;border-radius:5px;padding:3px 6px;text-align:center;">${escHtml(s.prefix)}</span>
-          <span style="font-size:13px;font-weight:600;color:#334155;line-height:1.4;word-break:break-word;">${escHtml(s.label)}</span>
+        <${subTag}${subHref} class="blog-toc-sub">
+          <span class="blog-toc-sub-prefix">${escHtml(s.prefix)}</span>
+          <span class="blog-toc-sub-label">${escHtml(s.label)}</span>
         </${subTag}>`
     }).join("")
 
     const subBlock = g.subs.length
-      ? `<div style="display:flex;flex-direction:column;gap:5px;margin-top:6px;">${subRows}</div>`
+      ? `<div class="blog-toc-sublist">${subRows}</div>`
       : ""
 
     return `
-<div style="display:flex;flex-direction:column;margin-bottom:10px;background:white;border-radius:14px;border:1.5px solid #edf2f7;padding:10px;box-shadow:0 2px 12px rgba(14,37,71,.05);">
+<div class="blog-toc-group">
   ${mainRow}
   ${subBlock}
 </div>`
   }).join("")
 
   return `
-<div style="margin:0 0 32px;border:1.5px solid #e2e8f0;border-radius:16px;background:linear-gradient(135deg,#f8faff 0%,#f0f4ff 100%);overflow:hidden;box-shadow:0 4px 24px rgba(14,37,71,.06);">
-  <div style="display:flex;align-items:center;gap:8px;padding:14px 16px;background:linear-gradient(135deg,#0e2547,#1e4a8a);">
-    <span style="width:24px;height:24px;border-radius:6px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;">📋</span>
-    <span style="font-size:13px;font-weight:800;color:white;letter-spacing:.05em;text-transform:uppercase;">Table of Contents</span>
-  </div>
-  <div style="padding:14px 16px 16px;display:flex;flex-direction:column;">${rows}</div>
-</div>`
+<nav class="blog-toc" aria-label="Table of contents">
+  <p class="blog-toc-title">Table of Contents</p>
+  <div class="blog-toc-list">${rows}</div>
+</nav>`
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
