@@ -40,6 +40,7 @@ export async function PUT(
         image: body.image,
         points: body.points,
         outcomes: body.outcomes,
+        why_it_matters: body.whyItMatters,
       })
       .eq("slug", params.slug)
 

@@ -14,6 +14,11 @@ const epilogue = Epilogue({ subsets: ["latin"], weight: ["700", "800"] })
 const outfit = Outfit({ subsets: ["latin"], weight: ["400", "500", "700"] })
 const mansalva = Mansalva({ subsets: ["latin"], weight: ["400"] })
 
+const defaultWhyItMatters = [
+  "Running ads without a clear system leads to wasted budget. We focus on what actually drives growth. When the right audience sees the right message and lands on a clear page, they are more likely to buy.",
+  "This helps you increase sales, lower your customer acquisition cost, improve your ROAS, and build repeat customers - not just one-time buyers.",
+]
+
 type Props = {
   params: Promise<{ slug: string; countryCode: string }>
 }
@@ -56,6 +61,9 @@ export default async function ServiceDetailPage(props: Props) {
   ])
 
   if (!service) return notFound()
+  const whyItMatters = service.whyItMatters.length
+    ? service.whyItMatters
+    : defaultWhyItMatters
   const seoKeys = [
     `service:${params.slug}`,
     `services:${params.slug}`,
@@ -172,12 +180,14 @@ export default async function ServiceDetailPage(props: Props) {
               <h3 className={`${epilogue.className} text-[24px] font-extrabold tracking-[-0.04em] text-[#0e2547]`}>
                 Why it matters
               </h3>
-              <p className={`${outfit.className} mt-5 text-[15px] leading-[1.95] text-slate-600`}>
-                Running ads without a clear system leads to wasted budget. We focus on what actually drives growth. When the right audience sees the right message and lands on a clear page, they are more likely to buy.
-              </p>
-              <p className={`${outfit.className} mt-4 text-[15px] leading-[1.95] text-slate-600`}>
-                This helps you increase sales, lower your customer acquisition cost, improve your ROAS, and build repeat customers — not just one-time buyers.
-              </p>
+              {whyItMatters.map((paragraph, index) => (
+                <p
+                  key={paragraph}
+                  className={`${outfit.className} ${index === 0 ? "mt-5" : "mt-4"} text-[15px] leading-[1.95] text-slate-600`}
+                >
+                  {paragraph}
+                </p>
+              ))}
               <div className="mt-8">
                 <LocalizedClientLink
                   href="/contact"

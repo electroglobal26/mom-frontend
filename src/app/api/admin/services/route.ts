@@ -37,6 +37,7 @@ export async function POST(req: NextRequest) {
       image: body.image || "",
       points: body.points || [],
       outcomes: body.outcomes || [],
+      why_it_matters: body.whyItMatters || [],
     })
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })

@@ -20,6 +20,7 @@ export type Service = {
   image: string
   points: string[]
   outcomes: string[]
+  whyItMatters: string[]
   faqs: FAQ[]
 }
 
@@ -33,6 +34,7 @@ type ServiceRow = {
   image: string
   points: string[]
   outcomes: string[]
+  why_it_matters?: string[]
   faqs: { question: string; answer: string }[]
   created_at: string
 }
@@ -55,6 +57,7 @@ export async function getServices(): Promise<Service[]> {
     image: s.image,
     points: s.points || [],
     outcomes: s.outcomes || [],
+    whyItMatters: s.why_it_matters || [],
     faqs: s.faqs || [],
   }))
 }
@@ -80,6 +83,7 @@ export async function getService(slug: string): Promise<Service | null> {
     image: s.image,
     points: s.points || [],
     outcomes: s.outcomes || [],
+    whyItMatters: s.why_it_matters || [],
     faqs: s.faqs || [],
   }
 }

@@ -105,6 +105,10 @@ export async function middleware(request: NextRequest) {
 
   const countryCode = await getCountryCode(request, regionMap)
 
+  if (pathname === "/" && countryCode) {
+    return NextResponse.redirect(new URL(`/${countryCode}`, request.url))
+  }
+
   const urlHasCountryCode =
     countryCode && pathname.split("/")[1]?.includes(countryCode)
 
@@ -112,14 +116,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  const redirectPath = pathname === "/" ? "" : pathname
-  const queryString = request.nextUrl.search || ""
-
-  if (countryCode) {
-    const redirectUrl = `${request.nextUrl.origin}/${countryCode}${redirectPath}${queryString}`
-    return NextResponse.redirect(redirectUrl, 307)
-  }
-
+  // Allow requests without country code to pass through
+  // This prevents automatic redirects and improves performance
   return NextResponse.next()
 }
 

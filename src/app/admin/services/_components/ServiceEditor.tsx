@@ -26,6 +26,9 @@ export default function ServiceEditor({ initialData, isEdit = false }: Props) {
   const [outcomes, setOutcomes] = useState<string[]>(
     initialData?.outcomes?.length ? initialData.outcomes : [""]
   )
+  const [whyItMatters, setWhyItMatters] = useState<string[]>(
+    initialData?.why_it_matters?.length ? initialData.why_it_matters : [""]
+  )
 
   function updateForm(key: string, value: string) {
     setForm((prev) => ({ ...prev, [key]: value }))
@@ -61,6 +64,7 @@ export default function ServiceEditor({ initialData, isEdit = false }: Props) {
       ...form,
       points: points.filter((p) => p.trim()),
       outcomes: outcomes.filter((o) => o.trim()),
+      whyItMatters: whyItMatters.filter((item) => item.trim()),
     }
 
     const url = isEdit
@@ -169,6 +173,24 @@ export default function ServiceEditor({ initialData, isEdit = false }: Props) {
                 <input type="text" value={outcome} onChange={(e) => updateList(outcomes, setOutcomes, i, e.target.value)} placeholder={`Outcome ${i + 1}...`} className={inputClass} />
                 {outcomes.length > 1 && (
                   <button onClick={() => removeFromList(outcomes, setOutcomes, i)} className="shrink-0 rounded-[10px] border border-red-100 px-3 text-[12px] text-red-400 hover:bg-red-50">✕</button>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Why it matters */}
+        <div className="rounded-[18px] bg-white p-6 shadow-[0_4px_16px_rgba(0,0,0,0.05)]">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-[15px] font-extrabold text-[#0e2547]">Why It Matters</h2>
+            <button onClick={() => addToList(whyItMatters, setWhyItMatters)} className="rounded-[8px] border border-slate-200 px-3 py-1.5 text-[12px] font-semibold text-[#0e2547] hover:border-[#0e2547]">+ Add</button>
+          </div>
+          <div className="space-y-3">
+            {whyItMatters.map((item, i) => (
+              <div key={i} className="flex gap-2">
+                <textarea value={item} onChange={(e) => updateList(whyItMatters, setWhyItMatters, i, e.target.value)} placeholder={`Paragraph ${i + 1}...`} rows={3} className={inputClass} />
+                {whyItMatters.length > 1 && (
+                  <button onClick={() => removeFromList(whyItMatters, setWhyItMatters, i)} className="shrink-0 rounded-[10px] border border-red-100 px-3 text-[12px] text-red-400 hover:bg-red-50">âœ•</button>
                 )}
               </div>
             ))}
