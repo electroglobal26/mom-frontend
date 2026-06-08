@@ -3,6 +3,7 @@ import "styles/globals.css"
 import { Cormorant_Garamond, DM_Sans } from "next/font/google"
 import Script from "next/script"
 import { buildSeoMetadata } from "@lib/data/seo"
+import KeepAlive from "../components/KeepAlive"
 
 const logoFont = Cormorant_Garamond({
   subsets: ["latin"],
@@ -51,6 +52,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           />
         </noscript>
         {/* End Google Tag Manager (noscript) */}
+
+        {/* Keep backend alive by pinging every 2 minutes */}
+        <KeepAlive />
 
         <main>{props.children}</main>
       </body>
